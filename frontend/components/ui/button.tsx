@@ -18,6 +18,9 @@ const buttonVariants = cva(
         destructive:
           'bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40',
         link: 'text-primary underline-offset-4 hover:underline',
+        // Varian tombol halaman customer (sesuai komponen "Customer/Button/*" di Figma)
+        'outline-strong': 'border-border-strong bg-transparent text-foreground hover:bg-foreground/5',
+        light: 'bg-foreground text-background hover:bg-foreground/90',
       },
       size: {
         default:
@@ -31,6 +34,8 @@ const buttonVariants = cva(
         'icon-sm':
           'size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg',
         'icon-lg': 'size-9',
+        // Tombol bulat besar halaman customer
+        pill: 'h-auto rounded-full px-[26px] py-[14px] text-sm font-semibold',
       },
     },
     defaultVariants: {
