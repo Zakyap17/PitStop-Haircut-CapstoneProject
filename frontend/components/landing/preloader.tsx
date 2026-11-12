@@ -93,7 +93,7 @@ export function Preloader() {
       <div className="h-1 bg-foreground/10">
         <div className="h-full bg-accent" style={{ width: `${count}%` }} />
       </div>
-      <div className="checker-strip h-5 [background-size:20px_20px]" />
+      <div className="checker-light h-5 bg-background [background-size:20px_20px]" />
     </div>
   )
 }

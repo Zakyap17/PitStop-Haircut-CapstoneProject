@@ -1,7 +1,5 @@
 import { BarbersSection } from '@/components/landing/barbers-section'
 import { BookingSection } from '@/components/landing/booking-section'
-import { CheckerStrip } from '@/components/landing/checker-strip'
-import { CtaBand } from '@/components/landing/cta-band'
 import { HeroSection } from '@/components/landing/hero-section'
 import { MarqueeStrip } from '@/components/landing/marquee-strip'
 import { PortfolioSection } from '@/components/landing/portfolio-section'
@@ -21,10 +19,9 @@ export default function LandingPage() {
       <Preloader />
       <SmoothScroll />
       <SiteNavbar />
-      <main>
+      <main className="relative w-full overflow-x-hidden">
         <HeroSection />
         <MarqueeStrip />
-        <CheckerStrip />
         <StorySection />
         <PortfolioSection />
         <ServicesSection />
@@ -33,7 +30,6 @@ export default function LandingPage() {
         <TryOnSection />
         <TestimonialsSection />
         <BookingSection />
-        <CtaBand />
       </main>
       <SiteFooter />
     </>

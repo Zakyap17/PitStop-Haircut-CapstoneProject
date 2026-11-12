@@ -2,91 +2,106 @@
 
 import { type CSSProperties, type ElementType, type ReactNode, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { intro } from '@/lib/intro-store'
-import { cn } from '@/lib/utils'
 
-/** True saat elemen sudah masuk layar (sekali saja) dan, bila `afterIntro`, preloader sudah selesai. */
-function useRevealed(afterIntro: boolean) {
+type RevealProps = {
+  as?: ElementType
+  className?: string
+  children?: ReactNode
+  delay?: number
+  afterIntro?: boolean
+  style?: CSSProperties
+  id?: string
+}
+
+export function Reveal({ as: Tag = 'div', className, children, delay = 0, afterIntro = false, style, id }: RevealProps) {
   const ref = useRef<HTMLElement>(null)
   const [inView, setInView] = useState(false)
   const introDone = useSyncExternalStore(intro.subscribe, intro.isFinished, intro.serverSnapshot)
 
   useEffect(() => {
-    const element = ref.current
-    if (!element) return
+    const el = ref.current
+    if (!el) return
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setInView(true)
         observer.disconnect()
       }
     })
-    observer.observe(element)
+    observer.observe(el)
     return () => observer.disconnect()
   }, [])
 
-  return { ref, revealed: inView && (!afterIntro || introDone) }
-}
-
-type RevealProps = {
-  as?: ElementType
-  className?: string
-  children?: ReactNode
-  /** Jeda sebelum animasi mulai (ms). Dipakai untuk efek berurutan (stagger). */
-  delay?: number
-  /** Tunggu sampai preloader selesai, untuk elemen di bagian atas halaman. */
-  afterIntro?: boolean
-  id?: string
-}
-
-/** Elemen yang muncul dengan fade + naik pelan saat masuk layar. */
-export function Reveal({ as: Tag = 'div', className, children, delay = 0, afterIntro = false, id }: RevealProps) {
-  const { ref, revealed } = useRevealed(afterIntro)
+  const revealed = inView && (!afterIntro || introDone)
 
   return (
     <Tag
       ref={ref}
       id={id}
       data-revealed={revealed ? '' : undefined}
-      className={cn('fade-up', className)}
-      style={{ '--delay': `${delay}ms` } as CSSProperties}
+      className={className}
+      style={{ '--delay': `${delay}ms`, ...style } as CSSProperties}
     >
       {children}
     </Tag>
   )
 }
 
-type RevealHeadingProps = {
-  as?: ElementType
-  text: string
-  className?: string
-  delay?: number
-  afterIntro?: boolean
-  /** Selisih waktu antar kata (ms). */
-  wordStagger?: number
+export function Letters({ text, baseDelay = 0, stagger = 52 }: { text: string; baseDelay?: number; stagger?: number }) {
+  return (
+    <span className="reveal-line whitespace-nowrap" aria-hidden="true">
+      {Array.from(text).map((char, index) => (
+        <span
+          key={`${char}-${index}`}
+          className="reveal-unit"
+          style={{ '--delay': `${baseDelay + index * stagger}ms` } as CSSProperties}
+        >
+          {char === ' ' ? '\u00A0' : char}
+        </span>
+      ))}
+    </span>
+  )
 }
 
-/**
- * Judul yang kata-katanya naik satu per satu dari balik "topeng".
- * Dipecah per kata (bukan per baris) supaya tetap rapi saat teks terbungkus di layar kecil.
- */
-export function RevealHeading({ as: Tag = 'h2', text, className, delay = 0, afterIntro = false, wordStagger = 70 }: RevealHeadingProps) {
-  const { ref, revealed } = useRevealed(afterIntro)
-  const words = text.split(' ')
-
+export function Lines({
+  lines,
+  baseDelay = 0,
+  stagger = 90,
+  duration = 900,
+}: {
+  lines: string[]
+  baseDelay?: number
+  stagger?: number
+  duration?: number
+}) {
   return (
-    <Tag ref={ref} data-revealed={revealed ? '' : undefined} className={className}>
+    <>
+      <span className="sr-only">{lines.join(' ')}</span>
+      {lines.map((line, index) => (
+        <span key={line} className="reveal-line" aria-hidden="true">
+          <span
+            className="reveal-unit"
+            style={{ '--delay': `${baseDelay + index * stagger}ms`, '--dur': `${duration}ms` } as CSSProperties}
+          >
+            {line}
+          </span>
+        </span>
+      ))}
+    </>
+  )
+}
+
+export function Words({ text, stagger = 22 }: { text: string; stagger?: number }) {
+  return (
+    <>
       <span className="sr-only">{text}</span>
       <span aria-hidden="true">
-        {words.map((word, index) => (
-          <span key={`${word}-${index}`}>
-            <span className="reveal-mask">
-              <span className="reveal-unit" style={{ '--delay': `${delay + index * wordStagger}ms` } as CSSProperties}>
-                {word}
-              </span>
-            </span>
-            {index < words.length - 1 && ' '}
+        {text.split(' ').map((word, index) => (
+          <span key={`${word}-${index}`} className="reveal-word" style={{ '--delay': `${index * stagger}ms` } as CSSProperties}>
+            {word}
+            {'\u00A0'}
           </span>
         ))}
       </span>
-    </Tag>
+    </>
   )
 }

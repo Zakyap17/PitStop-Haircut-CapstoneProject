@@ -1,32 +1,54 @@
-import { Reveal } from '@/components/shared/reveal'
-import { SectionContainer } from '@/components/shared/section-container'
-import { SectionHeading } from '@/components/shared/section-heading'
 import { barbers } from '@/data/barbers'
+
+const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 
 export function BarbersSection() {
   return (
-    <SectionContainer id="kapster" className="bg-card">
-      <SectionHeading eyebrow="Kapster" title="Pilih kapster kamu." description="Jadwal kapster tersinkron dengan form reservasi." />
+    <section id="kapster" className="border-t border-foreground/10 bg-card/40 py-24 md:py-32">
+      <div className="mx-auto max-w-7xl px-4 md:px-8">
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">Kru Pit Stop</p>
+            <h2 className="mt-4 font-serif text-5xl leading-none md:text-6xl">
+              Pilih <em className="text-accent">kapster</em> kamu
+            </h2>
+          </div>
+          <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
+            Jadwal kerja setiap kapster tersinkron langsung ke form reservasi, jadi kamu hanya melihat kapster yang
+            benar-benar tersedia.
+          </p>
+        </div>
 
-      <ul className="grid w-full gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {barbers.map((barber, index) => (
-          <Reveal as="li" key={barber.name} delay={index * 100} className="flex flex-col gap-4 rounded-[20px] border border-border bg-background px-4 pt-4 pb-6">
-            {/* Placeholder foto kapster, sesuai Figma. Ganti dengan <Image> saat foto asli tersedia. */}
-            <div className="flex h-[260px] flex-col items-center justify-center gap-1.5 rounded-[14px] border border-border bg-muted">
-              <span className="font-display text-[51.2px] leading-[1.05] tracking-[-0.025em] text-border-strong">PS</span>
-              <span className="text-xs font-medium text-muted-foreground">Foto {barber.name}</span>
-            </div>
-            <div className="flex flex-col gap-1 px-2">
-              <h3 className="font-display text-[30px] leading-[1.05] tracking-[-0.025em] text-foreground uppercase">{barber.name}</h3>
-              <p className="text-sm font-medium text-accent">
-                {barber.role} · {barber.experienceYears} tahun
+        <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {barbers.map((barber, index) => (
+            <li
+              key={barber.name}
+              className="group relative flex flex-col overflow-hidden rounded-3xl border border-foreground/10 bg-background p-6 transition-colors hover:border-primary"
+            >
+              <div className="checker absolute -right-10 -top-10 size-32 rotate-12 opacity-30" aria-hidden="true" />
+              <span className="relative flex size-16 items-center justify-center rounded-full bg-primary font-serif text-3xl text-primary-foreground">
+                {barber.name[0]}
+              </span>
+              <span className="mt-6 font-mono text-xs text-muted-foreground">No. {String(index + 1).padStart(2, '0')}</span>
+              <h3 className="font-serif text-3xl">{barber.name}</h3>
+              <p className="text-sm text-muted-foreground">{barber.role}</p>
+              <dl className="mt-6 grid grid-cols-2 gap-3 border-t border-foreground/10 pt-4 text-sm">
+                <div>
+                  <dt className="text-xs text-muted-foreground">Spesialis</dt>
+                  <dd className="font-medium">{barber.specialty}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">Pengalaman</dt>
+                  <dd className="font-medium">{barber.experienceYears} tahun</dd>
+                </div>
+              </dl>
+              <p className="mt-4 text-xs text-muted-foreground">
+                Libur tiap {barber.offDays.map((d) => dayNames[d]).join(', ')}
               </p>
-              <p className="text-sm text-muted-foreground">Spesialis: {barber.specialty}</p>
-              <p className="text-[13px] text-muted-foreground">Libur {barber.dayOffLabel}</p>
-            </div>
-          </Reveal>
-        ))}
-      </ul>
-    </SectionContainer>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   )
 }

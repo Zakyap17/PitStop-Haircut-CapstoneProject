@@ -1,8 +1,9 @@
 export type Service = {
   id: string
   name: string
-  /** Durasi layanan dalam menit. */
-  durationMinutes: number
+  description: string
   /** Harga dalam Rupiah. */
   price: number
+  /** Durasi layanan dalam menit. */
+  durationMinutes: number
 }

@@ -1,19 +1,19 @@
-import { marqueeWords } from '@/data/site-content'
+const words = ['Fade Presisi', 'Kursi Mobil Balap', 'Tanpa Antre', 'Men & Kids', 'Reservasi Online']
 
-/** Pita biru berjalan. Daftar kata diulang dua kali agar loop animasi tidak terlihat putus. */
 export function MarqueeStrip() {
   return (
-    <section aria-label="Keunggulan Pit Stop" className="overflow-hidden bg-primary py-4">
-      <div aria-hidden="true" className="flex w-max animate-marquee gap-12 pr-12">
+    <section aria-label="Keunggulan Pit Stop" className="overflow-hidden border-y border-border py-8">
+      <div className="flex w-max animate-marquee flex-nowrap" aria-hidden="true">
         {[0, 1].flatMap((round) =>
-          marqueeWords.map((word) => (
-            <span key={`${round}-${word}`} className="font-display text-[22px] leading-[1.05] tracking-[1px] whitespace-nowrap text-white uppercase">
-              {word}
+          words.map((word) => (
+            <span key={`${round}-${word}`} className="flex items-center">
+              <span className="whitespace-nowrap font-display text-4xl uppercase tracking-tight sm:text-5xl">{word}</span>
+              <span className="mx-8 size-2.5 rounded-full bg-accent" />
             </span>
           )),
         )}
       </div>
-      <p className="sr-only">{marqueeWords.join(', ')}</p>
+      <p className="sr-only">{words.join(', ')}</p>
     </section>
   )
 }
