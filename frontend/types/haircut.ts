@@ -1,9 +1,9 @@
-export type HaircutCategory = 'Dewasa' | 'Klasik' | 'Anak' | 'Grooming' | 'Korean Trend'
-
 export type Haircut = {
   name: string
-  barberName: string
-  category: HaircutCategory
+  /** Nama kapster yang mengerjakan. */
+  barber: string
+  category: string
   rating: number
-  imageSrc: string
+  /** Path foto di folder public. */
+  image: string
 }

@@ -9,8 +9,8 @@ export function SmoothScroll() {
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    // Jarak ke navbar sticky saat lompat ke anchor diatur lewat `scroll-mt-20` di SectionContainer (Lenis ikut menghormatinya).
-    const lenis = new Lenis({ smoothWheel: true, anchors: true })
+    // offset menyesuaikan tinggi navbar supaya judul section tidak tertutup saat lompat ke anchor
+    const lenis = new Lenis({ smoothWheel: true, anchors: { offset: -72 } })
     lenisRef.current = lenis
     if (!intro.isFinished()) lenis.stop()
     const unsubscribe = intro.subscribe(() => lenis.start())

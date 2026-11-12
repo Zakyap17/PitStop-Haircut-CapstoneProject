@@ -1,40 +1,66 @@
-import { BrandLogo } from '@/components/shared/brand-logo'
-import { operatingHours, socialLinks } from '@/data/site-content'
+import { Eyebrow } from '@/components/shared/eyebrow'
+import { Lines, Reveal } from '@/components/shared/reveal'
 
-const columnTitleClass = 'text-xs font-semibold tracking-[1.6px] text-accent uppercase'
+const socials = [
+  { label: 'Instagram', href: 'https://www.instagram.com' },
+  { label: 'TikTok', href: 'https://www.tiktok.com' },
+  { label: 'Google Maps', href: 'https://maps.google.com' },
+]
 
 export function SiteFooter() {
   return (
-    <footer className="flex flex-col gap-10 bg-background px-6 pt-16 pb-10 md:px-12 lg:px-24">
-      <div className="mx-auto flex w-full max-w-[1248px] flex-col justify-between gap-10 md:flex-row">
-        <div className="flex flex-col gap-3.5">
-          <BrandLogo />
-          <p className="text-sm text-muted-foreground">Pit Stop Barbershop · Men &amp; Kids</p>
-        </div>
+    <footer id="kontak" className="px-4 pt-24 md:px-10 md:pt-36">
+      <Eyebrow>Masuk Pit</Eyebrow>
+      <Reveal as="h2" className="mt-6 max-w-[18ch] font-display text-6xl uppercase leading-[0.95] tracking-tight sm:text-8xl">
+        <Lines lines={['Rambut sudah', 'waktunya', 'ganti ban?']} />
+      </Reveal>
+      <Reveal className="fade-up mt-8 max-w-[44ch] text-lg leading-relaxed text-muted-foreground md:text-xl">
+        <p>Kunci slotmu sekarang. Walk-in tetap dilayani sesuai slot yang tersedia.</p>
+      </Reveal>
+      <a
+        href="#reservasi"
+        className="group mt-12 inline-flex items-baseline gap-3 text-3xl font-semibold tracking-tight transition-all duration-300 hover:translate-x-3.5 hover:text-accent sm:gap-4 sm:text-6xl"
+      >
+        Reservasi sekarang
+        <span className="text-accent" aria-hidden="true">
+          ↗
+        </span>
+      </a>
 
-        <div className="flex flex-col gap-2.5">
-          <p className={columnTitleClass}>Jam operasional</p>
-          <ul className="text-sm leading-[1.6] text-muted-foreground">
-            {operatingHours.map((line) => (
-              <li key={line}>{line}</li>
+      <div className="mt-24 grid gap-10 border-t border-border py-12 md:mt-36 lg:grid-cols-12">
+        <div className="lg:col-span-5">
+          <p className="font-display text-5xl uppercase leading-none tracking-tight">Pit Stop</p>
+          <p className="mt-4 text-[13px] uppercase tracking-[0.22em] text-muted-foreground">
+            Barbershop — Men & Kids
+          </p>
+        </div>
+        <div className="text-sm lg:col-span-3">
+          <p className="text-[13px] uppercase tracking-[0.18em] text-muted-foreground">Jam Operasional</p>
+          <p className="mt-3">Setiap hari · 10.00 – 21.00 WIB</p>
+          <p className="text-muted-foreground">Istirahat · 18.00 – 19.00 WIB</p>
+        </div>
+        <nav aria-label="Sosial media" className="lg:col-span-2">
+          <ul className="flex flex-col gap-2">
+            {socials.map((social) => (
+              <li key={social.label}>
+                <a
+                  href={social.href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="group flex items-center gap-0 text-muted-foreground transition-all hover:gap-3 hover:text-foreground"
+                >
+                  <span className="h-px w-0 bg-accent transition-all group-hover:w-6" aria-hidden="true" />
+                  {social.label}
+                </a>
+              </li>
             ))}
           </ul>
-        </div>
-
-        <div className="flex flex-col gap-2.5">
-          <p className={columnTitleClass}>Ikuti kami</p>
-          {/* Tautan sosial belum ada URL-nya; isi di data/site-content.ts saat akun resmi tersedia. */}
-          <ul className="text-sm leading-[1.6] text-muted-foreground">
-            {socialLinks.map((name) => (
-              <li key={name}>{name}</li>
-            ))}
-          </ul>
-        </div>
+        </nav>
+        <p className="text-[13px] uppercase tracking-[0.18em] text-muted-foreground lg:col-span-2 lg:text-right">
+          © 2026 Pit Stop Barbershop.
+        </p>
       </div>
-
-      <div className="mx-auto w-full max-w-[1248px] border-t border-border pt-10">
-        <p className="text-[13px] text-muted-foreground">© 2026 Pit Stop Barbershop</p>
-      </div>
+      <div className="checker -mx-4 h-6 opacity-80 md:-mx-10" aria-hidden="true" />
     </footer>
   )
 }

@@ -1,32 +1,68 @@
-import { Reveal } from '@/components/shared/reveal'
-import { SectionContainer } from '@/components/shared/section-container'
-import { SectionHeading } from '@/components/shared/section-heading'
+import { Clock } from 'lucide-react'
+import { LiquidImage } from '@/components/shared/liquid-image'
 import { services } from '@/data/services'
 import { formatRupiah } from '@/lib/format'
 
 export function ServicesSection() {
   return (
-    <SectionContainer id="layanan">
-      <SectionHeading eyebrow="Layanan" title="Garasi kami, gaya kamu." />
-
-      <ul className="w-full max-w-[1000px] divide-y divide-border overflow-hidden rounded-[20px] border border-border bg-card">
-        {services.map((service, index) => (
-          <Reveal as="li" key={service.id} delay={index * 70} className="flex items-center justify-between gap-4 px-5 py-5 sm:px-8 sm:py-6">
-            <div className="flex items-center gap-5">
-              <span className="font-display text-2xl leading-[1.05] tracking-[-0.025em] text-accent">
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <div className="flex flex-col gap-0.5">
-                <h3 className="text-lg font-semibold text-foreground sm:text-xl">{service.name}</h3>
-                <p className="text-sm text-muted-foreground">{service.durationMinutes} menit</p>
+    <section id="layanan" className="relative border-t border-foreground/10 py-24 md:py-32">
+      <div className="mx-auto grid max-w-7xl gap-14 px-4 md:px-8 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="flex flex-col gap-8">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">Menu Layanan</p>
+            <h2 className="mt-4 font-serif text-5xl leading-none text-balance md:text-6xl">
+              Garasi kami, <em className="text-accent">gaya</em> kamu
+            </h2>
+            <p className="mt-5 max-w-md leading-relaxed text-muted-foreground">
+              Dinding biru, lantai kotak-kotak ala garis finish, dan kursi mobil balap untuk si kecil. Semua dirancang
+              agar potong rambut terasa seperti pit stop: cepat, presisi, menyenangkan.
+            </p>
+          </div>
+          <div className="grid grid-cols-5 gap-3">
+            <LiquidImage
+              src="/images/interior/interior-kids.png"
+              alt="Kursi mobil balap anak di Pit Stop Barbershop"
+              sizes="(min-width: 1024px) 25vw, 60vw"
+              className="col-span-3 aspect-[4/5] rounded-2xl ring-1 ring-foreground/15"
+            />
+            <div className="col-span-2 flex flex-col gap-3">
+              <LiquidImage
+                src="/images/interior/interior-wide.png"
+                alt="Interior Pit Stop Barbershop dengan panel biru"
+                sizes="(min-width: 1024px) 18vw, 40vw"
+                className="flex-1 rounded-2xl ring-1 ring-foreground/15"
+              />
+              <div className="checker flex aspect-square flex-col justify-end rounded-2xl bg-foreground p-4 ring-1 ring-foreground/15">
+                <span className="w-fit rounded-md bg-background px-2 py-1 font-serif text-2xl leading-none">4 Kursi</span>
               </div>
             </div>
-            <p className="font-display text-xl leading-[1.05] tracking-[-0.025em] whitespace-nowrap text-foreground uppercase sm:text-[26px]">
-              {formatRupiah(service.price)}
-            </p>
-          </Reveal>
-        ))}
-      </ul>
-    </SectionContainer>
+          </div>
+        </div>
+
+        <ul className="flex flex-col">
+          {services.map((service, index) => (
+            <li
+              key={service.id}
+              className="group flex items-start justify-between gap-6 border-b border-foreground/10 py-6 first:pt-0"
+            >
+              <div className="flex gap-5">
+                <span className="pt-1 font-mono text-xs text-muted-foreground">{String(index + 1).padStart(2, '0')}</span>
+                <div>
+                  <h3 className="font-serif text-3xl transition-colors group-hover:text-accent">{service.name}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{service.description}</p>
+                  <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Clock className="size-3.5" aria-hidden="true" />
+                    {service.durationMinutes} menit
+                  </p>
+                </div>
+              </div>
+              <span className="shrink-0 rounded-full border border-foreground/15 px-4 py-1.5 text-sm font-semibold">
+                {formatRupiah(service.price)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   )
 }
