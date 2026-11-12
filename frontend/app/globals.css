@@ -6,11 +6,12 @@
 
 @theme inline {
   --font-sans: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-anton), Impact, sans-serif;
   --font-display: var(--font-anton), Impact, sans-serif;
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-success: var(--success);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
@@ -33,10 +34,9 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
+/* Design tokens — nilainya mengikuti variabel warna di file Figma "PitStop Haircut". */
 :root {
   color-scheme: dark;
   --background: #07080c;
@@ -54,16 +54,20 @@
   --accent: #3a6bff;
   --accent-foreground: #ffffff;
   --destructive: #ff4d3d;
-  --border: rgba(243, 241, 234, 0.1);
-  --input: rgba(243, 241, 234, 0.16);
+  --success: #2fbf71;
+  --border: #22242b;
+  --border-strong: #3a3c43;
+  --input: #22242b;
   --ring: #3a6bff;
-  --line-strong: rgba(243, 241, 234, 0.22);
   --radius: 0.75rem;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
   }
   body {
     @apply bg-background text-foreground;
@@ -74,20 +78,15 @@
     background: var(--accent);
     color: var(--background);
   }
-  .font-serif {
-    text-transform: uppercase;
-    letter-spacing: -0.01em;
-  }
-  .font-serif em,
-  .font-serif .em {
-    font-style: normal;
-  }
 }
 
-/* Lenis */
+/* Lenis (scroll halus) */
 html.lenis,
 html.lenis body {
   height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
 }
 .lenis.lenis-stopped {
   overflow: clip;
@@ -95,14 +94,24 @@ html.lenis body {
 .lenis.lenis-smooth [data-lenis-prevent] {
   overscroll-behavior: contain;
 }
-.lenis.lenis-smooth iframe {
-  pointer-events: none;
+
+/* Animasi muncul saat scroll. Aktif ketika induknya diberi atribut data-revealed (lihat components/shared/reveal.tsx). */
+.fade-up {
+  opacity: 0;
+  transform: translateY(var(--y, 24px));
+  transition:
+    opacity var(--dur, 700ms) cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0ms),
+    transform var(--dur, 700ms) cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0ms);
+}
+.fade-up[data-revealed] {
+  opacity: 1;
+  transform: none;
 }
 
-/* Text & block reveals */
-.reveal-line {
-  display: block;
+.reveal-mask {
+  display: inline-block;
   overflow: hidden;
+  vertical-align: bottom;
   padding-bottom: 0.08em;
   margin-bottom: -0.08em;
 }
@@ -111,67 +120,24 @@ html.lenis body {
   transform: translateY(110%);
   opacity: 0;
   transition:
-    transform var(--dur, 900ms) var(--ease-expo) var(--delay, 0ms),
-    opacity var(--dur, 900ms) var(--ease-expo) var(--delay, 0ms);
+    transform var(--dur, 900ms) cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0ms),
+    opacity var(--dur, 900ms) cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0ms);
   will-change: transform;
 }
-.reveal-word {
-  display: inline-block;
-  transform: translateY(18px);
-  opacity: 0;
-  transition:
-    transform 520ms var(--ease-quart) var(--delay, 0ms),
-    opacity 520ms var(--ease-quart) var(--delay, 0ms);
-}
-[data-revealed] .reveal-unit,
-[data-revealed] .reveal-word {
+[data-revealed] .reveal-unit {
   transform: translateY(0);
   opacity: 1;
 }
-.fade-up {
-  opacity: 0;
-  transform: translateY(var(--y, 24px));
-  transition:
-    opacity var(--dur, 560ms) var(--ease-expo) var(--delay, 0ms),
-    transform var(--dur, 560ms) var(--ease-expo) var(--delay, 0ms);
-}
-.fade-up[data-revealed] {
-  opacity: 1;
-  transform: none;
-}
 
-@utility checker {
-  background-image: conic-gradient(var(--primary) 25%, transparent 0 50%, var(--primary) 0 75%, transparent 0);
-  background-size: 28px 28px;
-}
-
-@utility checker-light {
-  background-image: conic-gradient(var(--foreground) 25%, transparent 0 50%, var(--foreground) 0 75%, transparent 0);
-  background-size: 28px 28px;
-}
-
-@keyframes float-y {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-18px);
-  }
-}
-
-@keyframes spin-once {
-  from {
-    transform: rotate(0deg) scale(0.6);
-    opacity: 0;
-  }
-  40% {
-    opacity: 1;
-  }
-  to {
-    transform: rotate(720deg) scale(1);
-    opacity: 1;
-  }
+/* Pola kotak-kotak ala garis finish: baris pertama mulai terang, baris kedua mulai gelap. */
+@utility checker-strip {
+  background-image: conic-gradient(
+    var(--background) 25%,
+    var(--foreground) 0 50%,
+    var(--background) 0 75%,
+    var(--foreground) 0
+  );
+  background-size: 32px 32px;
 }
 
 @keyframes marquee {
@@ -180,27 +146,19 @@ html.lenis body {
   }
 }
 
-@utility animate-float-y {
-  animation: float-y 6s ease-in-out infinite;
-}
-
-@utility animate-spin-once {
-  animation: spin-once 1.4s cubic-bezier(0.65, 0, 0.35, 1) both;
-}
-
 @utility animate-marquee {
-  animation: marquee 22s linear infinite;
+  animation: marquee 28s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-float-y,
-  .animate-spin-once,
+  html {
+    scroll-behavior: auto;
+  }
   .animate-marquee {
     animation: none;
   }
-  .reveal-unit,
-  .reveal-word,
-  .fade-up {
+  .fade-up,
+  .reveal-unit {
     transition: none;
     transform: none;
     opacity: 1;
