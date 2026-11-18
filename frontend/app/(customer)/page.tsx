@@ -12,15 +12,19 @@ import { StatsSection } from '@/components/landing/stats-section'
 import { StorySection } from '@/components/landing/story-section'
 import { TestimonialsSection } from '@/components/landing/testimonials-section'
 import { TryOnSection } from '@/components/landing/try-on-section'
+import { BarbershopJsonLd } from '@/components/seo/barbershop-json-ld'
+import { SkipLink } from '@/components/shared/skip-link'
 import { SmoothScroll } from '@/components/shared/smooth-scroll'
 
 export default function LandingPage() {
   return (
     <>
+      <SkipLink />
+      <BarbershopJsonLd />
       <Preloader />
       <SmoothScroll />
       <SiteNavbar />
-      <main className="relative w-full overflow-x-hidden">
+      <main id="konten" className="relative w-full overflow-x-hidden">
         <HeroSection />
         <MarqueeStrip />
         <CheckerStrip />

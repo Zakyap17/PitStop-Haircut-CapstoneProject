@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function ETicketPage() {
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center px-6 py-16 lg:py-24">
+    <main id="konten" className="flex min-h-svh flex-col items-center justify-center px-6 py-16 lg:py-24">
       <ETicketView />
     </main>
   )
