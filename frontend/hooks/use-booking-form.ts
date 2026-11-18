@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation'
 import { barbers } from '@/data/barbers'
 import { BOOKING_DAYS_AHEAD, timeSlots } from '@/data/booking-slots'
 import { services } from '@/data/services'
+import { useTryOnChoice } from '@/hooks/use-try-on-choice'
 import { toIsoDate } from '@/lib/format'
 import { generateReservationCode, saveReservation } from '@/lib/reservation-storage'
+import { clearTryOnChoice } from '@/lib/try-on-storage'
 
 const EMAIL_PATTERN = /\S+@\S+\.\S+/
 
@@ -27,6 +29,7 @@ function isSlotInPast(day: Date, slot: string): boolean {
 /** State dan aturan form reservasi di landing page. Submit menyimpan reservasi lalu membuka halaman e-tiket. */
 export function useBookingForm() {
   const router = useRouter()
+  const tryOnChoice = useTryOnChoice()
 
   // Hari dihitung setelah mount supaya tidak mismatch antara server dan browser (zona waktu berbeda).
   const [days, setDays] = useState<Date[]>([])
@@ -71,11 +74,15 @@ export function useBookingForm() {
       customerName: customerName.trim(),
       customerEmail: customerEmail.trim(),
       price: service.price,
+      hairstyle: tryOnChoice?.name,
     })
+    clearTryOnChoice()
     router.push('/e-ticket')
   }
 
   return {
+    tryOnChoice,
+    clearTryOnChoice,
     days,
     timeSlots,
     barbers,

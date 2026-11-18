@@ -20,7 +20,7 @@ export function BookingSection() {
   return (
     <section
       id="reservasi"
-      className="relative overflow-hidden border-t border-foreground/10 bg-[radial-gradient(circle_at_20%_0%,oklch(0.35_0.16_264)_0%,var(--background)_60%)] py-24 md:py-32"
+      className="theme-alt checker-backdrop relative overflow-hidden border-t border-foreground/10 bg-[radial-gradient(circle_at_20%_0%,oklch(0.34_0.1_250)_0%,var(--background)_60%)] py-24 md:py-32"
     >
       <div className="mx-auto grid max-w-7xl gap-12 px-4 md:px-8 lg:grid-cols-[1fr_1.3fr]">
         <div className="flex flex-col gap-6">
@@ -43,6 +43,18 @@ export function BookingSection() {
         </div>
 
         <form onSubmit={form.submit} className="flex flex-col gap-7 rounded-3xl border border-foreground/10 bg-card/80 p-6 backdrop-blur md:p-8">
+          {form.tryOnChoice && (
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
+              <p>
+                <span className="text-muted-foreground">Gaya pilihanmu dari Try-On: </span>
+                <span className="font-semibold">{form.tryOnChoice.name}</span>
+                <span className="text-muted-foreground"> · kapster {form.tryOnChoice.barber}</span>
+              </p>
+              <button type="button" onClick={form.clearTryOnChoice} className="shrink-0 text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground">
+                Hapus
+              </button>
+            </div>
+          )}
           <fieldset>
             <legend className="mb-3 text-sm font-semibold">1. Layanan</legend>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">

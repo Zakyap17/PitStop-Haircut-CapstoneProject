@@ -4,7 +4,7 @@ const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'
 
 export function BarbersSection() {
   return (
-    <section id="kapster" className="border-t border-foreground/10 bg-card/40 py-24 md:py-32">
+    <section id="kapster" className="theme-alt checker-backdrop border-t border-foreground/10 bg-card/40 py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>

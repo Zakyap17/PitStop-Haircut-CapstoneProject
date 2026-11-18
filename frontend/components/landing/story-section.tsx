@@ -1,5 +1,5 @@
+import Image from 'next/image'
 import { Eyebrow } from '@/components/shared/eyebrow'
-import { LiquidImage } from '@/components/shared/liquid-image'
 import { Lines, Reveal } from '@/components/shared/reveal'
 
 const principles = [
@@ -23,7 +23,7 @@ const principles = [
 
 export function StorySection() {
   return (
-    <section id="cerita" className="px-4 py-24 md:px-10 md:py-36">
+    <section id="cerita" className="theme-alt checker-backdrop px-4 py-24 md:px-10 md:py-36">
       <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-6">
           <Eyebrow>Cerita Kami</Eyebrow>
@@ -37,12 +37,16 @@ export function StorySection() {
             </p>
           </Reveal>
           <Reveal className="fade-up mt-10" delay={120} style={{ '--y': '60px', '--dur': '620ms' } as React.CSSProperties}>
-            <LiquidImage
-              src="/images/interior/interior-wide.png"
-              alt="Interior Pit Stop Barbershop dengan panel dinding biru dan kursi mobil anak"
-              className="aspect-[16/10] w-full rounded-sm"
-              sizes="(min-width: 1024px) 45vw, 100vw"
-            />
+            {/* Gambar polos: tanpa filter distorsi/overlay supaya foto tetap tajam. */}
+            <div className="relative aspect-[16/10] w-full overflow-hidden rounded-sm">
+              <Image
+                src="/images/interior/interior-wide.png"
+                alt="Interior Pit Stop Barbershop dengan panel dinding biru dan kursi mobil anak"
+                fill
+                sizes="(min-width: 1024px) 45vw, 100vw"
+                className="object-cover"
+              />
+            </div>
           </Reveal>
         </div>
 

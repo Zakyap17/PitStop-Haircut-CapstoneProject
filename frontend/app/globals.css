@@ -8,6 +8,7 @@
   --font-sans: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-anton), Impact, sans-serif;
   --font-display: var(--font-anton), Impact, sans-serif;
+  --font-script: var(--font-galada), cursive;
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -44,30 +45,49 @@
   --ease-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
+/* Warna dasar (gelap): navy #091c33, dipakai di hero, marquee, try-on, dan footer. */
 :root {
   color-scheme: dark;
-  --background: #07080c;
+  --background: #091c33;
   --foreground: #f3f1ea;
-  --card: #101218;
+  --card: #102b48;
   --card-foreground: #f3f1ea;
-  --popover: #101218;
+  --popover: #102b48;
   --popover-foreground: #f3f1ea;
   --primary: #1f4bff;
   --primary-foreground: #ffffff;
-  --secondary: #171a22;
+  --secondary: #143353;
   --secondary-foreground: #f3f1ea;
-  --muted: #161820;
-  --muted-foreground: #8b8d97;
-  --accent: #3a6bff;
+  --muted: #0e2540;
+  --muted-foreground: #93a7c4;
+  --accent: #5483ff;
   --accent-foreground: #ffffff;
   --destructive: #ff4d3d;
-  --border: rgba(243, 241, 234, 0.1);
-  --border-strong: #3a3c43;
+  --border: rgba(243, 241, 234, 0.12);
+  --border-strong: #2c4666;
   --success: #2fbf71;
-  --input: rgba(243, 241, 234, 0.16);
-  --ring: #3a6bff;
-  --line-strong: rgba(243, 241, 234, 0.22);
+  --input: rgba(243, 241, 234, 0.18);
+  --ring: #5483ff;
+  --line-strong: rgba(243, 241, 234, 0.24);
   --radius: 0.75rem;
+}
+
+/* Warna selang-seling: navy yang sedikit lebih terang dari dasar, untuk section di antara bagian gelap.
+   Pasang kelas `theme-alt` pada <section>. Semua warna di dalamnya mengikuti. */
+.theme-alt {
+  color-scheme: dark;
+  --background: #0d2540;
+  --card: #14335a;
+  --card-foreground: #f3f1ea;
+  --popover: #14335a;
+  --secondary: #183b66;
+  --muted: #112e4d;
+  --muted-foreground: #9db1ce;
+  --border: rgba(243, 241, 234, 0.14);
+  --border-strong: #35547a;
+  --input: rgba(243, 241, 234, 0.2);
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 /* Tema terang untuk area admin/owner. Nilainya mengikuti variabel warna dashboard di Figma. */
@@ -189,6 +209,87 @@ html.lenis body {
   background-size: 28px 28px;
 }
 
+/* Tekstur kotak-kotak ala garis finish di bagian atas section. Warnanya mengikuti tema section (krem di gelap, navy di terang). */
+.checker-backdrop {
+  position: relative;
+  isolation: isolate;
+}
+.checker-backdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: min(30rem, 75%);
+  z-index: -1;
+  pointer-events: none;
+  background-image: conic-gradient(
+    color-mix(in srgb, var(--foreground) 15%, transparent) 25%,
+    transparent 0 50%,
+    color-mix(in srgb, var(--foreground) 15%, transparent) 0 75%,
+    transparent 0
+  );
+  background-size: 64px 64px;
+  /* Pekat di bagian atas, baru memudar ke bawah agar teks di bawahnya tetap terbaca. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent);
+  mask-image: linear-gradient(to bottom, #000 30%, transparent);
+}
+
+/* Garis finish dua baris (tinggi 32px), pembatas antara section gelap dan terang. */
+@utility checker-strip {
+  background-image: conic-gradient(
+    var(--background) 25%,
+    var(--foreground) 0 50%,
+    var(--background) 0 75%,
+    var(--foreground) 0
+  );
+  background-size: 32px 32px;
+}
+
+/* ---- Hero ala referensi: gradien radial yang berubah warna dan objek melayang ---- */
+/* @property membuat variabel warna bisa dianimasikan lewat transition (morph latar saat ganti pilihan). */
+@property --hero-inner {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0b6a78;
+}
+@property --hero-mid {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #073a4e;
+}
+@property --hero-outer {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #091c33;
+}
+.hero-theme {
+  background: radial-gradient(circle at center, var(--hero-inner) 0%, var(--hero-mid) 50%, var(--hero-outer) 100%);
+  transition:
+    --hero-inner 1.5s cubic-bezier(0.4, 0, 0.2, 1),
+    --hero-mid 1.5s cubic-bezier(0.4, 0, 0.2, 1),
+    --hero-outer 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+@keyframes hero-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+.hero-center-float {
+  animation: hero-float 6s ease-in-out infinite;
+}
+.hero-stage-in {
+  opacity: 0;
+  animation: hero-fade-in 1.5s ease-out 0.3s forwards;
+}
+
 @keyframes float-y {
   0%,
   100% {
@@ -234,8 +335,13 @@ html.lenis body {
 @media (prefers-reduced-motion: reduce) {
   .animate-float-y,
   .animate-spin-once,
-  .animate-marquee {
+  .animate-marquee,
+  .hero-center-float {
     animation: none;
+  }
+  .hero-stage-in {
+    animation: none;
+    opacity: 1;
   }
   .reveal-unit,
   .reveal-word,
