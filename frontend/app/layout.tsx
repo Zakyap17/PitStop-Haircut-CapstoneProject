@@ -1,9 +1,10 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Anton, Onest } from 'next/font/google'
+import { Anton, Galada, Onest } from 'next/font/google'
 import './globals.css'
 
 const onest = Onest({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-onest' })
+const galada = Galada({ subsets: ['latin'], weight: '400', variable: '--font-galada' })
 const anton = Anton({ subsets: ['latin'], weight: '400', variable: '--font-anton' })
 
 export const metadata: Metadata = {
@@ -24,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="id" className={`${onest.variable} ${anton.variable} bg-background`}>
+    <html lang="id" className={`${onest.variable} ${anton.variable} ${galada.variable} bg-background`}>
       <body className="font-sans antialiased">
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}

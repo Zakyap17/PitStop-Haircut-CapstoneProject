@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { ArrowRight } from 'lucide-react'
 import { lenisRef } from '@/lib/intro-store'
 import { cn } from '@/lib/utils'
 
@@ -15,16 +14,30 @@ const links = [
   { href: '#testimoni', label: 'Testimoni' },
 ]
 
+/** Navbar kaca: logo di kiri, menu berbentuk pil di tengah (aktif = pink), tombol Reservasi di kanan. */
 export function SiteNavbar() {
   const [open, setOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const [activeId, setActiveId] = useState<string | null>(null)
 
-  // Setelah sedikit di-scroll, navbar diberi latar navy agar menunya tetap terbaca di atas section terang.
+  // Menandai section yang sedang tampil di tengah layar.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24)
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    const sections = links.map((link) => document.querySelector(link.href)).filter((el): el is Element => el !== null)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActiveId(`#${entry.target.id}`)
+        })
+      },
+      { rootMargin: '-45% 0px -50% 0px' },
+    )
+    sections.forEach((section) => observer.observe(section))
+    const hero = document.querySelector('#beranda')
+    const heroObserver = new IntersectionObserver(([entry]) => entry.isIntersecting && setActiveId(null), { threshold: 0.4 })
+    if (hero) heroObserver.observe(hero)
+    return () => {
+      observer.disconnect()
+      heroObserver.disconnect()
+    }
   }, [])
 
   const toggle = (next: boolean) => {
@@ -35,29 +48,24 @@ export function SiteNavbar() {
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
-      <nav
-        aria-label="Navigasi utama"
-        className={cn(
-          'pointer-events-auto relative z-[60] flex items-center justify-between gap-4 px-4 py-5 transition-colors duration-300 md:px-10',
-          scrolled ? 'border-b border-border bg-background/90 backdrop-blur-md' : 'bg-gradient-to-b from-background/80 to-transparent',
-        )}
-      >
-        <a href="#beranda" className="flex items-center gap-3" onClick={() => open && toggle(false)}>
-          <Image src="/images/brand/logo-mark.png" alt="" width={40} height={40} className="size-10 rounded-full ring-1 ring-[var(--line-strong)]" />
-          <span className="hidden text-[13px] font-medium uppercase tracking-[0.22em] text-muted-foreground sm:block">
-            Pit Stop Barbershop
-          </span>
+      <nav aria-label="Navigasi utama" className="pointer-events-auto relative z-[60] flex items-center justify-between gap-4 px-[4%] py-6">
+        <a href="#beranda" className="flex items-center gap-2.5" onClick={() => open && toggle(false)}>
+          <Image src="/images/brand/logo-mark.png" alt="" width={36} height={36} className="size-9 rounded-full ring-1 ring-white/30" />
+          <span className="font-script text-xl text-white">Pit Stop</span>
         </a>
 
-        <ul className="hidden items-center gap-8 lg:flex">
+        <ul className="hidden items-center gap-1 rounded-full border border-white/20 bg-white/[0.08] p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.1),inset_0_0_0_1px_rgba(255,255,255,0.1)] backdrop-blur-xl lg:flex">
           {links.map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
-                className="group relative text-[13px] font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
+                aria-current={activeId === link.href ? 'true' : undefined}
+                className={cn(
+                  'block rounded-full px-5 py-2 text-[13px] font-medium transition-all duration-300',
+                  activeId === link.href ? 'bg-pink text-[#011d17]' : 'text-white/70 hover:bg-pink hover:text-[#011d17]',
+                )}
               >
                 {link.label}
-                <span className="absolute -bottom-1 left-0 h-px w-0 bg-accent transition-all duration-300 group-hover:w-full" />
               </a>
             </li>
           ))}
@@ -66,10 +74,9 @@ export function SiteNavbar() {
         <div className="flex items-center gap-2">
           <a
             href="#reservasi"
-            className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground transition-transform hover:-translate-y-0.5"
+            className="rounded-full bg-black/45 px-7 py-3 text-sm font-semibold text-white ring-1 ring-white/15 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-black/70"
           >
             Reservasi
-            <ArrowRight className="size-4" aria-hidden="true" />
           </a>
           <button
             type="button"
@@ -79,9 +86,9 @@ export function SiteNavbar() {
             onClick={() => toggle(!open)}
             className="flex size-10 flex-col items-center justify-center gap-1.5 lg:hidden"
           >
-            <span className={cn('h-0.5 w-6 bg-foreground transition-transform', open && 'translate-y-2 rotate-45')} />
-            <span className={cn('h-0.5 w-6 bg-foreground transition-opacity', open && 'opacity-0')} />
-            <span className={cn('h-0.5 w-6 bg-foreground transition-transform', open && '-translate-y-2 -rotate-45')} />
+            <span className={cn('h-0.5 w-6 bg-white transition-transform', open && 'translate-y-2 rotate-45')} />
+            <span className={cn('h-0.5 w-6 bg-white transition-opacity', open && 'opacity-0')} />
+            <span className={cn('h-0.5 w-6 bg-white transition-transform', open && '-translate-y-2 -rotate-45')} />
           </button>
         </div>
       </nav>
@@ -98,24 +105,21 @@ export function SiteNavbar() {
           {links.map((link, index) => (
             <li
               key={link.href}
-              className={cn(
-                'transition-all duration-[420ms] ease-out',
-                open ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0',
-              )}
+              className={cn('transition-all duration-[420ms] ease-out', open ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0')}
               style={{ transitionDelay: open ? `${120 + index * 60}ms` : '0ms' }}
             >
               <a
                 href={link.href}
                 tabIndex={open ? 0 : -1}
                 onClick={() => toggle(false)}
-                className="font-display text-5xl uppercase leading-none tracking-tight transition-colors hover:text-accent"
+                className="font-display text-5xl leading-none tracking-tight uppercase transition-colors hover:text-pink"
               >
                 {link.label}
               </a>
             </li>
           ))}
         </ul>
-        <div className="checker-light absolute inset-x-0 bottom-0 h-5 opacity-80 [background-size:20px_20px]" aria-hidden="true" />
+        <div className="checker-strip absolute inset-x-0 bottom-0 h-8" aria-hidden="true" />
       </div>
     </header>
   )

@@ -8,6 +8,8 @@
   --font-sans: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-anton), Impact, sans-serif;
   --font-display: var(--font-anton), Impact, sans-serif;
+  --font-script: var(--font-galada), cursive;
+  --color-pink: var(--pink);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -68,6 +70,7 @@
   --input: rgba(243, 241, 234, 0.18);
   --ring: #5483ff;
   --line-strong: rgba(243, 241, 234, 0.24);
+  --pink: #fbcfe8;
   --radius: 0.75rem;
 }
 
@@ -243,6 +246,75 @@ html.lenis body {
   background-size: 32px 32px;
 }
 
+/* ---- Hero ala referensi: gradien radial yang berubah warna, objek melayang, gelembung ---- */
+/* @property membuat variabel warna bisa dianimasikan lewat transition (morph latar saat ganti pilihan). */
+@property --hero-inner {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0b6a78;
+}
+@property --hero-mid {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #073a4e;
+}
+@property --hero-outer {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #091c33;
+}
+.hero-theme {
+  background: radial-gradient(circle at center, var(--hero-inner) 0%, var(--hero-mid) 50%, var(--hero-outer) 100%);
+  transition:
+    --hero-inner 1.5s cubic-bezier(0.4, 0, 0.2, 1),
+    --hero-mid 1.5s cubic-bezier(0.4, 0, 0.2, 1),
+    --hero-outer 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+@keyframes hero-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes hero-bubble-up {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: var(--bubble-opacity, 0.4);
+  }
+  100% {
+    transform: translateY(-110vh) translateX(30px) rotate(360deg);
+    opacity: 0;
+  }
+}
+.hero-center-float {
+  animation: hero-float 6s ease-in-out infinite;
+}
+.hero-stage-in {
+  opacity: 0;
+  animation: hero-fade-in 1.5s ease-out 0.3s forwards;
+}
+.hero-bubble {
+  position: absolute;
+  bottom: -50px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.08) 60%, transparent 70%);
+  animation: hero-bubble-up var(--bubble-duration, 8s) linear infinite;
+  animation-delay: var(--bubble-delay, 0s);
+}
+
 @keyframes float-y {
   0%,
   100% {
@@ -288,8 +360,14 @@ html.lenis body {
 @media (prefers-reduced-motion: reduce) {
   .animate-float-y,
   .animate-spin-once,
-  .animate-marquee {
+  .animate-marquee,
+  .hero-center-float,
+  .hero-bubble {
     animation: none;
+  }
+  .hero-stage-in {
+    animation: none;
+    opacity: 1;
   }
   .reveal-unit,
   .reveal-word,
