@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { CalendarCheck } from 'lucide-react'
 import { useBookingForm } from '@/hooks/use-booking-form'
 import { formatRupiah } from '@/lib/format'
@@ -39,6 +40,12 @@ export function BookingSection() {
               reservasi, pesanan otomatis dibatalkan dan slot dibuka untuk walk-in.
             </p>
           </div>
+          <p className="text-sm text-muted-foreground">
+            Sudah punya kode reservasi?{' '}
+            <Link href="/cek-reservasi" className="text-accent underline underline-offset-4 hover:text-foreground">
+              Cek reservasi
+            </Link>
+          </p>
           <div className="checker mt-auto hidden h-16 rounded-2xl opacity-60 lg:block" aria-hidden="true" />
         </div>
 

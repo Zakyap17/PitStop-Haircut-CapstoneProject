@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Eyebrow } from '@/components/shared/eyebrow'
 import { Lines, Reveal } from '@/components/shared/reveal'
 
@@ -26,6 +27,13 @@ export function SiteFooter() {
           ↗
         </span>
       </a>
+
+      <p className="mt-6 text-sm text-muted-foreground">
+        Sudah punya reservasi?{' '}
+        <Link href="/cek-reservasi" className="text-accent underline underline-offset-4 hover:text-foreground">
+          Cek di sini
+        </Link>
+      </p>
 
       <div className="mt-24 grid gap-10 border-t border-border py-12 md:mt-36 lg:grid-cols-12">
         <div className="lg:col-span-5">
