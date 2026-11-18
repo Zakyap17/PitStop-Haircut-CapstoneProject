@@ -14,7 +14,7 @@ const links = [
   { href: '#testimoni', label: 'Testimoni' },
 ]
 
-/** Navbar kaca: logo di kiri, menu berbentuk pil di tengah (aktif = pink), tombol Reservasi di kanan. */
+/** Navbar kaca: logo di kiri, menu berbentuk pil di tengah (aktif = biru brand), tombol Reservasi di kanan. */
 export function SiteNavbar() {
   const [open, setOpen] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -62,7 +62,7 @@ export function SiteNavbar() {
                 aria-current={activeId === link.href ? 'true' : undefined}
                 className={cn(
                   'block rounded-full px-5 py-2 text-[13px] font-medium transition-all duration-300',
-                  activeId === link.href ? 'bg-pink text-[#011d17]' : 'text-white/70 hover:bg-pink hover:text-[#011d17]',
+                  activeId === link.href ? 'bg-primary text-white' : 'text-white/70 hover:bg-primary hover:text-white',
                 )}
               >
                 {link.label}
@@ -112,7 +112,7 @@ export function SiteNavbar() {
                 href={link.href}
                 tabIndex={open ? 0 : -1}
                 onClick={() => toggle(false)}
-                className="font-display text-5xl leading-none tracking-tight uppercase transition-colors hover:text-pink"
+                className="font-display text-5xl leading-none tracking-tight uppercase transition-colors hover:text-accent"
               >
                 {link.label}
               </a>
