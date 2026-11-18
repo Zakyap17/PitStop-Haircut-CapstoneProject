@@ -27,3 +27,8 @@ export function fromIsoDate(isoDate: string): Date {
   const [year, month, day] = isoDate.split('-').map(Number)
   return new Date(year, month - 1, day)
 }
+
+/** Rupiah tanpa spasi, gaya tabel admin: "Rp150.000". */
+export function formatRupiahTight(value: number): string {
+  return formatRupiah(value).replace(/\s/g, '')
+}
