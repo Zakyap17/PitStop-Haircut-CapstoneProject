@@ -58,7 +58,7 @@ export function HeroSection() {
             <br />
             Crop
           </Reveal>
-          <Reveal as="p" afterIntro delay={200} className="max-w-[400px] text-[1.1rem] leading-relaxed text-white/70">
+          <Reveal as="p" afterIntro delay={200} className="max-w-[400px] text-[1.1rem] leading-relaxed text-white/70 lg:max-w-[300px] xl:max-w-[400px]">
             Barbershop untuk pria dan anak dengan presisi ala kru pit stop. Pilih kapster, kunci slot online, datang tanpa antre — si kecil duduk di kursi mobil
             balap.
           </Reveal>
@@ -97,7 +97,7 @@ export function HeroSection() {
                   width={460}
                   height={460}
                   preload
-                  className="size-56 rounded-full shadow-[0_40px_120px_-20px_color-mix(in_srgb,var(--primary)_80%,transparent)] sm:size-72 lg:size-[22rem]"
+                  className="size-56 rounded-full shadow-[0_40px_120px_-20px_color-mix(in_srgb,var(--primary)_80%,transparent)] sm:size-72 lg:size-[16rem] xl:size-[22rem]"
                 />
               </div>
             </div>

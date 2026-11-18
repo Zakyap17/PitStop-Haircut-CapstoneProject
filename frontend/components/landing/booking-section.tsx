@@ -23,7 +23,7 @@ export function BookingSection() {
       className="theme-alt checker-backdrop relative overflow-hidden border-t border-foreground/10 bg-[radial-gradient(circle_at_20%_0%,oklch(0.34_0.1_250)_0%,var(--background)_60%)] py-24 md:py-32"
     >
       <div className="mx-auto grid max-w-7xl gap-12 px-4 md:px-8 lg:grid-cols-[1fr_1.3fr]">
-        <div className="flex flex-col gap-6">
+        <div className="flex min-w-0 flex-col gap-6">
           <p className="text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">Reservasi Online</p>
           <h2 className="font-serif text-5xl leading-none text-balance md:text-6xl">
             Kunci slotmu, <em className="text-accent">skip</em> antrean
@@ -42,7 +42,7 @@ export function BookingSection() {
           <div className="checker mt-auto hidden h-16 rounded-2xl opacity-60 lg:block" aria-hidden="true" />
         </div>
 
-        <form onSubmit={form.submit} className="flex flex-col gap-7 rounded-3xl border border-foreground/10 bg-card/80 p-6 backdrop-blur md:p-8">
+        <form onSubmit={form.submit} className="flex min-w-0 flex-col gap-7 rounded-3xl border border-foreground/10 bg-card/80 p-6 backdrop-blur md:p-8">
           {form.tryOnChoice && (
             <div className="flex items-center justify-between gap-3 rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
               <p>
