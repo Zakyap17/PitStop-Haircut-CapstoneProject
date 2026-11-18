@@ -18,7 +18,7 @@ export function FacePanel({ videoRef, cameraActive, photoUrl }: FacePanelProps) 
         <Image src={photoUrl} alt="Foto wajahmu" fill unoptimized sizes="(min-width: 1024px) 18rem, 45vw" className="object-cover" />
       )}
       {!cameraActive && !photoUrl && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-5 text-center text-muted-foreground">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-12 text-center text-muted-foreground">
           <Camera className="size-8" aria-hidden="true" />
           <p className="text-sm leading-relaxed">Nyalakan kamera atau unggah foto wajah</p>
         </div>
