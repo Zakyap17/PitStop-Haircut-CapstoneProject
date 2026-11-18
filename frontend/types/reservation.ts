@@ -9,4 +9,6 @@ export type Reservation = {
   customerName: string
   customerEmail: string
   price: number
+  /** Gaya rambut pilihan dari Virtual Try-On (opsional). */
+  hairstyle?: string
 }
