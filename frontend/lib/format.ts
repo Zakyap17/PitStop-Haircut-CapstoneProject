@@ -1,7 +1,13 @@
 const LOCALE = 'id-ID'
 
+/**
+ * Format Rupiah: "Rp 50.000" (spasi tak terputus agar tidak pecah baris).
+ * Ditulis manual, bukan Intl.NumberFormat, karena tiap mesin memformat mata uang sedikit berbeda
+ * (Node memberi spasi, Safari iOS tidak) sehingga HTML server dan browser tidak cocok (hydration error).
+ */
 export function formatRupiah(value: number): string {
-  return new Intl.NumberFormat(LOCALE, { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value)
+  const digits = Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  return `Rp\u00A0${digits}`
 }
 
 /** Label chip hari di form reservasi, contoh: "Sel 29". */
@@ -30,5 +36,5 @@ export function fromIsoDate(isoDate: string): Date {
 
 /** Rupiah tanpa spasi, gaya tabel admin: "Rp150.000". */
 export function formatRupiahTight(value: number): string {
-  return formatRupiah(value).replace(/\s/g, '')
+  return formatRupiah(value).replace(/\u00A0/g, '')
 }

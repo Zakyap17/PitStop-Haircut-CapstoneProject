@@ -18,6 +18,15 @@ const links = [
 export function SiteNavbar() {
   const [open, setOpen] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [scrolled, setScrolled] = useState(false)
+
+  // Setelah di-scroll, navbar diberi latar blur agar tidak bertumpuk dengan isi halaman di belakangnya.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   // Menandai section yang sedang tampil di tengah layar.
   useEffect(() => {
@@ -48,7 +57,13 @@ export function SiteNavbar() {
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
-      <nav aria-label="Navigasi utama" className="pointer-events-auto relative z-[60] flex items-center justify-between gap-4 px-[4%] py-6">
+      <nav
+        aria-label="Navigasi utama"
+        className={cn(
+          'pointer-events-auto relative z-[60] flex items-center justify-between gap-4 px-[4%] transition-all duration-300',
+          scrolled ? 'border-b border-white/10 bg-background/80 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-xl' : 'py-6',
+        )}
+      >
         <a href="#beranda" className="flex items-center gap-2.5" onClick={() => open && toggle(false)}>
           <Image src="/images/brand/logo-mark.png" alt="" width={36} height={36} className="size-9 rounded-full ring-1 ring-white/30" />
           <span className="font-script text-xl text-white">Pit Stop</span>
