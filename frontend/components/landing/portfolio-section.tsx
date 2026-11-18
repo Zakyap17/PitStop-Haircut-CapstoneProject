@@ -24,7 +24,7 @@ export function PortfolioSection() {
   }
 
   return (
-    <section id="portofolio" className="relative overflow-hidden py-24 md:py-32">
+    <section id="portofolio" className="theme-light relative overflow-hidden py-24 md:py-32">
       <div className="mx-auto flex max-w-7xl flex-col items-center px-4 text-center md:px-8">
         <p className="flex items-center gap-3 text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">
           <span className="h-px w-10 bg-muted-foreground/50" aria-hidden="true" />
@@ -112,7 +112,7 @@ export function PortfolioSection() {
             >
               <Image src={cut.image || '/placeholder.svg'} alt="" fill sizes="220px" className="pointer-events-none object-cover" draggable={false} />
               <span className="absolute left-3 top-3 text-[10px] font-semibold text-foreground/90">{pad(index + 1)}</span>
-              <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent p-3 pt-10 text-left font-serif text-lg">
+              <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-10 text-left font-serif text-lg text-white">
                 {cut.name}
               </span>
             </button>

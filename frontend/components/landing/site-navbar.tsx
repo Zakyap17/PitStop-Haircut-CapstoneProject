@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { lenisRef } from '@/lib/intro-store'
 import { cn } from '@/lib/utils'
@@ -17,6 +17,15 @@ const links = [
 
 export function SiteNavbar() {
   const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  // Setelah sedikit di-scroll, navbar diberi latar navy agar menunya tetap terbaca di atas section terang.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const toggle = (next: boolean) => {
     setOpen(next)
@@ -28,7 +37,10 @@ export function SiteNavbar() {
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
       <nav
         aria-label="Navigasi utama"
-        className="pointer-events-auto relative z-[60] flex items-center justify-between gap-4 bg-gradient-to-b from-background/80 to-transparent px-4 py-5 md:px-10"
+        className={cn(
+          'pointer-events-auto relative z-[60] flex items-center justify-between gap-4 px-4 py-5 transition-colors duration-300 md:px-10',
+          scrolled ? 'border-b border-border bg-background/90 backdrop-blur-md' : 'bg-gradient-to-b from-background/80 to-transparent',
+        )}
       >
         <a href="#beranda" className="flex items-center gap-3" onClick={() => open && toggle(false)}>
           <Image src="/images/brand/logo-mark.png" alt="" width={40} height={40} className="size-10 rounded-full ring-1 ring-[var(--line-strong)]" />
