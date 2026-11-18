@@ -11,6 +11,13 @@
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-success: var(--success);
+  --color-navy: var(--navy);
+  --color-soft: var(--soft);
+  --color-success-fg: var(--success-fg);
+  --color-warn-fg: var(--warn-fg);
+  --color-neutral-fg: var(--neutral-fg);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
@@ -55,10 +62,42 @@
   --accent-foreground: #ffffff;
   --destructive: #ff4d3d;
   --border: rgba(243, 241, 234, 0.1);
+  --border-strong: #3a3c43;
+  --success: #2fbf71;
   --input: rgba(243, 241, 234, 0.16);
   --ring: #3a6bff;
   --line-strong: rgba(243, 241, 234, 0.22);
   --radius: 0.75rem;
+}
+
+/* Tema terang untuk area admin/owner. Nilainya mengikuti variabel warna dashboard di Figma. */
+.admin-theme {
+  color-scheme: light;
+  --background: #f6f8fc;
+  --foreground: #12213a;
+  --card: #ffffff;
+  --card-foreground: #12213a;
+  --popover: #ffffff;
+  --popover-foreground: #12213a;
+  --primary: #155eef;
+  --primary-foreground: #ffffff;
+  --secondary: #eef4ff;
+  --secondary-foreground: #155eef;
+  --muted: #f6f8fc;
+  --muted-foreground: #64748b;
+  --accent: #155eef;
+  --accent-foreground: #ffffff;
+  --border: #e4eaf2;
+  --input: #e4eaf2;
+  --ring: #155eef;
+  --navy: #10213d;
+  --soft: #eef4ff;
+  --success-fg: #14804a;
+  --warn-fg: #a76804;
+  --neutral-fg: #718096;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
