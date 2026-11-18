@@ -1,5 +1,6 @@
 import { BarbersSection } from '@/components/landing/barbers-section'
 import { BookingSection } from '@/components/landing/booking-section'
+import { CheckerStrip } from '@/components/landing/checker-strip'
 import { HeroSection } from '@/components/landing/hero-section'
 import { MarqueeStrip } from '@/components/landing/marquee-strip'
 import { PortfolioSection } from '@/components/landing/portfolio-section'
@@ -22,14 +23,18 @@ export default function LandingPage() {
       <main className="relative w-full overflow-x-hidden">
         <HeroSection />
         <MarqueeStrip />
+        <CheckerStrip />
         <StorySection />
         <PortfolioSection />
         <ServicesSection />
         <BarbersSection />
         <StatsSection />
+        <CheckerStrip />
         <TryOnSection />
+        <CheckerStrip />
         <TestimonialsSection />
         <BookingSection />
+        <CheckerStrip />
       </main>
       <SiteFooter />
     </>

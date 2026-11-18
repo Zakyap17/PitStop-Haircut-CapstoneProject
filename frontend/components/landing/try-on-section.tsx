@@ -9,7 +9,7 @@ const steps = [
 
 export function TryOnSection() {
   return (
-    <section id="try-on" className="border-t border-foreground/10 py-24 md:py-32">
+    <section id="try-on" className="checker-backdrop border-t border-foreground/10 py-24 md:py-32">
       <div className="mx-auto grid max-w-7xl items-start gap-14 px-4 md:px-8 lg:grid-cols-2">
         <div className="mx-auto w-full max-w-xl">
           <TryOnStudio />

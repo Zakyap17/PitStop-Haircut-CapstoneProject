@@ -12,7 +12,7 @@ export function TestimonialsSection() {
   const current = voices[active]
 
   return (
-    <section id="testimoni" className="theme-light px-4 py-24 md:px-10 md:py-36">
+    <section id="testimoni" className="theme-alt checker-backdrop px-4 py-24 md:px-10 md:py-36">
       <Eyebrow>Testimoni</Eyebrow>
       <Reveal as="h2" className="mt-6 font-display text-5xl uppercase leading-none tracking-tight sm:text-6xl">
         <Lines lines={['Kata mereka.']} />

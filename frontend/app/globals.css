@@ -44,53 +44,47 @@
   --ease-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-/* Tema gelap (default): biru-navy, dipakai di hero, marquee, try-on, dan footer. */
+/* Warna dasar (gelap): navy #091c33, dipakai di hero, marquee, try-on, dan footer. */
 :root {
   color-scheme: dark;
-  --background: #0f1b3d;
+  --background: #091c33;
   --foreground: #f3f1ea;
-  --card: #17275d;
+  --card: #102b48;
   --card-foreground: #f3f1ea;
-  --popover: #17275d;
+  --popover: #102b48;
   --popover-foreground: #f3f1ea;
   --primary: #1f4bff;
   --primary-foreground: #ffffff;
-  --secondary: #1c2f6e;
+  --secondary: #143353;
   --secondary-foreground: #f3f1ea;
-  --muted: #16265a;
-  --muted-foreground: #9aa8cc;
-  --accent: #4d7cff;
+  --muted: #0e2540;
+  --muted-foreground: #93a7c4;
+  --accent: #5483ff;
   --accent-foreground: #ffffff;
   --destructive: #ff4d3d;
   --border: rgba(243, 241, 234, 0.12);
-  --border-strong: #41538a;
+  --border-strong: #2c4666;
   --success: #2fbf71;
   --input: rgba(243, 241, 234, 0.18);
-  --ring: #4d7cff;
+  --ring: #5483ff;
   --line-strong: rgba(243, 241, 234, 0.24);
   --radius: 0.75rem;
 }
 
-/* Tema terang: tambahkan kelas `theme-light` pada <section> agar seluruh isinya memakai warna terang. */
-.theme-light {
-  color-scheme: light;
-  --background: #f6f7fb;
-  --foreground: #0f1b3d;
-  --card: #ffffff;
-  --card-foreground: #0f1b3d;
-  --popover: #ffffff;
-  --popover-foreground: #0f1b3d;
-  --secondary: #e9edf8;
-  --secondary-foreground: #0f1b3d;
-  --muted: #eef1f9;
-  --muted-foreground: #55627f;
-  --accent: #1f4bff;
-  --accent-foreground: #ffffff;
-  --border: rgba(15, 27, 61, 0.12);
-  --border-strong: #c3cbe0;
-  --input: rgba(15, 27, 61, 0.18);
-  --ring: #1f4bff;
-  --line-strong: rgba(15, 27, 61, 0.24);
+/* Warna selang-seling: navy yang sedikit lebih terang dari dasar, untuk section di antara bagian gelap.
+   Pasang kelas `theme-alt` pada <section>. Semua warna di dalamnya mengikuti. */
+.theme-alt {
+  color-scheme: dark;
+  --background: #0d2540;
+  --card: #14335a;
+  --card-foreground: #f3f1ea;
+  --popover: #14335a;
+  --secondary: #183b66;
+  --muted: #112e4d;
+  --muted-foreground: #9db1ce;
+  --border: rgba(243, 241, 234, 0.14);
+  --border-strong: #35547a;
+  --input: rgba(243, 241, 234, 0.2);
   background-color: var(--background);
   color: var(--foreground);
 }
@@ -212,6 +206,41 @@ html.lenis body {
 @utility checker-light {
   background-image: conic-gradient(var(--foreground) 25%, transparent 0 50%, var(--foreground) 0 75%, transparent 0);
   background-size: 28px 28px;
+}
+
+/* Tekstur kotak-kotak ala garis finish di bagian atas section. Warnanya mengikuti tema section (krem di gelap, navy di terang). */
+.checker-backdrop {
+  position: relative;
+  isolation: isolate;
+}
+.checker-backdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: min(30rem, 75%);
+  z-index: -1;
+  pointer-events: none;
+  background-image: conic-gradient(
+    color-mix(in srgb, var(--foreground) 15%, transparent) 25%,
+    transparent 0 50%,
+    color-mix(in srgb, var(--foreground) 15%, transparent) 0 75%,
+    transparent 0
+  );
+  background-size: 64px 64px;
+  /* Pekat di bagian atas, baru memudar ke bawah agar teks di bawahnya tetap terbaca. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent);
+  mask-image: linear-gradient(to bottom, #000 30%, transparent);
+}
+
+/* Garis finish dua baris (tinggi 32px), pembatas antara section gelap dan terang. */
+@utility checker-strip {
+  background-image: conic-gradient(
+    var(--background) 25%,
+    var(--foreground) 0 50%,
+    var(--background) 0 75%,
+    var(--foreground) 0
+  );
+  background-size: 32px 32px;
 }
 
 @keyframes float-y {

@@ -20,7 +20,7 @@ export function BookingSection() {
   return (
     <section
       id="reservasi"
-      className="theme-light relative overflow-hidden border-t border-foreground/10 bg-[radial-gradient(circle_at_20%_0%,oklch(0.93_0.05_264)_0%,var(--background)_60%)] py-24 md:py-32"
+      className="theme-alt checker-backdrop relative overflow-hidden border-t border-foreground/10 bg-[radial-gradient(circle_at_20%_0%,oklch(0.34_0.1_250)_0%,var(--background)_60%)] py-24 md:py-32"
     >
       <div className="mx-auto grid max-w-7xl gap-12 px-4 md:px-8 lg:grid-cols-[1fr_1.3fr]">
         <div className="flex flex-col gap-6">

@@ -23,7 +23,7 @@ const principles = [
 
 export function StorySection() {
   return (
-    <section id="cerita" className="theme-light px-4 py-24 md:px-10 md:py-36">
+    <section id="cerita" className="theme-alt checker-backdrop px-4 py-24 md:px-10 md:py-36">
       <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-6">
           <Eyebrow>Cerita Kami</Eyebrow>
