@@ -8,10 +8,6 @@ export const backOut =
     return x * x * ((overshoot + 1) * x + overshoot) + 1
   }
 
-export const lerp = (from: number, to: number, progress: number) => from + (to - from) * progress
-
-export const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
-
 /** Animasi berbasis requestAnimationFrame. `onUpdate` menerima progres setelah easing (bisa melewati 1 pada back.out). */
 export function tween(durationSeconds: number, ease: (t: number) => number, onUpdate: (progress: number) => void): Promise<void> {
   return new Promise((resolve) => {

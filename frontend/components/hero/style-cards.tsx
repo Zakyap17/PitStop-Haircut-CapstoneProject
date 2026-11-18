@@ -27,7 +27,7 @@ export function StyleCards({ active, onSelect }: StyleCardsProps) {
               onClick={() => onSelect(id)}
               className={cn(
                 'group relative flex w-[135px] flex-col items-center gap-3 rounded-[28px] border bg-white/5 px-3 pt-16 pb-4 text-center backdrop-blur-md transition-all duration-300',
-                isActive ? 'border-pink' : 'border-white/10 hover:border-white/40 hover:bg-white/10',
+                isActive ? 'border-accent' : 'border-white/10 hover:border-white/40 hover:bg-white/10',
               )}
             >
               <span className="absolute -top-12 left-1/2 size-[110px] -translate-x-1/2 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-translate-y-4 group-hover:-rotate-12 group-hover:scale-110">

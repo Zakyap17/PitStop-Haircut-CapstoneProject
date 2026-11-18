@@ -4,11 +4,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useSyncExternalStore, type CSSProperties } from 'react'
 import { Star } from 'lucide-react'
-import { HeroBubbles } from '@/components/hero/hero-bubbles'
-import { HeroItem } from '@/components/hero/hero-item'
 import { StyleCards } from '@/components/hero/style-cards'
 import { Reveal } from '@/components/shared/reveal'
-import { heroDiamonds, heroSlots, heroThemes, type HeroThemeId } from '@/data/hero-theme'
+import { heroDiamonds, heroThemes, type HeroThemeId } from '@/data/hero-theme'
 import { useHeroMotion } from '@/hooks/use-hero-motion'
 import { intro } from '@/lib/intro-store'
 import { cn } from '@/lib/utils'
@@ -17,37 +15,21 @@ const titleClass = 'font-script text-[clamp(4.5rem,10vw,12rem)] leading-[0.8] wh
 
 /**
  * Hero ala referensi "Soda": gradien radial yang berganti warna, navbar kaca, judul cursive raksasa,
- * logo yang miring mengikuti kursor, elemen melayang yang menghindari kursor, dan kartu pilihan di kanan.
- * Memilih kartu mengubah warna latar, memutar logo, lalu mengacak ulang elemen melayang.
+ * logo yang miring mengikuti kursor, kotak finish melayang di latar, dan kartu pilihan di kanan.
+ * Memilih kartu mengubah warna latar dan memutar logo.
  */
 export function HeroSection() {
   const introDone = useSyncExternalStore(intro.subscribe, intro.isFinished, intro.serverSnapshot)
-  // `activeTheme` langsung berubah saat kartu diklik (warna latar + kartu aktif);
-  // `itemsTheme` baru berubah di tengah transisi, saat semua elemen melayang sedang tersembunyi.
   const [activeTheme, setActiveTheme] = useState<HeroThemeId>('dewasa')
-  const [itemsTheme, setItemsTheme] = useState<HeroThemeId>('dewasa')
   const motion = useHeroMotion()
 
   const handleSelect = (id: HeroThemeId) => {
     if (id === activeTheme || motion.isSwitching()) return
     setActiveTheme(id)
-    void motion.runSwitch(() => setItemsTheme(id))
+    void motion.runSwitch()
   }
 
   const colors = heroThemes[activeTheme].colors
-  const renderItems = (layer: 'fg' | 'bg') =>
-    heroSlots
-      .map((slot, index) => ({ slot, index }))
-      .filter(({ slot }) => slot.layer === layer)
-      .map(({ slot, index }) => (
-        <HeroItem
-          key={slot.id}
-          slot={slot}
-          content={heroThemes[itemsTheme].items[slot.id]}
-          itemRef={(el) => motion.registerItem(slot.id, slot.layer, index, el)}
-        />
-      ))
-
   return (
     <section
       id="beranda"
@@ -55,8 +37,6 @@ export function HeroSection() {
       style={{ '--hero-inner': colors.inner, '--hero-mid': colors.mid, '--hero-outer': colors.outer } as CSSProperties}
     >
       <h1 className="sr-only">Pit Stop Barbershop: Fade, Crop, Shave, Kids</h1>
-
-      <HeroBubbles />
 
       {/* Kotak finish melayang di latar paling jauh */}
       <div ref={motion.diamondsRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
@@ -68,11 +48,6 @@ export function HeroSection() {
             />
           </div>
         ))}
-      </div>
-
-      {/* Foto melayang di belakang logo */}
-      <div ref={motion.bgRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 hidden md:block">
-        {renderItems('bg')}
       </div>
 
       <div className="relative z-10 mx-auto flex min-h-svh w-full max-w-[1920px] flex-col gap-10 px-[4%] pt-28 pb-12 lg:flex-row lg:justify-between lg:pt-24">
@@ -93,12 +68,12 @@ export function HeroSection() {
               className="flex w-fit items-center gap-6 rounded-full bg-black/50 py-1.5 pr-1.5 pl-6 font-bold text-white backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-black/70"
             >
               Booking Slot
-              <span className="flex size-[38px] items-center justify-center rounded-full bg-pink pb-0.5 text-[1.4rem] leading-none font-black text-[#011d17]">+</span>
+              <span className="flex size-[38px] items-center justify-center rounded-full bg-primary pb-0.5 text-[1.4rem] leading-none font-black text-white">+</span>
             </Link>
           </Reveal>
           <Reveal afterIntro delay={500} className="mt-auto flex items-center gap-4">
             <span className="flex size-12 items-center justify-center rounded-xl border border-white/10 bg-white/5">
-              <Star className="size-5 fill-pink text-pink" aria-hidden="true" />
+              <Star className="size-5 fill-accent text-accent" aria-hidden="true" />
             </span>
             <span className="flex flex-col">
               <span className="text-[0.7rem] tracking-[0.1em] text-white/70">RATING PELANGGAN</span>
@@ -140,11 +115,6 @@ export function HeroSection() {
             Kids
           </Reveal>
         </div>
-      </div>
-
-      {/* Foto melayang di depan teks dan logo */}
-      <div ref={motion.fgRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-30 hidden md:block">
-        {renderItems('fg')}
       </div>
     </section>
   )

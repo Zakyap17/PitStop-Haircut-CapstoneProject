@@ -14,7 +14,7 @@ const links = [
   { href: '#testimoni', label: 'Testimoni' },
 ]
 
-/** Navbar kaca: logo di kiri, menu berbentuk pil di tengah (aktif = biru brand), tombol Reservasi di kanan. */
+/** Navbar kaca: logo di kiri, menu berbentuk pil di tengah (aktif = abu-abu transparan), tombol Reservasi di kanan. */
 export function SiteNavbar() {
   const [open, setOpen] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -62,7 +62,7 @@ export function SiteNavbar() {
                 aria-current={activeId === link.href ? 'true' : undefined}
                 className={cn(
                   'block rounded-full px-5 py-2 text-[13px] font-medium transition-all duration-300',
-                  activeId === link.href ? 'bg-primary text-white' : 'text-white/70 hover:bg-primary hover:text-white',
+                  activeId === link.href ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white',
                 )}
               >
                 {link.label}

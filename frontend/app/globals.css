@@ -9,7 +9,6 @@
   --font-serif: var(--font-anton), Impact, sans-serif;
   --font-display: var(--font-anton), Impact, sans-serif;
   --font-script: var(--font-galada), cursive;
-  --color-pink: var(--pink);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -70,7 +69,6 @@
   --input: rgba(243, 241, 234, 0.18);
   --ring: #5483ff;
   --line-strong: rgba(243, 241, 234, 0.24);
-  --pink: #fbcfe8;
   --radius: 0.75rem;
 }
 
@@ -246,7 +244,7 @@ html.lenis body {
   background-size: 32px 32px;
 }
 
-/* ---- Hero ala referensi: gradien radial yang berubah warna, objek melayang, gelembung ---- */
+/* ---- Hero ala referensi: gradien radial yang berubah warna dan objek melayang ---- */
 /* @property membuat variabel warna bisa dianimasikan lewat transition (morph latar saat ganti pilihan). */
 @property --hero-inner {
   syntax: '<color>';
@@ -284,35 +282,12 @@ html.lenis body {
     opacity: 1;
   }
 }
-@keyframes hero-bubble-up {
-  0% {
-    transform: translateY(0) translateX(0) rotate(0deg);
-    opacity: 0;
-  }
-  10%,
-  90% {
-    opacity: var(--bubble-opacity, 0.4);
-  }
-  100% {
-    transform: translateY(-110vh) translateX(30px) rotate(360deg);
-    opacity: 0;
-  }
-}
 .hero-center-float {
   animation: hero-float 6s ease-in-out infinite;
 }
 .hero-stage-in {
   opacity: 0;
   animation: hero-fade-in 1.5s ease-out 0.3s forwards;
-}
-.hero-bubble {
-  position: absolute;
-  bottom: -50px;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.08) 60%, transparent 70%);
-  animation: hero-bubble-up var(--bubble-duration, 8s) linear infinite;
-  animation-delay: var(--bubble-delay, 0s);
 }
 
 @keyframes float-y {
@@ -361,8 +336,7 @@ html.lenis body {
   .animate-float-y,
   .animate-spin-once,
   .animate-marquee,
-  .hero-center-float,
-  .hero-bubble {
+  .hero-center-float {
     animation: none;
   }
   .hero-stage-in {
