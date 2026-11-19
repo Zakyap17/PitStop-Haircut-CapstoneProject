@@ -40,6 +40,13 @@ export function saveReservation(reservation: Reservation): void {
   }
 }
 
+/** Mengubah jadwal reservasi (tanggal, jam, kapster) lalu memperbarui e-tiket aktif dan riwayat. Mengembalikan reservasi baru. */
+export function rescheduleReservation(reservation: Reservation, change: Pick<Reservation, 'date' | 'time' | 'barberName'>): Reservation {
+  const updated: Reservation = { ...reservation, ...change, rescheduleCount: (reservation.rescheduleCount ?? 0) + 1 }
+  saveReservation(updated)
+  return updated
+}
+
 export function loadReservation(): Reservation | null {
   try {
     const raw = sessionStorage.getItem(CURRENT_KEY)
