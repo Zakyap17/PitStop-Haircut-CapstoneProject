@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Check, X } from 'lucide-react'
 import { CancelConfirmation } from '@/components/e-ticket/cancel-confirmation'
+import { DownloadButtons } from '@/components/e-ticket/download-buttons'
 import { TicketCard } from '@/components/e-ticket/ticket-card'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { isReservationCancelled, isReservationPast } from '@/lib/booking-rules'
@@ -87,6 +88,7 @@ export function ETicketView() {
         <Button size="pill" onClick={() => downloadReservationIcs(reservation)}>
           Tambah ke Kalender
         </Button>
+        <DownloadButtons reservation={reservation} />
         <Link href="/ubah-reservasi" className={cn(buttonVariants({ variant: 'outline-strong', size: 'pill' }), 'px-7')}>
           Ubah Jadwal
         </Link>
