@@ -13,4 +13,6 @@ export type Reservation = {
   hairstyle?: string
   /** Berapa kali jadwal sudah diubah (kosong = belum pernah). */
   rescheduleCount?: number
+  /** Status reservasi. Kosong = aktif. */
+  status?: 'cancelled'
 }

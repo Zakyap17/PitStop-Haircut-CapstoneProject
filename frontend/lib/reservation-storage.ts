@@ -47,6 +47,13 @@ export function rescheduleReservation(reservation: Reservation, change: Pick<Res
   return updated
 }
 
+/** Membatalkan reservasi: statusnya jadi "cancelled" di e-tiket aktif dan riwayat. Mengembalikan reservasi baru. */
+export function cancelReservation(reservation: Reservation): Reservation {
+  const cancelled: Reservation = { ...reservation, status: 'cancelled' }
+  saveReservation(cancelled)
+  return cancelled
+}
+
 export function loadReservation(): Reservation | null {
   try {
     const raw = sessionStorage.getItem(CURRENT_KEY)

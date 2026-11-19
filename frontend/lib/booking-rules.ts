@@ -19,6 +19,10 @@ export function isSlotInPast(day: Date, slot: string): boolean {
   return hours * 60 + minutes <= now.getHours() * 60 + now.getMinutes()
 }
 
+export function isReservationCancelled(reservation: Reservation): boolean {
+  return reservation.status === 'cancelled'
+}
+
 /** Apakah jadwal reservasi ini sudah lewat (tidak bisa diubah lagi). */
 export function isReservationPast(reservation: Reservation): boolean {
   const [hours, minutes] = reservation.time.split(':').map(Number)

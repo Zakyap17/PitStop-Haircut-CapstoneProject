@@ -7,7 +7,7 @@ import { CalendarClock } from 'lucide-react'
 import { ScheduleFields } from '@/components/booking/schedule-fields'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { useScheduleSelection } from '@/hooks/use-schedule-selection'
-import { MAX_RESCHEDULES, isReservationPast } from '@/lib/booking-rules'
+import { MAX_RESCHEDULES, isReservationCancelled, isReservationPast } from '@/lib/booking-rules'
 import { formatLongDate, fromIsoDate, toIsoDate } from '@/lib/format'
 import { loadReservation, rescheduleReservation } from '@/lib/reservation-storage'
 import { cn } from '@/lib/utils'
@@ -44,6 +44,17 @@ export function RescheduleForm() {
         text="Buka reservasimu lewat Cek Reservasi dulu, lalu pilih Ubah Jadwal dari e-tiketnya."
         href="/cek-reservasi"
         cta="Cek Reservasi"
+      />
+    )
+  }
+
+  if (isReservationCancelled(reservation)) {
+    return (
+      <EmptyState
+        title="Reservasi sudah dibatalkan."
+        text="Reservasi yang dibatalkan tidak bisa diubah jadwalnya. Buat reservasi baru untuk datang lagi."
+        href="/#reservasi"
+        cta="Buat Reservasi Baru"
       />
     )
   }
