@@ -1,15 +1,11 @@
 'use client'
 
+import Link from 'next/link'
 import { CalendarCheck } from 'lucide-react'
+import { ScheduleFields, chipClass } from '@/components/booking/schedule-fields'
 import { useBookingForm } from '@/hooks/use-booking-form'
 import { formatRupiah } from '@/lib/format'
 import { cn } from '@/lib/utils'
-
-const chip = (selected: boolean) =>
-  cn(
-    'rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-35',
-    selected ? 'border-accent bg-accent text-accent-foreground' : 'border-foreground/15 hover:border-foreground/40',
-  )
 
 const inputClass =
   'rounded-xl border border-input bg-background/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none'
@@ -23,7 +19,7 @@ export function BookingSection() {
       className="theme-alt checker-backdrop relative overflow-hidden border-t border-foreground/10 bg-[radial-gradient(circle_at_20%_0%,oklch(0.34_0.1_250)_0%,var(--background)_60%)] py-24 md:py-32"
     >
       <div className="mx-auto grid max-w-7xl gap-12 px-4 md:px-8 lg:grid-cols-[1fr_1.3fr]">
-        <div className="flex flex-col gap-6">
+        <div className="flex min-w-0 flex-col gap-6">
           <p className="text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">Reservasi Online</p>
           <h2 className="font-serif text-5xl leading-none text-balance md:text-6xl">
             Kunci slotmu, <em className="text-accent">skip</em> antrean
@@ -39,10 +35,16 @@ export function BookingSection() {
               reservasi, pesanan otomatis dibatalkan dan slot dibuka untuk walk-in.
             </p>
           </div>
+          <p className="text-sm text-muted-foreground">
+            Sudah punya kode reservasi?{' '}
+            <Link href="/cek-reservasi" className="text-accent underline underline-offset-4 hover:text-foreground">
+              Cek reservasi
+            </Link>
+          </p>
           <div className="checker mt-auto hidden h-16 rounded-2xl opacity-60 lg:block" aria-hidden="true" />
         </div>
 
-        <form onSubmit={form.submit} className="flex flex-col gap-7 rounded-3xl border border-foreground/10 bg-card/80 p-6 backdrop-blur md:p-8">
+        <form onSubmit={form.submit} className="flex min-w-0 flex-col gap-7 rounded-3xl border border-foreground/10 bg-card/80 p-6 backdrop-blur md:p-8">
           {form.tryOnChoice && (
             <div className="flex items-center justify-between gap-3 rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
               <p>
@@ -64,7 +66,7 @@ export function BookingSection() {
                   type="button"
                   onClick={() => form.setServiceId(service.id)}
                   aria-pressed={form.serviceId === service.id}
-                  className={cn(chip(form.serviceId === service.id), 'text-left')}
+                  className={cn(chipClass(form.serviceId === service.id), 'text-left')}
                 >
                   <span className="block">{service.name}</span>
                   <span className="block text-xs opacity-70">{formatRupiah(service.price)}</span>
@@ -73,59 +75,7 @@ export function BookingSection() {
             </div>
           </fieldset>
 
-          <fieldset>
-            <legend className="mb-3 text-sm font-semibold">2. Tanggal & jam</legend>
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {form.days.map((day, index) => (
-                <button
-                  key={day.toISOString()}
-                  type="button"
-                  aria-pressed={form.dayIndex === index}
-                  onClick={() => form.selectDay(index)}
-                  className={cn(chip(form.dayIndex === index), 'flex min-w-16 flex-col items-center')}
-                >
-                  <span className="text-xs opacity-70">{day.toLocaleDateString('id-ID', { weekday: 'short' })}</span>
-                  <span className="font-serif text-2xl leading-none">{day.getDate()}</span>
-                </button>
-              ))}
-            </div>
-            <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-5">
-              {form.timeSlots.map((slot) => (
-                <button
-                  key={slot}
-                  type="button"
-                  disabled={form.isSlotDisabled(slot)}
-                  aria-pressed={form.time === slot}
-                  onClick={() => form.setTime(slot)}
-                  className={chip(form.time === slot)}
-                >
-                  {slot}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset>
-            <legend className="mb-3 text-sm font-semibold">3. Kapster tersedia</legend>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {form.barbers.map((barber) => {
-                const available = !form.isBarberOff(barber.offDays)
-                return (
-                  <button
-                    key={barber.name}
-                    type="button"
-                    disabled={!available}
-                    aria-pressed={form.barberName === barber.name}
-                    onClick={() => form.setBarberName(barber.name)}
-                    className={cn(chip(form.barberName === barber.name), 'text-left')}
-                  >
-                    <span className="block">{barber.name}</span>
-                    <span className="block text-xs opacity-70">{available ? 'Tersedia' : 'Libur'}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </fieldset>
+          <ScheduleFields schedule={form} dateLegend="2. Tanggal & jam" barberLegend="3. Kapster tersedia" />
 
           <fieldset className="grid gap-3 sm:grid-cols-2">
             <legend className="mb-3 text-sm font-semibold">4. Data pelanggan</legend>

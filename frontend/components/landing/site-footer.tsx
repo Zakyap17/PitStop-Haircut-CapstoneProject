@@ -1,10 +1,19 @@
+import Link from 'next/link'
 import { Eyebrow } from '@/components/shared/eyebrow'
+import { fullAddress, location } from '@/data/location'
 import { Lines, Reveal } from '@/components/shared/reveal'
+
+const pages = [
+  { href: '/layanan', label: 'Layanan & Harga' },
+  { href: '/kapster', label: 'Profil Kapster' },
+  { href: '/galeri', label: 'Galeri' },
+  { href: '/lokasi', label: 'Lokasi & Jam Buka' },
+]
 
 const socials = [
   { label: 'Instagram', href: 'https://www.instagram.com' },
   { label: 'TikTok', href: 'https://www.tiktok.com' },
-  { label: 'Google Maps', href: 'https://maps.google.com' },
+  { label: 'Google Maps', href: location.mapsUrl },
 ]
 
 export function SiteFooter() {
@@ -27,8 +36,15 @@ export function SiteFooter() {
         </span>
       </a>
 
+      <p className="mt-6 text-sm text-muted-foreground">
+        Sudah punya reservasi?{' '}
+        <Link href="/cek-reservasi" className="text-accent underline underline-offset-4 hover:text-foreground">
+          Cek di sini
+        </Link>
+      </p>
+
       <div className="mt-24 grid gap-10 border-t border-border py-12 md:mt-36 lg:grid-cols-12">
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-3">
           <p className="font-display text-5xl uppercase leading-none tracking-tight">Pit Stop</p>
           <p className="mt-4 text-[13px] uppercase tracking-[0.22em] text-muted-foreground">
             Barbershop — Men & Kids
@@ -38,7 +54,20 @@ export function SiteFooter() {
           <p className="text-[13px] uppercase tracking-[0.18em] text-muted-foreground">Jam Operasional</p>
           <p className="mt-3">Setiap hari · 10.00 – 21.00 WIB</p>
           <p className="text-muted-foreground">Istirahat · 18.00 – 19.00 WIB</p>
+          <p className="mt-4 text-[13px] uppercase tracking-[0.18em] text-muted-foreground">Alamat</p>
+          <address className="mt-2 not-italic text-muted-foreground">{fullAddress}</address>
         </div>
+        <nav aria-label="Halaman" className="lg:col-span-2">
+          <ul className="flex flex-col gap-2 text-muted-foreground">
+            {pages.map((page) => (
+              <li key={page.href}>
+                <Link href={page.href} className="transition-colors hover:text-foreground">
+                  {page.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
         <nav aria-label="Sosial media" className="lg:col-span-2">
           <ul className="flex flex-col gap-2">
             {socials.map((social) => (

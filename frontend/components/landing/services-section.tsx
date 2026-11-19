@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Clock } from 'lucide-react'
 import { LiquidImage } from '@/components/shared/liquid-image'
 import { services } from '@/data/services'
@@ -62,6 +63,9 @@ export function ServicesSection() {
             </li>
           ))}
         </ul>
+        <Link href="/layanan" className="text-sm text-accent underline underline-offset-4 hover:text-foreground lg:col-span-2">
+          Lihat semua layanan dan harga
+        </Link>
       </div>
     </section>
   )

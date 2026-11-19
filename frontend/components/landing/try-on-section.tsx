@@ -11,11 +11,11 @@ export function TryOnSection() {
   return (
     <section id="try-on" className="checker-backdrop border-t border-foreground/10 py-24 md:py-32">
       <div className="mx-auto grid max-w-7xl items-start gap-14 px-4 md:px-8 lg:grid-cols-2">
-        <div className="mx-auto w-full max-w-xl">
+        <div className="mx-auto w-full min-w-0 max-w-xl">
           <TryOnStudio />
         </div>
 
-        <div className="lg:pt-4">
+        <div className="min-w-0 lg:pt-4">
           <p className="text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">Virtual Try-On</p>
           <h2 className="mt-4 font-serif text-5xl leading-none text-balance md:text-6xl">
             Coba dulu, <em className="text-accent">baru</em> potong

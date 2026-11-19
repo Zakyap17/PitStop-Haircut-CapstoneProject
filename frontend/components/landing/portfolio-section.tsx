@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import Image from 'next/image'
 import { useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
@@ -37,7 +38,7 @@ export function PortfolioSection() {
           dibingkai <em className="text-accent">rapi</em>
         </h2>
 
-        <div role="group" aria-label="Filter kategori gaya" className="mt-8 flex flex-wrap justify-center gap-2">
+        <div role="group" aria-label="Filter kategori gaya" className="mt-8 flex flex-wrap justify-center gap-2.5">
           {cutCategories.map((item) => (
             <button
               key={item}
@@ -76,7 +77,7 @@ export function PortfolioSection() {
           if (dx < -50) go(active + 1)
           dragStart.current = null
         }}
-        className="relative mt-12 flex h-[420px] touch-pan-y select-none items-center justify-center rounded-3xl [perspective:1400px] md:h-[480px]"
+        className="relative mt-10 flex h-[290px] touch-pan-y select-none items-center justify-center rounded-3xl [--card-step:176px] [--card-w:130px] [perspective:1400px] md:mt-12 md:h-[380px] md:[--card-step:232px] md:[--card-w:170px] lg:h-[480px] lg:[--card-step:258px] lg:[--card-w:190px]"
       >
         <span
           aria-hidden="true"
@@ -101,11 +102,11 @@ export function PortfolioSection() {
               aria-current={offset === 0}
               tabIndex={abs > 3 ? -1 : 0}
               className={cn(
-                'absolute aspect-[3/4] w-[150px] overflow-hidden rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7)] ring-1 ring-foreground/15 transition-all duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] md:w-[190px]',
+                'absolute aspect-[3/4] w-[var(--card-w)] overflow-hidden rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7)] ring-1 ring-foreground/15 transition-all duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]',
                 offset === 0 && 'ring-2 ring-accent',
               )}
               style={{
-                transform: `translateX(calc(${offset} * clamp(120px, 16vw, 225px))) rotateY(${-offset * 16}deg) scale(${1 + abs * 0.1})`,
+                transform: `translateX(calc(${offset} * var(--card-step))) rotateY(${-offset * 16}deg) scale(${1 + abs * 0.1})`,
                 zIndex: 10 - abs,
                 opacity: abs > 3 ? 0 : 1,
               }}
@@ -171,6 +172,9 @@ export function PortfolioSection() {
               <ChevronRight className="size-4" aria-hidden="true" />
             </button>
           </div>
+          <Link href="/galeri" className="text-sm text-accent underline underline-offset-4 hover:text-foreground">
+            Lihat galeri lengkap
+          </Link>
         </div>
       </div>
     </section>
