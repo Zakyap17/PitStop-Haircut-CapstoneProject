@@ -2,15 +2,10 @@
 
 import Link from 'next/link'
 import { CalendarCheck } from 'lucide-react'
+import { ScheduleFields, chipClass } from '@/components/booking/schedule-fields'
 import { useBookingForm } from '@/hooks/use-booking-form'
 import { formatRupiah } from '@/lib/format'
 import { cn } from '@/lib/utils'
-
-const chip = (selected: boolean) =>
-  cn(
-    'rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-35',
-    selected ? 'border-accent bg-accent text-accent-foreground' : 'border-foreground/15 hover:border-foreground/40',
-  )
 
 const inputClass =
   'rounded-xl border border-input bg-background/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none'
@@ -71,7 +66,7 @@ export function BookingSection() {
                   type="button"
                   onClick={() => form.setServiceId(service.id)}
                   aria-pressed={form.serviceId === service.id}
-                  className={cn(chip(form.serviceId === service.id), 'text-left')}
+                  className={cn(chipClass(form.serviceId === service.id), 'text-left')}
                 >
                   <span className="block">{service.name}</span>
                   <span className="block text-xs opacity-70">{formatRupiah(service.price)}</span>
@@ -80,59 +75,7 @@ export function BookingSection() {
             </div>
           </fieldset>
 
-          <fieldset>
-            <legend className="mb-3 text-sm font-semibold">2. Tanggal & jam</legend>
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {form.days.map((day, index) => (
-                <button
-                  key={day.toISOString()}
-                  type="button"
-                  aria-pressed={form.dayIndex === index}
-                  onClick={() => form.selectDay(index)}
-                  className={cn(chip(form.dayIndex === index), 'flex min-w-16 flex-col items-center')}
-                >
-                  <span className="text-xs opacity-70">{day.toLocaleDateString('id-ID', { weekday: 'short' })}</span>
-                  <span className="font-serif text-2xl leading-none">{day.getDate()}</span>
-                </button>
-              ))}
-            </div>
-            <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-5">
-              {form.timeSlots.map((slot) => (
-                <button
-                  key={slot}
-                  type="button"
-                  disabled={form.isSlotDisabled(slot)}
-                  aria-pressed={form.time === slot}
-                  onClick={() => form.setTime(slot)}
-                  className={chip(form.time === slot)}
-                >
-                  {slot}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset>
-            <legend className="mb-3 text-sm font-semibold">3. Kapster tersedia</legend>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {form.barbers.map((barber) => {
-                const available = !form.isBarberOff(barber.offDays)
-                return (
-                  <button
-                    key={barber.name}
-                    type="button"
-                    disabled={!available}
-                    aria-pressed={form.barberName === barber.name}
-                    onClick={() => form.setBarberName(barber.name)}
-                    className={cn(chip(form.barberName === barber.name), 'text-left')}
-                  >
-                    <span className="block">{barber.name}</span>
-                    <span className="block text-xs opacity-70">{available ? 'Tersedia' : 'Libur'}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </fieldset>
+          <ScheduleFields schedule={form} dateLegend="2. Tanggal & jam" barberLegend="3. Kapster tersedia" />
 
           <fieldset className="grid gap-3 sm:grid-cols-2">
             <legend className="mb-3 text-sm font-semibold">4. Data pelanggan</legend>
