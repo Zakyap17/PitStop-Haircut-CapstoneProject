@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import Image from 'next/image'
 import { useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
@@ -171,6 +172,9 @@ export function PortfolioSection() {
               <ChevronRight className="size-4" aria-hidden="true" />
             </button>
           </div>
+          <Link href="/galeri" className="text-sm text-accent underline underline-offset-4 hover:text-foreground">
+            Lihat galeri lengkap
+          </Link>
         </div>
       </div>
     </section>

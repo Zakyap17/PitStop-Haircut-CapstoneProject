@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { barbers } from '@/data/barbers'
 
 const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
@@ -48,6 +49,9 @@ export function BarbersSection() {
             </li>
           ))}
         </ul>
+        <Link href="/kapster" className="mt-8 inline-block text-sm text-accent underline underline-offset-4 hover:text-foreground">
+          Lihat profil lengkap kapster
+        </Link>
       </div>
     </section>
   )

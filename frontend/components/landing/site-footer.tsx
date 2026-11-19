@@ -2,6 +2,12 @@ import Link from 'next/link'
 import { Eyebrow } from '@/components/shared/eyebrow'
 import { Lines, Reveal } from '@/components/shared/reveal'
 
+const pages = [
+  { href: '/layanan', label: 'Layanan & Harga' },
+  { href: '/kapster', label: 'Profil Kapster' },
+  { href: '/galeri', label: 'Galeri' },
+]
+
 const socials = [
   { label: 'Instagram', href: 'https://www.instagram.com' },
   { label: 'TikTok', href: 'https://www.tiktok.com' },
@@ -36,7 +42,7 @@ export function SiteFooter() {
       </p>
 
       <div className="mt-24 grid gap-10 border-t border-border py-12 md:mt-36 lg:grid-cols-12">
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-3">
           <p className="font-display text-5xl uppercase leading-none tracking-tight">Pit Stop</p>
           <p className="mt-4 text-[13px] uppercase tracking-[0.22em] text-muted-foreground">
             Barbershop — Men & Kids
@@ -47,6 +53,17 @@ export function SiteFooter() {
           <p className="mt-3">Setiap hari · 10.00 – 21.00 WIB</p>
           <p className="text-muted-foreground">Istirahat · 18.00 – 19.00 WIB</p>
         </div>
+        <nav aria-label="Halaman" className="lg:col-span-2">
+          <ul className="flex flex-col gap-2 text-muted-foreground">
+            {pages.map((page) => (
+              <li key={page.href}>
+                <Link href={page.href} className="transition-colors hover:text-foreground">
+                  {page.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
         <nav aria-label="Sosial media" className="lg:col-span-2">
           <ul className="flex flex-col gap-2">
             {socials.map((social) => (
