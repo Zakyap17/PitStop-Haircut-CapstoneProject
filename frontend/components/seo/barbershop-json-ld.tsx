@@ -1,3 +1,4 @@
+import { location } from '@/data/location'
 import { services } from '@/data/services'
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site-config'
 
@@ -13,6 +14,16 @@ export function BarbershopJsonLd() {
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     image: `${SITE_URL}/images/brand/logo-mark.png`,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: location.street,
+      addressLocality: location.city,
+      addressRegion: location.province,
+      postalCode: location.postalCode,
+      addressCountry: 'ID',
+    },
+    geo: { '@type': 'GeoCoordinates', latitude: location.latitude, longitude: location.longitude },
+    hasMap: location.mapsUrl,
     priceRange: `Rp${Math.min(...prices).toLocaleString('id-ID')} - Rp${Math.max(...prices).toLocaleString('id-ID')}`,
     openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: DAYS, opens: '10:00', closes: '21:00' }],
     hasOfferCatalog: {

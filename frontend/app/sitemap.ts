@@ -7,6 +7,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/layanan`, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${SITE_URL}/kapster`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${SITE_URL}/galeri`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${SITE_URL}/lokasi`, changeFrequency: 'yearly', priority: 0.7 },
     { url: `${SITE_URL}/cek-reservasi`, changeFrequency: 'yearly', priority: 0.3 },
   ]
 }

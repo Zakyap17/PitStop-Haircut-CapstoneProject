@@ -8,6 +8,7 @@ export const pageLinks = [
   { href: '/layanan', label: 'Layanan' },
   { href: '/kapster', label: 'Kapster' },
   { href: '/galeri', label: 'Galeri' },
+  { href: '/lokasi', label: 'Lokasi' },
 ]
 
 /** Menu antar halaman. Halaman yang sedang dibuka ditandai (aria-current) dan berwarna abu-abu transparan. */
