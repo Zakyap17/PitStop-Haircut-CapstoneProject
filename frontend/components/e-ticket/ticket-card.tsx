@@ -1,9 +1,10 @@
+import { TicketQr } from '@/components/e-ticket/ticket-qr'
 import { BrandLogo } from '@/components/shared/brand-logo'
 import { cn } from '@/lib/utils'
 import { formatLongDate, formatRupiah, fromIsoDate } from '@/lib/format'
 import type { Reservation } from '@/types/reservation'
 
-/** Kartu e-tiket: detail reservasi di kiri, kode + QR di kanan, dipisah garis perforasi. */
+/** Kartu e-tiket: detail reservasi di kiri, kode + QR (isi: kode reservasi) di kanan, dipisah garis perforasi. */
 export function TicketCard({ reservation, cancelled = false }: { reservation: Reservation; cancelled?: boolean }) {
   const rows = [
     { label: 'Layanan', value: `${reservation.serviceName} · ${reservation.durationMinutes} menit` },
@@ -37,14 +38,7 @@ export function TicketCard({ reservation, cancelled = false }: { reservation: Re
         <p className="text-xs font-medium tracking-[1.6px] text-muted-foreground uppercase">Kode reservasi</p>
         <p className={cn('font-display text-5xl tracking-[1px] text-accent', cancelled && 'line-through')}>{reservation.code}</p>
         {cancelled && <p className="rounded-full border border-destructive px-4 py-1 text-xs font-semibold tracking-[1.6px] text-destructive uppercase">Dibatalkan</p>}
-        {/* Placeholder QR sesuai Figma. Ganti dengan QR asli yang dibuat backend. */}
-        {!cancelled && (
-          <div role="img" aria-label="QR code (placeholder)" className="flex size-[168px] items-center justify-center rounded-xl bg-foreground">
-            <div className="flex size-[148px] items-center justify-center rounded-md bg-background">
-              <span className="font-display text-[40px] text-muted-foreground">QR</span>
-            </div>
-          </div>
-        )}
+        {!cancelled && <TicketQr value={reservation.code} />}
         <p className="max-w-[240px] text-center text-xs text-muted-foreground">
           {cancelled ? 'Kode ini tidak berlaku lagi.' : 'Check-in maks. 10 menit sebelum jadwal'}
         </p>

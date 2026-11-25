@@ -1,4 +1,5 @@
 import { formatLongDate, formatRupiah, fromIsoDate } from '@/lib/format'
+import { buildQrMatrix, QR_QUIET_ZONE } from '@/lib/qr'
 import type { Reservation } from '@/types/reservation'
 
 /** Ukuran gambar e-tiket (px). Dua kali ukuran kartu di layar supaya tetap tajam saat dibuka di HP. */
@@ -122,21 +123,38 @@ export async function renderReservationImage(reservation: Reservation): Promise<
     ctx.fillText(value, rowRight, y, rowRight - left - 220)
   })
 
-  // Kode reservasi
+  // Kode reservasi dan QR (isi QR = kode reservasi)
   const centerX = splitX + (cardX + cardW - splitX) / 2
   ctx.textAlign = 'center'
   ctx.fillStyle = COLORS.muted
   ctx.font = `500 22px ${sans}`
   ctx.letterSpacing = '4px'
-  ctx.fillText('KODE RESERVASI', centerX, cardY + cardH / 2 - 70)
+  ctx.fillText('KODE RESERVASI', centerX, cardY + 92)
   ctx.letterSpacing = '0px'
   ctx.fillStyle = COLORS.accent
-  ctx.font = `120px ${display}`
-  ctx.fillText(reservation.code, centerX, cardY + cardH / 2 + 50)
+  ctx.font = `100px ${display}`
+  ctx.fillText(reservation.code, centerX, cardY + 190)
+
+  const matrix = buildQrMatrix(reservation.code)
+  const qrSize = 250
+  const qrX = centerX - qrSize / 2
+  const qrY = cardY + 225
+  const unit = qrSize / (matrix.length + QR_QUIET_ZONE * 2)
+  ctx.fillStyle = '#f4f1ea'
+  roundedRect(ctx, qrX, qrY, qrSize, qrSize, 18)
+  ctx.fill()
+  ctx.fillStyle = COLORS.page
+  matrix.forEach((row, y) =>
+    row.forEach((dark, x) => {
+      // Sedikit melebihi 1 piksel agar tidak ada garis tipis antar modul.
+      if (dark) ctx.fillRect(qrX + (x + QR_QUIET_ZONE) * unit, qrY + (y + QR_QUIET_ZONE) * unit, unit + 0.6, unit + 0.6)
+    }),
+  )
+
   ctx.fillStyle = COLORS.muted
   ctx.font = `400 22px ${sans}`
-  ctx.fillText('Tunjukkan kode ini ke kasir saat datang.', centerX, cardY + cardH / 2 + 110)
-  ctx.fillText('Check-in maks. 10 menit sebelum jadwal.', centerX, cardY + cardH / 2 + 148)
+  ctx.fillText('Tunjukkan kode atau QR ini ke kasir.', centerX, qrY + qrSize + 42)
+  ctx.fillText('Check-in maks. 10 menit sebelum jadwal.', centerX, qrY + qrSize + 76)
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('Gagal membuat gambar'))), 'image/png')
