@@ -1,14 +1,17 @@
 import { Eyebrow } from '@/components/shared/eyebrow'
 import { Lines, Reveal } from '@/components/shared/reveal'
+import { getCatalog } from '@/lib/catalog'
 
-const stats = [
-  { value: '1.200+', label: 'Potongan rambut dikerjakan' },
-  { value: '4.9', label: 'Rating rata-rata pelanggan' },
-  { value: '4', label: 'Kapster siap di pit' },
-  { value: '0′', label: 'Menit antre dengan reservasi' },
-]
+export async function StatsSection() {
+  const { barbers } = await getCatalog()
+  const stats = [
+    { value: '1.200+', label: 'Potongan rambut dikerjakan' },
+    { value: '4.9', label: 'Rating rata-rata pelanggan' },
+    // Jumlah kapster dihitung dari database, bukan angka tetap.
+    { value: String(barbers.length), label: 'Kapster siap di pit' },
+    { value: '0′', label: 'Menit antre dengan reservasi' },
+  ]
 
-export function StatsSection() {
   return (
     <section id="angka" className="theme-alt checker-backdrop px-4 py-24 md:px-10 md:py-36">
       <Eyebrow>Dalam Angka</Eyebrow>

@@ -5,12 +5,15 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Star, X } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
-import { haircutCategories, haircuts } from '@/data/haircuts'
+import { useCatalog } from '@/components/providers/catalog-provider'
+import { haircutCategories } from '@/lib/catalog-utils'
 import { cn } from '@/lib/utils'
 import type { Haircut } from '@/types/haircut'
 
 /** Galeri lengkap gaya rambut: filter kategori dan tampilan besar (dialog bawaan browser) saat foto dipilih. */
 export function GalleryGrid() {
+  const { haircuts } = useCatalog()
+  const haircutCategoryList = haircutCategories(haircuts)
   const [category, setCategory] = useState('Semua')
   const [selected, setSelected] = useState<Haircut | null>(null)
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -27,7 +30,7 @@ export function GalleryGrid() {
   return (
     <div>
       <div role="group" aria-label="Filter kategori gaya" className="flex flex-wrap gap-2.5">
-        {haircutCategories.map((item) => (
+        {haircutCategoryList.map((item) => (
           <button
             key={item}
             type="button"

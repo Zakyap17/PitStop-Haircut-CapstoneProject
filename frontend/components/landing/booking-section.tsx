@@ -25,8 +25,8 @@ export function BookingSection() {
             Kunci slotmu, <em className="text-accent">skip</em> antrean
           </h2>
           <p className="max-w-md leading-relaxed text-muted-foreground">
-            Pilih layanan, jam, dan kapster yang tersedia. E-ticket berisi kode reservasi dikirim ke email kamu untuk
-            check-in di kasir.
+            Pilih layanan, jam, dan kapster yang tersedia. Kamu mendapat e-tiket berisi kode reservasi untuk
+            check-in di kasir. Simpan atau unduh e-tiketnya.
           </p>
           <div className="rounded-2xl border border-foreground/10 bg-card/60 p-5 text-sm">
             <p className="font-semibold">Aturan kedatangan</p>
@@ -104,9 +104,15 @@ export function BookingSection() {
             </label>
           </fieldset>
 
+          {form.submitError && (
+            <p role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm leading-relaxed">
+              {form.submitError}
+            </p>
+          )}
+
           <div className="flex flex-col items-start justify-between gap-4 border-t border-foreground/10 pt-6 sm:flex-row sm:items-center">
             <div>
-              <p className="text-xs text-muted-foreground">Total bayar di muka</p>
+              <p className="text-xs text-muted-foreground">Total biaya</p>
               <p className="font-serif text-3xl">{formatRupiah(form.service.price)}</p>
             </div>
             <button
@@ -115,7 +121,7 @@ export function BookingSection() {
               className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-40"
             >
               <CalendarCheck className="size-4" aria-hidden="true" />
-              Konfirmasi Reservasi
+              {form.submitting ? 'Memproses…' : 'Konfirmasi Reservasi'}
             </button>
           </div>
         </form>

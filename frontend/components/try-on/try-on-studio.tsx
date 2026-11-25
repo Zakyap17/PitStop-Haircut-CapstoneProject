@@ -5,7 +5,7 @@ import { Camera, Check, ImagePlus, RotateCcw, Save } from 'lucide-react'
 import { FacePanel } from '@/components/try-on/face-panel'
 import { StylePanel } from '@/components/try-on/style-panel'
 import { TemplateStrip } from '@/components/try-on/template-strip'
-import { haircuts } from '@/data/haircuts'
+import { useCatalog } from '@/components/providers/catalog-provider'
 import { useCamera } from '@/hooks/use-camera'
 import { useTryOnChoice } from '@/hooks/use-try-on-choice'
 import { clearTryOnChoice, saveTryOnChoice } from '@/lib/try-on-storage'
@@ -21,6 +21,7 @@ const actionButton =
  * Semua diproses di browser; yang disimpan ke reservasi hanya nama gaya yang dipilih.
  */
 export function TryOnStudio() {
+  const { haircuts } = useCatalog()
   const camera = useCamera()
   const savedChoice = useTryOnChoice()
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
@@ -31,7 +32,7 @@ export function TryOnStudio() {
 
   const haircut = haircuts[activeIndex]
   const cameraActive = camera.status === 'active'
-  const isSaved = savedChoice?.name === haircut.name
+  const isSaved = savedChoice?.name === haircut?.name
 
   const replacePhoto = (nextUrl: string | null) => {
     if (photoUrlRef.current) URL.revokeObjectURL(photoUrlRef.current)
@@ -85,6 +86,8 @@ export function TryOnStudio() {
 
   const go = (index: number) => setActiveIndex(Math.max(0, Math.min(haircuts.length - 1, index)))
   const message = uploadError ?? camera.errorMessage
+
+  if (!haircut) return null
 
   return (
     <div className="flex flex-col gap-4">

@@ -1,11 +1,12 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useCatalog } from '@/components/providers/catalog-provider'
 import { lenisRef } from '@/lib/intro-store'
 import { cn } from '@/lib/utils'
 
-const links = [
+const allLinks = [
   { href: '#cerita', label: 'Cerita' },
   { href: '#portofolio', label: 'Portofolio' },
   { href: '#layanan', label: 'Layanan' },
@@ -16,6 +17,9 @@ const links = [
 
 /** Navbar kaca: logo di kiri, menu berbentuk pil di tengah (aktif = abu-abu transparan), tombol Reservasi di kanan. */
 export function SiteNavbar() {
+  const { testimonials } = useCatalog()
+  // Tautan Testimoni hanya ada kalau bagian itu tampil (butuh testimoni asli dari database).
+  const links = useMemo(() => allLinks.filter((link) => link.href !== '#testimoni' || testimonials.length > 0), [testimonials.length])
   const [open, setOpen] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [scrolled, setScrolled] = useState(false)

@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { findReservation, setCurrentReservation } from '@/lib/reservation-storage'
+import { api, ApiError } from '@/lib/api'
+import { setCurrentReservation } from '@/lib/reservation-storage'
 
 const inputClass =
   'w-full rounded-xl border border-input bg-background/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none'
@@ -14,17 +15,21 @@ export function CheckReservationForm() {
   const router = useRouter()
   const [code, setCode] = useState('')
   const [email, setEmail] = useState('')
-  const [notFound, setNotFound] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const [checking, setChecking] = useState(false)
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    const reservation = findReservation(code, email)
-    if (!reservation) {
-      setNotFound(true)
-      return
+    setChecking(true)
+    setMessage(null)
+    try {
+      const reservation = await api.lookupReservation(code, email.trim())
+      setCurrentReservation(reservation)
+      router.push('/e-ticket')
+    } catch (error) {
+      setMessage(error instanceof ApiError ? error.message : 'Reservasi gagal dicari. Coba lagi.')
+      setChecking(false)
     }
-    setCurrentReservation(reservation)
-    router.push('/e-ticket')
   }
 
   return (
@@ -36,7 +41,7 @@ export function CheckReservationForm() {
           value={code}
           onChange={(event) => {
             setCode(event.target.value.toUpperCase())
-            setNotFound(false)
+            setMessage(null)
           }}
           autoComplete="off"
           placeholder="PS-4821"
@@ -54,7 +59,7 @@ export function CheckReservationForm() {
           value={email}
           onChange={(event) => {
             setEmail(event.target.value)
-            setNotFound(false)
+            setMessage(null)
           }}
           autoComplete="email"
           placeholder="nama@email.com"
@@ -62,15 +67,15 @@ export function CheckReservationForm() {
         />
       </label>
 
-      {notFound && (
+      {message && (
         <p role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm leading-relaxed">
-          Reservasi tidak ditemukan. Periksa lagi kode dan emailnya. Pencarian saat ini hanya mencakup reservasi yang dibuat di perangkat ini.
+          {message}
         </p>
       )}
 
-      <Button type="submit" size="pill" className="w-full">
+      <Button type="submit" size="pill" className="w-full" disabled={checking}>
         <Search className="size-4" aria-hidden="true" />
-        Cek Reservasi
+        {checking ? 'Mencari…' : 'Cek Reservasi'}
       </Button>
     </form>
   )

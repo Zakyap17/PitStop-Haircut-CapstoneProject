@@ -3,8 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { PageShell } from '@/components/pages/page-shell'
 import { buttonVariants } from '@/components/ui/button'
-import { barbers } from '@/data/barbers'
-import { haircuts } from '@/data/haircuts'
+import { getCatalog } from '@/lib/catalog'
 import { cn } from '@/lib/utils'
 
 export const metadata: Metadata = {
@@ -23,7 +22,8 @@ const weekDays = [
   { day: 0, short: 'Min' },
 ]
 
-export default function BarbersPage() {
+export default async function BarbersPage() {
+  const { barbers, haircuts } = await getCatalog()
   return (
     <PageShell
       eyebrow="Kru Pit Stop"
@@ -36,7 +36,7 @@ export default function BarbersPage() {
     >
       <ul className="flex flex-col gap-6">
         {barbers.map((barber) => {
-          const works = haircuts.filter((haircut) => haircut.barber === barber.name)
+          const works = haircuts.filter((haircut) => haircut.barberId === barber.id)
           return (
             <li key={barber.name} className="grid gap-8 rounded-3xl border border-foreground/10 bg-card/70 p-6 backdrop-blur md:p-8 lg:grid-cols-[320px_1fr]">
               <div className="flex flex-col gap-5">
@@ -82,7 +82,7 @@ export default function BarbersPage() {
                   </ul>
                 </div>
 
-                <Link href={`/?kapster=${encodeURIComponent(barber.name)}#reservasi`} className={cn(buttonVariants({ size: 'pill' }), 'mt-auto w-full')}>
+                <Link href={`/?kapster=${encodeURIComponent(barber.id)}#reservasi`} className={cn(buttonVariants({ size: 'pill' }), 'mt-auto w-full')}>
                   Reservasi dengan {barber.name}
                 </Link>
               </div>

@@ -10,6 +10,11 @@ export function formatRupiah(value: number): string {
   return `Rp\u00A0${digits}`
 }
 
+/** "10:00" -> "10.00" (penulisan jam gaya Indonesia). */
+export function dotTime(time: string): string {
+  return time.replace(':', '.')
+}
+
 /** Label chip hari di form reservasi, contoh: "Sel 29". */
 export function formatDayChip(date: Date): string {
   const weekday = date.toLocaleDateString(LOCALE, { weekday: 'short' })

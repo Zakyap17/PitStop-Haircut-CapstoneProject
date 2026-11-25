@@ -4,12 +4,15 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
-import { haircutCategories as cutCategories, haircuts as allCuts } from '@/data/haircuts'
+import { useCatalog } from '@/components/providers/catalog-provider'
+import { haircutCategories } from '@/lib/catalog-utils'
 import { cn } from '@/lib/utils'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
 export function PortfolioSection() {
+  const { haircuts: allCuts } = useCatalog()
+  const cutCategories = haircutCategories(allCuts)
   const [category, setCategory] = useState('Semua')
   const [active, setActive] = useState(Math.floor(allCuts.length / 2))
   const dragStart = useRef<number | null>(null)
@@ -23,6 +26,8 @@ export function PortfolioSection() {
     setCategory(next)
     setActive(Math.floor(count / 2))
   }
+
+  if (allCuts.length === 0) return null
 
   return (
     <section id="portofolio" className="theme-alt checker-backdrop relative overflow-hidden py-24 md:py-32">

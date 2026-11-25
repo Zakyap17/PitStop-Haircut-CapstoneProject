@@ -6,10 +6,12 @@ import { useRouter } from 'next/navigation'
 import { CalendarClock } from 'lucide-react'
 import { ScheduleFields } from '@/components/booking/schedule-fields'
 import { Button, buttonVariants } from '@/components/ui/button'
+import { useCatalog } from '@/components/providers/catalog-provider'
 import { useScheduleSelection } from '@/hooks/use-schedule-selection'
-import { MAX_RESCHEDULES, isReservationCancelled, isReservationPast } from '@/lib/booking-rules'
-import { formatLongDate, fromIsoDate, toIsoDate } from '@/lib/format'
-import { loadReservation, rescheduleReservation } from '@/lib/reservation-storage'
+import { api, ApiError } from '@/lib/api'
+import { isReservationActive, isReservationPast } from '@/lib/booking-rules'
+import { formatLongDate, fromIsoDate } from '@/lib/format'
+import { loadReservation, setCurrentReservation } from '@/lib/reservation-storage'
 import { cn } from '@/lib/utils'
 import type { Reservation } from '@/types/reservation'
 
@@ -28,12 +30,16 @@ function EmptyState({ title, text, href, cta }: { title: string; text: string; h
 /** Form ubah jadwal: layanan dan data pelanggan tetap, hanya tanggal, jam, dan kapster yang bisa diganti. */
 export function RescheduleForm() {
   const router = useRouter()
+  const { booking } = useCatalog()
+  const maxReschedules = booking.maxReschedules
   // undefined = belum dibaca dari storage; null = tidak ada reservasi aktif.
   const [reservation, setReservation] = useState<Reservation | null | undefined>(undefined)
   useEffect(() => setReservation(loadReservation()), [])
 
-  const schedule = useScheduleSelection()
-  const { selectedDay, time, barberName } = schedule
+  const schedule = useScheduleSelection(reservation?.serviceId ?? null)
+  const { isoDate, time, barberId } = schedule
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   if (reservation === undefined) return null
 
@@ -48,11 +54,11 @@ export function RescheduleForm() {
     )
   }
 
-  if (isReservationCancelled(reservation)) {
+  if (!isReservationActive(reservation)) {
     return (
       <EmptyState
-        title="Reservasi sudah dibatalkan."
-        text="Reservasi yang dibatalkan tidak bisa diubah jadwalnya. Buat reservasi baru untuk datang lagi."
+        title={reservation.status === 'cancelled' ? 'Reservasi sudah dibatalkan.' : 'Reservasi sudah selesai.'}
+        text="Reservasi ini tidak bisa diubah jadwalnya lagi. Buat reservasi baru untuk datang lagi."
         href="/#reservasi"
         cta="Buat Reservasi Baru"
       />
@@ -71,26 +77,35 @@ export function RescheduleForm() {
   }
 
   const changeCount = reservation.rescheduleCount ?? 0
-  if (changeCount >= MAX_RESCHEDULES) {
+  if (changeCount >= maxReschedules) {
     return (
       <EmptyState
         title="Batas ubah jadwal tercapai."
-        text={`Jadwal satu reservasi hanya bisa diubah ${MAX_RESCHEDULES} kali. Hubungi kasir kalau kamu masih perlu mengubahnya.`}
+        text={`Jadwal satu reservasi hanya bisa diubah ${maxReschedules} kali. Hubungi kasir kalau kamu masih perlu mengubahnya.`}
         href="/e-ticket"
         cta="Kembali ke E-Tiket"
       />
     )
   }
 
-  const isSameSchedule =
-    selectedDay !== null && toIsoDate(selectedDay) === reservation.date && time === reservation.time && barberName === reservation.barberName
-  const isValid = selectedDay !== null && time !== null && barberName !== null && !isSameSchedule
+  const isSameSchedule = isoDate === reservation.date && time === reservation.time && barberId === reservation.barberId
+  const isValid = isoDate !== null && time !== null && barberId !== null && !isSameSchedule && !submitting
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    if (!isValid || !selectedDay || !time || !barberName) return
-    rescheduleReservation(reservation, { date: toIsoDate(selectedDay), time, barberName })
-    router.push('/e-ticket')
+    if (!isValid || !isoDate || !time || !barberId) return
+    setSubmitting(true)
+    setSubmitError(null)
+    try {
+      const updated = await api.rescheduleReservation(reservation.code, { email: reservation.customerEmail, barberId, date: isoDate, time })
+      setCurrentReservation(updated)
+      router.push('/e-ticket')
+    } catch (error) {
+      const apiError = error instanceof ApiError ? error : null
+      setSubmitError(apiError?.message ?? 'Jadwal gagal diubah. Coba lagi.')
+      if (apiError && ['slot_taken', 'slot_unavailable', 'date_out_of_range', 'invalid_time'].includes(apiError.code)) schedule.reload()
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -104,7 +119,7 @@ export function RescheduleForm() {
           {formatLongDate(fromIsoDate(reservation.date))} · {reservation.time} · Kapster {reservation.barberName}
         </p>
         <p className="mt-1 text-muted-foreground">
-          {reservation.serviceName} atas nama {reservation.customerName}. Sisa kesempatan ubah jadwal: {MAX_RESCHEDULES - changeCount} kali.
+          {reservation.serviceName} atas nama {reservation.customerName}. Sisa kesempatan ubah jadwal: {maxReschedules - changeCount} kali.
         </p>
       </div>
 
@@ -112,13 +127,19 @@ export function RescheduleForm() {
 
       {isSameSchedule && <p className="text-sm text-muted-foreground">Pilih tanggal, jam, atau kapster yang berbeda dari jadwal sekarang.</p>}
 
+      {submitError && (
+        <p role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm leading-relaxed">
+          {submitError}
+        </p>
+      )}
+
       <div className="flex flex-col-reverse gap-3 border-t border-foreground/10 pt-6 sm:flex-row sm:justify-between">
         <Link href="/e-ticket" className={cn(buttonVariants({ variant: 'outline-strong', size: 'pill' }), 'px-7')}>
           Batal
         </Link>
         <Button type="submit" size="pill" disabled={!isValid}>
           <CalendarClock className="size-4" aria-hidden="true" />
-          Simpan Jadwal Baru
+          {submitting ? 'Menyimpan…' : 'Simpan Jadwal Baru'}
         </Button>
       </div>
     </form>

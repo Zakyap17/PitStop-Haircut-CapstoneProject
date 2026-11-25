@@ -10,12 +10,8 @@ export const location = {
   longitude: 107.5958281,
   /** Tautan pendek Google Maps yang dibagikan pemilik. */
   mapsUrl: 'https://maps.app.goo.gl/hhVQXvJ6JRuaVRMk6',
-  /** Jam buka setiap hari, dan jam istirahat. */
-  opensAt: '10:00',
-  closesAt: '21:00',
-  breakFrom: '18:00',
-  breakTo: '19:00',
 }
+// Jam buka dan istirahat ada di database (tabel settings), diatur admin; bukan di sini.
 
 export const fullAddress = `${location.street}, ${location.district}, ${location.city}, ${location.province} ${location.postalCode}`
 

@@ -4,17 +4,18 @@ import { Clock, MapPin, Navigation } from 'lucide-react'
 import { PageShell } from '@/components/pages/page-shell'
 import { buttonVariants } from '@/components/ui/button'
 import { directionsUrl, fullAddress, location, mapEmbedUrl } from '@/data/location'
+import { getCatalog } from '@/lib/catalog'
+import { dotTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: 'Lokasi & Jam Buka — Pit Stop Barbershop',
-  description: `Pit Stop Barbershop Men & Kids di ${location.street}, ${location.city}. Buka setiap hari pukul ${location.opensAt}–${location.closesAt} WIB.`,
+  description: `Pit Stop Barbershop Men & Kids di ${location.street}, ${location.city}. Lihat jam buka, peta, dan petunjuk arah.`,
   alternates: { canonical: '/lokasi' },
 }
 
-const dot = (time: string) => time.replace(':', '.')
-
-export default function LocationPage() {
+export default async function LocationPage() {
+  const { booking } = await getCatalog()
   return (
     <PageShell
       eyebrow="Kunjungi Kami"
@@ -48,15 +49,17 @@ export default function LocationPage() {
               <div className="flex justify-between gap-4">
                 <dt className="text-muted-foreground">Setiap hari</dt>
                 <dd className="font-semibold">
-                  {dot(location.opensAt)} – {dot(location.closesAt)} WIB
+                  {dotTime(booking.opensAt)} – {dotTime(booking.closesAt)} WIB
                 </dd>
               </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">Istirahat</dt>
-                <dd className="font-semibold">
-                  {dot(location.breakFrom)} – {dot(location.breakTo)} WIB
-                </dd>
-              </div>
+              {booking.breakFrom && booking.breakTo && (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">Istirahat</dt>
+                  <dd className="font-semibold">
+                    {dotTime(booking.breakFrom)} – {dotTime(booking.breakTo)} WIB
+                  </dd>
+                </div>
+              )}
             </dl>
           </section>
 

@@ -1,10 +1,15 @@
+export type ReservationStatus = 'confirmed' | 'completed' | 'cancelled' | 'no_show'
+
+/** Reservasi seperti yang dikirim backend. */
 export type Reservation = {
   code: string
+  serviceId: string
   serviceName: string
   durationMinutes: number
   /** Tanggal reservasi dalam format ISO (YYYY-MM-DD). */
   date: string
   time: string
+  barberId: string
   barberName: string
   customerName: string
   customerEmail: string
@@ -13,6 +18,5 @@ export type Reservation = {
   hairstyle?: string
   /** Berapa kali jadwal sudah diubah (kosong = belum pernah). */
   rescheduleCount?: number
-  /** Status reservasi. Kosong = aktif. */
-  status?: 'cancelled'
+  status: ReservationStatus
 }

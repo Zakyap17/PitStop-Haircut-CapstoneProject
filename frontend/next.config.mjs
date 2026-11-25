@@ -9,6 +9,12 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Browser memanggil /api/... di alamat web ini; Next meneruskannya ke backend (BACKEND_URL).
+  // Alamat backend tidak terlihat di browser, tidak ada masalah CORS, dan tidak ada mixed-content saat web memakai HTTPS.
+  async rewrites() {
+    const backend = (process.env.BACKEND_URL ?? 'http://localhost:4000').replace(/\/$/, '')
+    return [{ source: '/api/:path*', destination: `${backend}/api/:path*` }]
+  },
 }
 
 export default nextConfig

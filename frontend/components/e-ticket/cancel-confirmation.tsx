@@ -6,10 +6,14 @@ import { Button } from '@/components/ui/button'
 type CancelConfirmationProps = {
   onConfirm: () => void
   onDismiss: () => void
+  /** Permintaan pembatalan sedang dikirim. */
+  busy?: boolean
+  /** Pesan kalau pembatalan gagal. */
+  error?: string | null
 }
 
 /** Konfirmasi pembatalan: pembatalan tidak bisa diurungkan, jadi pengguna harus menyetujui sekali lagi. */
-export function CancelConfirmation({ onConfirm, onDismiss }: CancelConfirmationProps) {
+export function CancelConfirmation({ onConfirm, onDismiss, busy = false, error = null }: CancelConfirmationProps) {
   const keepButton = useRef<HTMLButtonElement>(null)
 
   // Fokus ke pilihan yang aman ("Tidak jadi") agar Enter tidak langsung membatalkan.
@@ -31,12 +35,17 @@ export function CancelConfirmation({ onConfirm, onDismiss }: CancelConfirmationP
           Slotmu dibuka kembali untuk pelanggan lain dan pembatalan tidak bisa diurungkan. Kalau masih ingin datang, kamu perlu membuat reservasi baru.
         </p>
       </div>
+      {error && (
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
       <div className="flex flex-wrap gap-3">
-        <Button ref={keepButton} type="button" variant="outline-strong" size="pill" onClick={onDismiss}>
+        <Button ref={keepButton} type="button" variant="outline-strong" size="pill" onClick={onDismiss} disabled={busy}>
           Tidak Jadi
         </Button>
-        <Button type="button" size="pill" onClick={onConfirm} className="bg-destructive text-white hover:bg-destructive/90">
-          Ya, Batalkan
+        <Button type="button" size="pill" onClick={onConfirm} disabled={busy} className="bg-destructive text-white hover:bg-destructive/90">
+          {busy ? 'Membatalkan…' : 'Ya, Batalkan'}
         </Button>
       </div>
     </div>

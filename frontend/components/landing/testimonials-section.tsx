@@ -4,12 +4,16 @@ import { useState } from 'react'
 import { Eyebrow } from '@/components/shared/eyebrow'
 import { LiquidImage } from '@/components/shared/liquid-image'
 import { Lines, Reveal, Words } from '@/components/shared/reveal'
-import { testimonials as voices } from '@/data/testimonials'
+import { useCatalog } from '@/components/providers/catalog-provider'
 import { cn } from '@/lib/utils'
 
 export function TestimonialsSection() {
+  const { testimonials: voices } = useCatalog()
   const [active, setActive] = useState(0)
   const current = voices[active]
+
+  // Belum ada testimoni asli: bagian ini disembunyikan, bukan diisi karangan.
+  if (voices.length === 0) return null
 
   return (
     <section id="testimoni" className="theme-alt checker-backdrop px-4 py-24 md:px-10 md:py-36">

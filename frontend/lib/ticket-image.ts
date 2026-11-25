@@ -105,7 +105,7 @@ export async function renderReservationImage(reservation: Reservation): Promise<
     ['Kapster', reservation.barberName],
     ['Atas nama', reservation.customerName],
     ...(reservation.hairstyle ? ([['Gaya pilihan', reservation.hairstyle]] as [string, string][]) : []),
-    ['Dibayar di muka', formatRupiah(reservation.price)],
+    ['Biaya layanan', formatRupiah(reservation.price)],
   ]
   const rowRight = splitX - 70
   const rowTop = cardY + 210

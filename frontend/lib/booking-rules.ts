@@ -1,29 +1,27 @@
-import { BOOKING_DAYS_AHEAD } from '@/data/booking-slots'
-import { fromIsoDate, toIsoDate } from '@/lib/format'
+import { fromIsoDate } from '@/lib/format'
 import type { Reservation } from '@/types/reservation'
 
-/** Berapa kali jadwal satu reservasi boleh diubah. Backend nanti yang menegakkan aturan aslinya. */
-export const MAX_RESCHEDULES = 2
+/**
+ * Aturan yang hanya untuk tampilan. Aturan sebenarnya (jam buka, istirahat, bentrok, batas ubah jadwal)
+ * ditegakkan backend; frontend hanya menyembunyikan pilihan yang pasti ditolak.
+ */
 
-/** Hari yang bisa dipesan, mulai dari hari ini. */
-export function buildBookableDays(): Date[] {
+/** Hari yang bisa dipesan: `count` hari mulai dari hari ini. */
+export function buildBookableDays(count: number): Date[] {
   const today = new Date()
-  return Array.from({ length: BOOKING_DAYS_AHEAD }, (_, offset) => new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset))
-}
-
-/** Slot hari ini yang jamnya sudah lewat tidak boleh dipilih. */
-export function isSlotInPast(day: Date, slot: string): boolean {
-  const now = new Date()
-  if (toIsoDate(day) !== toIsoDate(now)) return false
-  const [hours, minutes] = slot.split(':').map(Number)
-  return hours * 60 + minutes <= now.getHours() * 60 + now.getMinutes()
+  return Array.from({ length: count }, (_, offset) => new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset))
 }
 
 export function isReservationCancelled(reservation: Reservation): boolean {
   return reservation.status === 'cancelled'
 }
 
-/** Apakah jadwal reservasi ini sudah lewat (tidak bisa diubah lagi). */
+/** Reservasi yang masih bisa diubah atau dibatalkan pelanggan (belum dibatalkan, selesai, atau tidak datang). */
+export function isReservationActive(reservation: Reservation): boolean {
+  return reservation.status === 'confirmed'
+}
+
+/** Apakah jadwal reservasi ini sudah lewat (menurut jam perangkat; backend yang memutuskan di akhir). */
 export function isReservationPast(reservation: Reservation): boolean {
   const [hours, minutes] = reservation.time.split(':').map(Number)
   const start = fromIsoDate(reservation.date)

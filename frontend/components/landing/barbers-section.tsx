@@ -1,9 +1,10 @@
 import Link from 'next/link'
-import { barbers } from '@/data/barbers'
+import { getCatalog } from '@/lib/catalog'
 
 const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 
-export function BarbersSection() {
+export async function BarbersSection() {
+  const { barbers } = await getCatalog()
   return (
     <section id="kapster" className="theme-alt checker-backdrop border-t border-foreground/10 bg-card/40 py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-4 md:px-8">
@@ -23,7 +24,7 @@ export function BarbersSection() {
         <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {barbers.map((barber, index) => (
             <li
-              key={barber.name}
+              key={barber.id}
               className="group relative flex flex-col overflow-hidden rounded-3xl border border-foreground/10 bg-background p-6 transition-colors hover:border-primary"
             >
               <div className="checker absolute -right-10 -top-10 size-32 rotate-12 opacity-30" aria-hidden="true" />

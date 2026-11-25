@@ -1,11 +1,12 @@
 import { location } from '@/data/location'
-import { services } from '@/data/services'
+import { getCatalog } from '@/lib/catalog'
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site-config'
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 /** Data terstruktur agar mesin pencari memahami bahwa ini barbershop, jam buka, dan daftar layanannya. */
-export function BarbershopJsonLd() {
+export async function BarbershopJsonLd() {
+  const { services, booking } = await getCatalog()
   const prices = services.map((service) => service.price)
   const data = {
     '@context': 'https://schema.org',
@@ -25,7 +26,7 @@ export function BarbershopJsonLd() {
     geo: { '@type': 'GeoCoordinates', latitude: location.latitude, longitude: location.longitude },
     hasMap: location.mapsUrl,
     priceRange: `Rp${Math.min(...prices).toLocaleString('id-ID')} - Rp${Math.max(...prices).toLocaleString('id-ID')}`,
-    openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: DAYS, opens: '10:00', closes: '21:00' }],
+    openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: DAYS, opens: booking.opensAt, closes: booking.closesAt }],
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: 'Layanan',

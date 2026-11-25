@@ -1,5 +1,3 @@
-import { services } from '@/data/services'
-
 export type HeroThemeId = 'dewasa' | 'anak'
 
 /** Kotak-kotak finish yang melayang di latar jauh (pengganti daun di referensi). */
@@ -12,8 +10,10 @@ export const heroDiamonds = [
 
 type HeroTheme = {
   id: HeroThemeId
-  label: string
-  price: number
+  /** Nama cadangan kalau layanannya tidak ada di katalog. */
+  fallbackLabel: string
+  /** Id layanan di katalog; nama dan harga kartu diambil dari sana. */
+  serviceId: string
   /** Foto yang muncul menyembul di kartu pilihan. */
   cardPhoto: string
   /** Warna gradien radial latar hero. */
@@ -23,15 +23,15 @@ type HeroTheme = {
 export const heroThemes: Record<HeroThemeId, HeroTheme> = {
   dewasa: {
     id: 'dewasa',
-    label: services[0].name,
-    price: services[0].price,
+    fallbackLabel: 'Dewasa',
+    serviceId: 'haircut-dewasa',
     cardPhoto: '/images/cuts/skin-fade.png',
     colors: { inner: '#0b6a78', mid: '#073a4e', outer: '#091c33' },
   },
   anak: {
     id: 'anak',
-    label: services[1].name,
-    price: services[1].price,
+    fallbackLabel: 'Anak',
+    serviceId: 'haircut-anak',
     cardPhoto: '/images/cuts/kids-undercut.png',
     colors: { inner: '#1a4fb8', mid: '#0b2f6b', outer: '#091c33' },
   },

@@ -11,7 +11,7 @@ export function TicketCard({ reservation, cancelled = false }: { reservation: Re
     { label: 'Kapster', value: reservation.barberName },
     { label: 'Atas nama', value: reservation.customerName },
     ...(reservation.hairstyle ? [{ label: 'Gaya pilihan', value: reservation.hairstyle }] : []),
-    { label: 'Dibayar di muka', value: formatRupiah(reservation.price) },
+    { label: 'Biaya layanan', value: formatRupiah(reservation.price) },
   ]
 
   return (

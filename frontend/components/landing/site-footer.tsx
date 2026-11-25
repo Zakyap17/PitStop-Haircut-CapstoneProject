@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { Eyebrow } from '@/components/shared/eyebrow'
 import { fullAddress, location } from '@/data/location'
+import { getCatalog } from '@/lib/catalog'
+import { dotTime } from '@/lib/format'
 import { Lines, Reveal } from '@/components/shared/reveal'
 
 const pages = [
@@ -16,7 +18,8 @@ const socials = [
   { label: 'Google Maps', href: location.mapsUrl },
 ]
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const { booking } = await getCatalog()
   return (
     <footer id="kontak" className="px-4 pt-24 md:px-10 md:pt-36">
       <Eyebrow>Masuk Pit</Eyebrow>
@@ -52,8 +55,14 @@ export function SiteFooter() {
         </div>
         <div className="text-sm lg:col-span-3">
           <p className="text-[13px] uppercase tracking-[0.18em] text-muted-foreground">Jam Operasional</p>
-          <p className="mt-3">Setiap hari · 10.00 – 21.00 WIB</p>
-          <p className="text-muted-foreground">Istirahat · 18.00 – 19.00 WIB</p>
+          <p className="mt-3">
+            Setiap hari · {dotTime(booking.opensAt)} – {dotTime(booking.closesAt)} WIB
+          </p>
+          {booking.breakFrom && booking.breakTo && (
+            <p className="text-muted-foreground">
+              Istirahat · {dotTime(booking.breakFrom)} – {dotTime(booking.breakTo)} WIB
+            </p>
+          )}
           <p className="mt-4 text-[13px] uppercase tracking-[0.18em] text-muted-foreground">Alamat</p>
           <address className="mt-2 not-italic text-muted-foreground">{fullAddress}</address>
         </div>

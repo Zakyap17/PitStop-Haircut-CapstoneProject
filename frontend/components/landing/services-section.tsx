@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { Clock } from 'lucide-react'
 import { LiquidImage } from '@/components/shared/liquid-image'
-import { services } from '@/data/services'
+import { getCatalog } from '@/lib/catalog'
 import { formatRupiah } from '@/lib/format'
 
-export function ServicesSection() {
+export async function ServicesSection() {
+  const { services } = await getCatalog()
   return (
     <section id="layanan" className="theme-alt checker-backdrop relative border-t border-foreground/10 py-24 md:py-32">
       <div className="mx-auto grid max-w-7xl gap-14 px-4 md:px-8 lg:grid-cols-[0.9fr_1.1fr]">

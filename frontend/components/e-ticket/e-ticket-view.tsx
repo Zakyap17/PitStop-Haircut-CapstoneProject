@@ -7,17 +7,55 @@ import { CancelConfirmation } from '@/components/e-ticket/cancel-confirmation'
 import { DownloadButtons } from '@/components/e-ticket/download-buttons'
 import { TicketCard } from '@/components/e-ticket/ticket-card'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { isReservationCancelled, isReservationPast } from '@/lib/booking-rules'
+import { api, ApiError } from '@/lib/api'
+import { isReservationActive, isReservationCancelled, isReservationPast } from '@/lib/booking-rules'
 import { downloadReservationIcs } from '@/lib/calendar'
-import { cancelReservation, loadReservation } from '@/lib/reservation-storage'
+import { loadReservation, setCurrentReservation } from '@/lib/reservation-storage'
 import { cn } from '@/lib/utils'
 import type { Reservation } from '@/types/reservation'
 
 export function ETicketView() {
   // undefined = belum dibaca dari storage; null = tidak ada reservasi tersimpan.
   const [reservation, setReservation] = useState<Reservation | null | undefined>(undefined)
-  useEffect(() => setReservation(loadReservation()), [])
+  useEffect(() => {
+    const stored = loadReservation()
+    setReservation(stored)
+    if (!stored) return
+
+    // Segarkan dari server: admin atau perangkat lain mungkin sudah mengubah atau membatalkan reservasi ini.
+    // Kalau server tidak terjangkau, tiket tersimpan tetap ditampilkan.
+    let cancelled = false
+    api
+      .lookupReservation(stored.code, stored.customerEmail)
+      .then((fresh) => {
+        if (cancelled) return
+        setCurrentReservation(fresh)
+        setReservation(fresh)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
   const [confirmingCancel, setConfirmingCancel] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelError, setCancelError] = useState<string | null>(null)
+
+  const confirmCancel = async (current: Reservation) => {
+    setCancelling(true)
+    setCancelError(null)
+    try {
+      const updated = await api.cancelReservation(current.code, current.customerEmail)
+      setCurrentReservation(updated)
+      setReservation(updated)
+      setConfirmingCancel(false)
+      window.scrollTo({ top: 0 })
+    } catch (error) {
+      setCancelError(error instanceof ApiError ? error.message : 'Reservasi gagal dibatalkan. Coba lagi.')
+    } finally {
+      setCancelling(false)
+    }
+  }
 
   if (reservation === undefined) return null
 
@@ -62,7 +100,7 @@ export function ETicketView() {
   }
 
   const wasRescheduled = (reservation.rescheduleCount ?? 0) > 0
-  const canCancel = !isReservationPast(reservation)
+  const canCancel = isReservationActive(reservation) && !isReservationPast(reservation)
 
   return (
     <div className="flex w-full flex-col items-center gap-8">
@@ -78,7 +116,7 @@ export function ETicketView() {
         <p className="max-w-[520px] leading-normal text-muted-foreground">
           {wasRescheduled
             ? 'Jadwal lama otomatis dibatalkan dan slotnya dibuka kembali. Tunjukkan kode yang sama ke kasir saat datang.'
-            : 'E-tiket sudah dikirim ke email kamu. Tunjukkan kode ini ke kasir saat datang.'}
+            : 'Simpan kode ini atau unduh e-tiketnya, lalu tunjukkan ke kasir saat datang.'}
         </p>
       </div>
 
@@ -99,14 +137,7 @@ export function ETicketView() {
 
       {canCancel &&
         (confirmingCancel ? (
-          <CancelConfirmation
-            onDismiss={() => setConfirmingCancel(false)}
-            onConfirm={() => {
-              setReservation(cancelReservation(reservation))
-              setConfirmingCancel(false)
-              window.scrollTo({ top: 0 })
-            }}
-          />
+          <CancelConfirmation onDismiss={() => setConfirmingCancel(false)} onConfirm={() => confirmCancel(reservation)} busy={cancelling} error={cancelError} />
         ) : (
           <button type="button" onClick={() => setConfirmingCancel(true)} className="text-sm text-muted-foreground underline underline-offset-4 hover:text-destructive">
             Batalkan reservasi

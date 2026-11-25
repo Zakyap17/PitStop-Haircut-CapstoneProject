@@ -7,22 +7,27 @@ Aplikasi booking potong rambut. Monorepo berisi:
 
 ## Menjalankan Project
 
+### Backend (jalankan lebih dulu)
+```bash
+cd backend
+npm install
+cp .env.example .env     # DATABASE_URL kosong = memakai database tertanam (PGlite), cukup untuk dev
+npm run dev
+```
+Berjalan di http://localhost:4000. Migrasi database dijalankan otomatis saat server start.
+Detail API, database, dan tes ada di [backend/README.md](backend/README.md).
+
 ### Frontend
 ```bash
 cd frontend
 npm install
+cp .env.example .env.local   # BACKEND_URL=http://localhost:4000
 npm run dev
 ```
-Berjalan di http://localhost:3000
+Berjalan di http://localhost:3000. Halaman customer mengambil semua datanya (layanan, kapster, gaya rambut,
+jadwal, reservasi) dari backend, jadi backend harus menyala.
 
-### Backend
-```bash
-cd backend
-npm install
-cp .env.example .env
-npm run dev
-```
-Berjalan di http://localhost:4000
+Memasang di server (VM): lihat [docs/deploy-vm.md](docs/deploy-vm.md).
 
 ## Coba di HP (jaringan Wi-Fi yang sama)
 

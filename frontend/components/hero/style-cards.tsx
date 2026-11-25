@@ -1,5 +1,8 @@
+'use client'
+
 import Image from 'next/image'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { useCatalog } from '@/components/providers/catalog-provider'
 import { heroThemeOrder, heroThemes, type HeroThemeId } from '@/data/hero-theme'
 import { formatRupiah } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -11,6 +14,7 @@ type StyleCardsProps = {
 
 /** Dua kartu pilihan (Dewasa / Anak). Foto menyembul dari atas kartu dan miring saat di-hover. */
 export function StyleCards({ active, onSelect }: StyleCardsProps) {
+  const { services } = useCatalog()
   const other = heroThemeOrder.find((id) => id !== active) as HeroThemeId
 
   return (
@@ -18,6 +22,7 @@ export function StyleCards({ active, onSelect }: StyleCardsProps) {
       <div role="group" aria-label="Pilih kategori layanan" className="flex gap-4 pt-14">
         {heroThemeOrder.map((id) => {
           const theme = heroThemes[id]
+          const service = services.find((item) => item.id === theme.serviceId)
           const isActive = id === active
           return (
             <button
@@ -40,8 +45,8 @@ export function StyleCards({ active, onSelect }: StyleCardsProps) {
                 />
               </span>
               <span className="flex w-full flex-col text-[0.7rem]">
-                <span className="font-semibold">{theme.label}</span>
-                <span className="text-white/70">{formatRupiah(theme.price)}</span>
+                <span className="font-semibold">{service?.name ?? theme.fallbackLabel}</span>
+                {service && <span className="text-white/70">{formatRupiah(service.price)}</span>}
               </span>
             </button>
           )

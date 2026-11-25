@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Clock } from 'lucide-react'
 import { PageShell } from '@/components/pages/page-shell'
 import { buttonVariants } from '@/components/ui/button'
-import { services } from '@/data/services'
+import { getCatalog } from '@/lib/catalog'
 import { formatRupiah } from '@/lib/format'
 
 export const metadata: Metadata = {
@@ -13,7 +13,8 @@ export const metadata: Metadata = {
   alternates: { canonical: '/layanan' },
 }
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const { services } = await getCatalog()
   return (
     <PageShell
       eyebrow="Menu Layanan"
