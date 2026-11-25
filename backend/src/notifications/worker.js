@@ -1,7 +1,12 @@
-const { processOutbox, scheduleReminders } = require('./outbox')
+const { expireUnpaidBookings, processOutbox, scanConfirmedBookings, scanSettledBookings, scheduleReminders } = require('./outbox')
 
 /**
- * Pekerja latar belakang: tiap beberapa detik membuat pengingat yang jatuh tempo lalu mengirim antrean pesan.
+ * Pekerja latar belakang. Tiap beberapa detik, berurutan:
+ *  1. membatalkan booking yang DP-nya kedaluwarsa,
+ *  2. membuat pesan bukti booking untuk booking yang baru dikonfirmasi admin,
+ *  3. menerbitkan invoice dan pesannya untuk pelunasan yang baru dicatat,
+ *  4. membuat pengingat yang jatuh tempo,
+ *  5. mengirim antrean pesan WhatsApp.
  * Satu putaran tidak tumpang tindih dengan putaran berikutnya. Mengembalikan fungsi untuk menghentikannya.
  */
 function startNotificationWorker({ db, provider, clock = () => new Date(), webUrl, intervalMs = 5000, log = console.log }) {
@@ -12,12 +17,17 @@ function startNotificationWorker({ db, provider, clock = () => new Date(), webUr
     if (running || stopped) return
     running = true
     try {
-      const reminders = await scheduleReminders({ db, clock, webUrl })
-      if (reminders > 0) log(`[whatsapp] ${reminders} pengingat dijadwalkan`)
+      const context = { db, clock, webUrl }
+      const expired = await expireUnpaidBookings(context)
+      if (expired > 0) log(`[booking] ${expired} booking dibatalkan karena DP tidak dibayar`)
+      const confirmed = await scanConfirmedBookings(context)
+      const invoices = await scanSettledBookings(context)
+      const reminders = await scheduleReminders(context)
+      if (confirmed + invoices + reminders > 0) log(`[whatsapp] dijadwalkan: bukti booking ${confirmed}, invoice ${invoices}, pengingat ${reminders}`)
       const { sent, failed } = await processOutbox({ db, provider, clock })
       if (sent + failed > 0) log(`[whatsapp] terkirim ${sent}, gagal ${failed}`)
     } catch (error) {
-      console.error('[whatsapp] worker error:', error.message)
+      console.error('[worker] error:', error.message)
     } finally {
       running = false
     }

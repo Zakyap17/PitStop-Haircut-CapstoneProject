@@ -4,10 +4,10 @@ const { z } = require('zod')
 const { badRequest } = require('../lib/errors')
 const { getAvailability } = require('../services/availability')
 const { loadSettings } = require('../services/settings')
-const { cancelReservation, createReservation, lookupReservation, rescheduleReservation } = require('../services/reservations')
+const { cancelBooking, createBooking, lookupBooking, rescheduleBooking } = require('../services/bookings')
 
 const text = (max) => z.string().trim().min(1).max(max)
-const email = z.string().trim().toLowerCase().email().max(120)
+const phone = z.string().trim().min(8).max(30)
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
 const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/)
 
@@ -15,17 +15,17 @@ const schemas = {
   availability: z.object({ date: isoDate, serviceId: text(60) }),
   create: z.object({
     serviceId: text(60),
-    barberId: text(60),
+    // Kosong atau "any" = tanpa preferensi capster.
+    barberId: z.string().trim().max(60).optional(),
     date: isoDate,
     time: hhmm,
     customerName: z.string().trim().min(2).max(100),
-    customerEmail: email,
-    customerPhone: z.string().trim().min(8).max(30),
+    customerPhone: phone,
     hairstyle: z.string().trim().max(80).optional(),
   }),
-  lookup: z.object({ code: text(20), email }),
-  reschedule: z.object({ email, barberId: text(60), date: isoDate, time: hhmm }),
-  cancel: z.object({ email }),
+  lookup: z.object({ code: text(20), phone }),
+  reschedule: z.object({ phone, barberId: text(60), date: isoDate, time: hhmm }),
+  cancel: z.object({ phone }),
 }
 
 /** Mengubah hasil validasi zod yang gagal menjadi pesan 400 yang ramah (dalam bahasa Indonesia). */
@@ -60,23 +60,23 @@ function reservationsRouter(ctx) {
   })
 
   router.post('/reservations', writeLimit, async (req, res) => {
-    const reservation = await createReservation(ctx, parse(schemas.create, req.body))
+    const reservation = await createBooking(ctx, parse(schemas.create, req.body))
     res.status(201).json({ reservation })
   })
 
   // POST, bukan GET, supaya email tidak tercatat di URL dan log server.
   router.post('/reservations/lookup', accessLimit, async (req, res) => {
-    res.json({ reservation: await lookupReservation(ctx, parse(schemas.lookup, req.body)) })
+    res.json({ reservation: await lookupBooking(ctx, parse(schemas.lookup, req.body)) })
   })
 
   router.post('/reservations/:code/reschedule', accessLimit, async (req, res) => {
     const body = parse(schemas.reschedule, req.body)
-    res.json({ reservation: await rescheduleReservation(ctx, { code: req.params.code, ...body }) })
+    res.json({ reservation: await rescheduleBooking(ctx, { code: req.params.code, ...body }) })
   })
 
   router.post('/reservations/:code/cancel', accessLimit, async (req, res) => {
     const body = parse(schemas.cancel, req.body)
-    res.json({ reservation: await cancelReservation(ctx, { code: req.params.code, email: body.email }) })
+    res.json({ reservation: await cancelBooking(ctx, { code: req.params.code, phone: body.phone }) })
   })
 
   return router

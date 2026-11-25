@@ -2,7 +2,7 @@ require('dotenv').config()
 
 const { createApp } = require('./app')
 const { createDb } = require('./db')
-const { runMigrations } = require('./db/migrate')
+const { pendingMigrations, runMigrations } = require('./db/migrate')
 const { createProviderFromEnv } = require('./notifications/providers')
 const { startNotificationWorker } = require('./notifications/worker')
 
@@ -11,9 +11,20 @@ const HOST = process.env.HOST || '0.0.0.0'
 
 async function main() {
   const db = await createDb()
-  // Migrasi dijalankan otomatis saat start; aman diulang karena yang sudah jalan dilewati.
-  const applied = await runMigrations(db, { log: console.log })
-  if (applied.length) console.log(`${applied.length} migrasi baru dijalankan.`)
+  // Migrasi otomatis hanya untuk database tertanam (dev/tes). Di database bersama (Supabase/VM) migrasi yang mengubah
+  // struktur harus dijalankan sengaja: `npm run migrate`, atau isi AUTO_MIGRATE=true kalau memang mau otomatis.
+  // Tanpa ini, siapa pun yang menyalakan backend dengan .env database bersama bisa tanpa sengaja menjalankan migrasi.
+  const autoMigrate = db.driver === 'pglite' || process.env.AUTO_MIGRATE === 'true'
+  if (autoMigrate) {
+    const applied = await runMigrations(db, { log: console.log })
+    if (applied.length) console.log(`${applied.length} migrasi baru dijalankan.`)
+  } else {
+    const pending = await pendingMigrations(db)
+    if (pending.length) {
+      console.error(`Ada ${pending.length} migrasi belum dijalankan: ${pending.join(', ')}. Jalankan "npm run migrate" lebih dulu, lalu nyalakan backend lagi.`)
+      process.exit(1)
+    }
+  }
 
   const corsOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim()) : '*'
   // Batas percobaan per alamat IP. Bawaan: 30 pembuatan reservasi per menit dan 100 cek/ubah/batal per 15 menit.

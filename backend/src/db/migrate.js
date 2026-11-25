@@ -30,7 +30,14 @@ async function runMigrations(db, { log = () => {} } = {}) {
   return applied
 }
 
-module.exports = { runMigrations }
+/** Nama file migrasi yang belum pernah dijalankan di database ini (tanpa menjalankannya). */
+async function pendingMigrations(db) {
+  await db.exec(`CREATE TABLE IF NOT EXISTS schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())`)
+  const done = new Set((await db.query('SELECT name FROM schema_migrations')).rows.map((row) => row.name))
+  return fs.readdirSync(MIGRATIONS_DIR).filter((file) => file.endsWith('.sql') && !done.has(file)).sort()
+}
+
+module.exports = { runMigrations, pendingMigrations }
 
 if (require.main === module) {
   require('dotenv').config()

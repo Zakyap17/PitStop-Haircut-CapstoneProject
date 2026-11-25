@@ -9,7 +9,7 @@ Kamera Try-On hanya jalan lewat **HTTPS**, jadi web perlu alamat HTTPS (lihat la
 2. Salin connection string (Neon: *Connection string*; Supabase: *Connect* → pooler, mode transaction).
 3. Simpan, ini akan jadi `DATABASE_URL`. Jangan di-commit.
 
-Tabel dibuat otomatis oleh backend saat pertama start (migrasi), termasuk data awal layanan dan kapster.
+Tabel dibuat lewat migrasi. Untuk database bersama, jalankan sengaja: `cd backend && npm run migrate` (backend tidak menjalankannya sendiri). Hasilnya ERD resmi beserta data awal layanan, capster, dan galeri.
 
 ## 2. Siapkan VM
 
@@ -60,7 +60,7 @@ yang diteruskan ke `BACKEND_URL`, jadi port 4000 **tidak perlu** dibuka ke luar 
 
 ## 5b. WhatsApp otomatis
 
-Pesan invoice, kabar ubah/batal, dan pengingat memakai Fonnte. Langkahnya ada di `backend/README.md` bagian
+Pesan instruksi DP, bukti booking, invoice, kabar ubah/batal, dan pengingat memakai Fonnte. Langkahnya ada di `backend/README.md` bagian
 "WhatsApp otomatis". Singkatnya, di `backend/.env` isi `WHATSAPP_PROVIDER=fonnte`, `FONNTE_TOKEN=...`, dan
 `PUBLIC_WEB_URL=https://alamat-web-mu`, lalu `pm2 restart pitstop-backend`. Tanpa itu backend memakai mode `console`
 (pesan hanya tercetak di log, tidak ada yang terkirim).
@@ -89,8 +89,8 @@ cd ../frontend && npm install && npm run build && pm2 restart pitstop-web
 - [ ] `curl http://localhost:4000/api/health` menjawab `"database":"pg"`
 - [ ] Buka web, daftar layanan dan kapster tampil (artinya web berhasil membaca backend)
 - [ ] Buat satu reservasi dari HP, lalu buka Cek Reservasi dari perangkat lain: harus ketemu
-- [ ] Buat reservasi kedua di jam dan kapster yang sama dari perangkat lain: kapster harus tampil "Penuh"
-- [ ] Buat reservasi dengan nomor WhatsApp-mu sendiri: invoice masuk dalam beberapa detik dan e-tiket menulis "Invoice sudah dikirim"
+- [ ] Buat booking kedua di jam dan kapster yang sama dari perangkat lain: kapster harus tampil "Penuh"
+- [ ] Buat booking dengan nomor WhatsApp-mu sendiri: pesan instruksi DP masuk dalam beberapa detik dan e-tiket menulis "Menunggu DP"
 - [ ] `pm2 status` menunjukkan `pitstop-backend` dan `pitstop-web` berstatus online
 
 ## Kalau ada masalah
