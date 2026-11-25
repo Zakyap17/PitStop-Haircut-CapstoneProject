@@ -1,15 +1,17 @@
 import { Eyebrow } from '@/components/shared/eyebrow'
 import { Lines, Reveal } from '@/components/shared/reveal'
 import { getCatalog } from '@/lib/catalog'
+import { dotTime, formatRupiahTight } from '@/lib/format'
 
 export async function StatsSection() {
-  const { barbers } = await getCatalog()
+  const { barbers, services, booking } = await getCatalog()
+  // Semua angka dihitung dari database. Tidak ada angka klaim (jumlah pelanggan, rating) sebelum datanya nyata.
+  const cheapest = Math.min(...services.map((service) => service.price))
   const stats = [
-    { value: '1.200+', label: 'Potongan rambut dikerjakan' },
-    { value: '4.9', label: 'Rating rata-rata pelanggan' },
-    // Jumlah kapster dihitung dari database, bukan angka tetap.
     { value: String(barbers.length), label: 'Kapster siap di pit' },
-    { value: '0′', label: 'Menit antre dengan reservasi' },
+    { value: String(services.length), label: 'Pilihan layanan' },
+    { value: `${dotTime(booking.opensAt)}–${dotTime(booking.closesAt)}`, label: 'Buka setiap hari (WIB)' },
+    { value: formatRupiahTight(cheapest).replace('Rp', ''), label: 'Harga layanan mulai dari (Rp)' },
   ]
 
   return (

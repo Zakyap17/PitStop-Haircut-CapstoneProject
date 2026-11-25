@@ -3,11 +3,13 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useSyncExternalStore, type CSSProperties } from 'react'
-import { Star } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { StyleCards } from '@/components/hero/style-cards'
+import { useCatalog } from '@/components/providers/catalog-provider'
 import { Reveal } from '@/components/shared/reveal'
 import { heroDiamonds, heroThemes, type HeroThemeId } from '@/data/hero-theme'
 import { useHeroMotion } from '@/hooks/use-hero-motion'
+import { dotTime } from '@/lib/format'
 import { intro } from '@/lib/intro-store'
 import { cn } from '@/lib/utils'
 
@@ -19,6 +21,7 @@ const titleClass = 'font-script text-[clamp(4.5rem,10vw,12rem)] leading-[0.8] wh
  * Memilih kartu mengubah warna latar dan memutar logo.
  */
 export function HeroSection() {
+  const { booking } = useCatalog()
   const introDone = useSyncExternalStore(intro.subscribe, intro.isFinished, intro.serverSnapshot)
   const [activeTheme, setActiveTheme] = useState<HeroThemeId>('dewasa')
   const motion = useHeroMotion()
@@ -73,11 +76,13 @@ export function HeroSection() {
           </Reveal>
           <Reveal afterIntro delay={500} className="mt-auto flex items-center gap-4">
             <span className="flex size-12 items-center justify-center rounded-xl border border-white/10 bg-white/5">
-              <Star className="size-5 fill-accent text-accent" aria-hidden="true" />
+              <Clock className="size-5 text-accent" aria-hidden="true" />
             </span>
             <span className="flex flex-col">
-              <span className="text-[0.7rem] tracking-[0.1em] text-white/70">RATING PELANGGAN</span>
-              <span className="text-[0.85rem] font-semibold">4.9 / 5 · 1.200+ POTONGAN</span>
+              <span className="text-[0.7rem] tracking-[0.1em] text-white/70">BUKA SETIAP HARI</span>
+              <span className="text-[0.85rem] font-semibold">
+                {dotTime(booking.opensAt)} – {dotTime(booking.closesAt)} WIB
+              </span>
             </span>
           </Reveal>
         </div>
