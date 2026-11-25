@@ -19,4 +19,6 @@ export type Reservation = {
   /** Berapa kali jadwal sudah diubah (kosong = belum pernah). */
   rescheduleCount?: number
   status: ReservationStatus
+  /** Pengiriman invoice ke WhatsApp. `to` sudah disamarkan; null kalau reservasi tanpa nomor (data lama). */
+  invoice: { to: string; status: 'pending' | 'sent' | 'failed' } | null
 }

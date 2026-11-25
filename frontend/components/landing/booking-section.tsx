@@ -26,7 +26,7 @@ export function BookingSection() {
           </h2>
           <p className="max-w-md leading-relaxed text-muted-foreground">
             Pilih layanan, jam, dan kapster yang tersedia. Kamu mendapat e-tiket berisi kode reservasi untuk
-            check-in di kasir. Simpan atau unduh e-tiketnya.
+            check-in di kasir, dan invoice dikirim otomatis ke WhatsApp-mu.
           </p>
           <div className="rounded-2xl border border-foreground/10 bg-card/60 p-5 text-sm">
             <p className="font-semibold">Aturan kedatangan</p>
@@ -101,6 +101,21 @@ export function BookingSection() {
                 placeholder="nama@email.com"
                 className={inputClass}
               />
+            </label>
+            <label className="flex flex-col gap-1.5 text-xs text-muted-foreground sm:col-span-2">
+              Nomor WhatsApp
+              <input
+                required
+                type="tel"
+                inputMode="tel"
+                value={form.customerPhone}
+                onChange={(event) => form.setCustomerPhone(event.target.value)}
+                autoComplete="tel"
+                placeholder="081234567890"
+                aria-describedby="phone-hint"
+                className={inputClass}
+              />
+              <span id="phone-hint">Invoice, kabar perubahan jadwal, dan pengingat dikirim otomatis ke nomor ini.</span>
             </label>
           </fieldset>
 

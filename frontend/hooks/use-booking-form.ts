@@ -6,6 +6,7 @@ import { useCatalog } from '@/components/providers/catalog-provider'
 import { useScheduleSelection } from '@/hooks/use-schedule-selection'
 import { useTryOnChoice } from '@/hooks/use-try-on-choice'
 import { api, ApiError } from '@/lib/api'
+import { isValidPhone } from '@/lib/phone'
 import { setCurrentReservation } from '@/lib/reservation-storage'
 import { clearTryOnChoice } from '@/lib/try-on-storage'
 
@@ -23,6 +24,7 @@ export function useBookingForm() {
   const [serviceId, setServiceId] = useState(services[0]?.id ?? '')
   const [customerName, setCustomerName] = useState('')
   const [customerEmail, setCustomerEmail] = useState('')
+  const [customerPhone, setCustomerPhone] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -61,6 +63,7 @@ export function useBookingForm() {
     barberId !== null &&
     customerName.trim().length > 1 &&
     EMAIL_PATTERN.test(customerEmail) &&
+    isValidPhone(customerPhone) &&
     !submitting
 
   const submit = async (event: React.FormEvent) => {
@@ -77,6 +80,7 @@ export function useBookingForm() {
         time,
         customerName: customerName.trim(),
         customerEmail: customerEmail.trim(),
+        customerPhone: customerPhone.trim(),
         hairstyle: tryOnChoice?.name,
       })
       setCurrentReservation(reservation)
@@ -103,6 +107,8 @@ export function useBookingForm() {
     setCustomerName,
     customerEmail,
     setCustomerEmail,
+    customerPhone,
+    setCustomerPhone,
     isValid,
     submitting,
     submitError,

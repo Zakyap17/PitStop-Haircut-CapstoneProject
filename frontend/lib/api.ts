@@ -45,6 +45,8 @@ export type NewReservation = {
   time: string
   customerName: string
   customerEmail: string
+  /** Nomor WhatsApp tujuan invoice. */
+  customerPhone: string
   hairstyle?: string
 }
 

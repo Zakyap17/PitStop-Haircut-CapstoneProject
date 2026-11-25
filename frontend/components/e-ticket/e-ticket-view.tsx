@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Check, X } from 'lucide-react'
 import { CancelConfirmation } from '@/components/e-ticket/cancel-confirmation'
 import { DownloadButtons } from '@/components/e-ticket/download-buttons'
+import { InvoiceStatus } from '@/components/e-ticket/invoice-status'
 import { TicketCard } from '@/components/e-ticket/ticket-card'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { api, ApiError } from '@/lib/api'
@@ -121,6 +122,7 @@ export function ETicketView() {
       </div>
 
       <TicketCard reservation={reservation} />
+      <InvoiceStatus invoice={reservation.invoice} />
 
       <div className="flex flex-wrap justify-center gap-3.5">
         <Button size="pill" onClick={() => downloadReservationIcs(reservation)}>

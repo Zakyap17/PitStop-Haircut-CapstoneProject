@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -14,6 +14,12 @@ const inputClass =
 export function CheckReservationForm() {
   const router = useRouter()
   const [code, setCode] = useState('')
+
+  // Tautan dari pesan WhatsApp membawa ?kode=PS-1234 supaya pelanggan cukup mengisi emailnya.
+  useEffect(() => {
+    const fromLink = new URLSearchParams(window.location.search).get('kode')
+    if (fromLink) setCode(fromLink.toUpperCase().slice(0, 12))
+  }, [])
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState<string | null>(null)
   const [checking, setChecking] = useState(false)
