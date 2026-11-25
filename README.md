@@ -21,10 +21,11 @@ Detail API, database, dan tes ada di [backend/README.md](backend/README.md).
 ```bash
 cd frontend
 npm install
-cp .env.example .env.local   # BACKEND_URL=http://localhost:4000
 npm run dev
 ```
-Berjalan di http://localhost:3000. Halaman customer mengambil semua datanya (layanan, kapster, gaya rambut,
+Berjalan di http://localhost:3000. Tidak perlu berkas `.env`: web otomatis memakai backend di `http://localhost:4000`.
+Kalau backend ada di alamat lain, buat `frontend/.env.local` berisi `BACKEND_URL=http://alamat-backend:4000`.
+Halaman customer mengambil semua datanya (layanan, kapster, gaya rambut,
 jadwal, reservasi) dari backend, jadi backend harus menyala.
 
 Memasang di server (VM): lihat [docs/deploy-vm.md](docs/deploy-vm.md).

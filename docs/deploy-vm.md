@@ -47,7 +47,8 @@ curl http://localhost:4000/api/health     # {"status":"ok",...,"database":"pg"}
 ```bash
 cd ../frontend
 npm install
-cp .env.example .env.local     # BACKEND_URL=http://localhost:4000
+# Backend di VM yang sama (localhost:4000) tidak butuh pengaturan. Kalau di alamat lain, buat .env.local berisi:
+#   BACKEND_URL=http://alamat-backend:4000
 npm run build
 pm2 start npm --name pitstop-web -- start
 pm2 save && pm2 startup        # jalan otomatis setelah VM restart (ikuti perintah yang dicetak)
@@ -74,7 +75,7 @@ Pilih salah satu:
   membukanya untuk umum (cocok untuk penguji di luar tailnet). Aktifkan HTTPS di admin console Tailscale dulu.
 - **Cloudflare Tunnel**: alamat publik HTTPS tanpa membuka port router.
 
-Setelah alamatnya jadi, isi `NEXT_PUBLIC_SITE_URL` di `frontend/.env.local` dengan alamat itu, lalu build ulang.
+Setelah alamatnya jadi, buat `frontend/.env.local` berisi `NEXT_PUBLIC_SITE_URL=<alamat itu>`, lalu build ulang.
 
 ## 7. Update setelah ada perubahan kode
 
