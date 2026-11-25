@@ -30,7 +30,10 @@ npm run migrate    # menjalankan migrasi manual (juga otomatis saat server start
 Skema ada di `migrations/` (SQL biasa, berurutan). Aturan:
 
 - **Jangan mengubah migrasi yang sudah dijalankan.** Perubahan skema = file baru (`003_nama.sql`).
-- Tabel: `settings`, `services`, `barbers`, `booking_slots`, `haircuts`, `testimonials`, `reservations`.
+- Tabel: `settings`, `services`, `barbers`, `booking_slots`, `haircuts`, `testimonials`, `reservations`, `notifications`.
+- **Setiap tabel baru wajib diikuti `ALTER TABLE nama_tabel ENABLE ROW LEVEL SECURITY;`** di migrasi yang sama
+  (lihat `004_lock_public_api.sql`). Di Supabase, tabel tanpa itu bisa dibaca lewat API publik, padahal berisi data pelanggan.
+  Backend tidak terpengaruh karena terhubung sebagai pemilik database.
 - `reservations` menyimpan salinan nama layanan, durasi, dan harga saat dipesan, jadi riwayat tidak berubah
   kalau menu diubah. `starts_at`/`ends_at` adalah **waktu setempat toko** (tanpa zona waktu, WIB).
 - Status reservasi: `confirmed`, `completed`, `cancelled`, `no_show`. Kolom `source`: `online` atau `walk-in`.
