@@ -39,7 +39,7 @@ export default function ServicesPage() {
                 </p>
               </div>
               <Link
-                href="/#reservasi"
+                href={`/?layanan=${service.id}#reservasi`}
                 aria-label={`Reservasi ${service.name}`}
                 className={buttonVariants({ variant: 'outline-strong', size: 'pill', className: 'px-5 py-2.5' })}
               >

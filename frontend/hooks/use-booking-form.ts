@@ -1,5 +1,8 @@
-import { useState } from 'react'
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { barbers } from '@/data/barbers'
 import { services } from '@/data/services'
 import { useScheduleSelection } from '@/hooks/use-schedule-selection'
 import { useTryOnChoice } from '@/hooks/use-try-on-choice'
@@ -21,6 +24,29 @@ export function useBookingForm() {
   const [customerEmail, setCustomerEmail] = useState('')
 
   const service = services.find((item) => item.id === serviceId) ?? services[0]
+
+  // Halaman Layanan dan Kapster membuka form ini dengan ?layanan=<id> atau ?kapster=<nama>. Dibaca sekali
+  // setelah hari tersedia, lalu alamatnya dibersihkan supaya muat ulang tidak mengulang pilihan itu.
+  const appliedUrlChoice = useRef(false)
+  const { days, selectDay, setBarberName } = schedule
+  useEffect(() => {
+    if (appliedUrlChoice.current || days.length === 0) return
+    appliedUrlChoice.current = true
+
+    const params = new URLSearchParams(window.location.search)
+    const wantedService = services.find((item) => item.id === params.get('layanan'))
+    const wantedBarber = barbers.find((item) => item.name === params.get('kapster'))
+    if (!wantedService && !wantedBarber) return
+
+    if (wantedService) setServiceId(wantedService.id)
+    if (wantedBarber) {
+      // Mulai dari hari terdekat saat kapster itu masuk, supaya pilihannya tidak langsung gugur.
+      const workingDay = days.findIndex((day) => !wantedBarber.offDays.includes(day.getDay()))
+      if (workingDay >= 0) selectDay(workingDay)
+      setBarberName(wantedBarber.name)
+    }
+    window.history.replaceState(null, '', window.location.pathname + window.location.hash)
+  }, [days, selectDay, setBarberName])
 
   const isValid =
     selectedDay !== null && time !== null && barberName !== null && customerName.trim().length > 1 && EMAIL_PATTERN.test(customerEmail)
