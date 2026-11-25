@@ -8,7 +8,7 @@ const { reservationsRouter } = require('./routes/reservations')
  * Membuat aplikasi Express. Dipisah dari index.js supaya tes bisa membuatnya dengan database dan jam palsu.
  * @param {{ db: object, clock?: () => Date, corsOrigins?: string[] | '*', trustProxy?: string, limits?: { write?: number, access?: number } }} options
  */
-function createApp({ db, clock = () => new Date(), corsOrigins = '*', trustProxy, limits } = {}) {
+function createApp({ db, clock = () => new Date(), corsOrigins = '*', trustProxy, limits, webUrl } = {}) {
   const app = express()
   if (trustProxy) app.set('trust proxy', trustProxy === 'true' ? true : /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy)
   app.disable('x-powered-by')
@@ -16,7 +16,7 @@ function createApp({ db, clock = () => new Date(), corsOrigins = '*', trustProxy
   app.use(cors({ origin: corsOrigins === '*' ? true : corsOrigins }))
   app.use(express.json({ limit: '20kb' }))
 
-  const ctx = { db, clock, limits }
+  const ctx = { db, clock, limits, webUrl }
   app.get('/api/health', async (req, res) => {
     await db.query('SELECT 1')
     res.json({ status: 'ok', service: 'pitstop-backend', database: db.driver })

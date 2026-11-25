@@ -20,7 +20,7 @@ const schemas = {
     time: hhmm,
     customerName: z.string().trim().min(2).max(100),
     customerEmail: email,
-    customerPhone: z.string().trim().max(30).optional(),
+    customerPhone: z.string().trim().min(8).max(30),
     hairstyle: z.string().trim().max(80).optional(),
   }),
   lookup: z.object({ code: text(20), email }),

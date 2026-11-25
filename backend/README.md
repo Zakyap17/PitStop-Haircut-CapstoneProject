@@ -9,7 +9,7 @@ dipakai bersama web internal (admin, capster, owner).
 npm install
 cp .env.example .env
 npm run dev        # nodemon
-npm test           # 17 tes otomatis, memakai database tertanam, tidak butuh PostgreSQL
+npm test           # 32 tes otomatis, memakai database tertanam, tidak butuh PostgreSQL
 npm run migrate    # menjalankan migrasi manual (juga otomatis saat server start)
 ```
 
@@ -20,6 +20,9 @@ npm run migrate    # menjalankan migrasi manual (juga otomatis saat server start
 | `PORT`, `HOST` | Port (4000) dan alamat yang didengarkan (`0.0.0.0`). |
 | `CORS_ORIGINS` | Asal web yang boleh memanggil API langsung dari browser. Tidak wajib kalau web memakai proxy `/api` bawaan Next. |
 | `TRUST_PROXY` | Isi `1` kalau ada reverse proxy di depan backend, supaya batas percobaan per IP benar. |
+| `WHATSAPP_PROVIDER` | `console` (bawaan: pesan hanya dicetak di log, aman untuk dev) atau `fonnte` (kirim sungguhan). |
+| `FONNTE_TOKEN` | Token perangkat dari dashboard Fonnte. Rahasia. Wajib kalau `WHATSAPP_PROVIDER=fonnte`. |
+| `PUBLIC_WEB_URL` | Alamat publik web customer, untuk tautan cek/ubah di pesan WhatsApp. |
 | `RATE_LIMIT_WRITE`, `RATE_LIMIT_ACCESS` | Batas percobaan per IP (bawaan 30/menit untuk membuat reservasi, 100/15 menit untuk cek/ubah/batal). Web memanggil backend lewat proxy Next, sehingga semua pengunjung bisa terlihat sebagai satu IP: naikkan kalau penguji saling terblokir. |
 
 ## Database
@@ -70,9 +73,40 @@ database sehingga hanya satu yang berhasil. Kode atau email salah selalu dijawab
 
 Pelanggan tidak punya akun: kode reservasi + email adalah kuncinya.
 
+## WhatsApp otomatis
+
+Pelanggan mengisi nomor WhatsApp saat reservasi (wajib). Pesan yang dikirim otomatis:
+
+| Kapan | Pesan |
+|---|---|
+| Reservasi dibuat | **Invoice**: kode, nama, layanan, jadwal, kapster, gaya pilihan, total biaya, alamat, peta, tautan cek/ubah/batal |
+| Jadwal diubah | Jadwal baru (kode tetap sama) |
+| Dibatalkan | Konfirmasi pembatalan |
+| `reminder_minutes_before` menit sebelum jadwal (bawaan 120) | Pengingat. Sekali per reservasi, dijadwalkan ulang kalau jadwal diubah, dilewati kalau jadwalnya sudah dekat saat dipesan |
+
+Cara kerjanya: perubahan reservasi menulis pesan ke tabel `notifications` (antrean) dalam transaksi yang sama,
+lalu worker di backend mengirimnya tiap 5 detik. Akibatnya pemesanan tidak pernah gagal gara-gara WhatsApp
+bermasalah. Pesan yang gagal dicoba ulang dengan jeda 30 detik, 2 menit, 10 menit, 30 menit, lalu ditandai `failed`
+setelah 5 percobaan (alasannya di kolom `last_error`). Status terlihat di e-tiket ("Invoice sudah dikirim ke WhatsApp
+0812••••890"). Teks semua pesan ada di `src/notifications/templates.js`.
+
+Memantau: `SELECT kind, recipient, status, attempts, last_error FROM notifications ORDER BY id DESC LIMIT 20;`
+
+### Memasang Fonnte (penyedia WhatsApp)
+
+1. Daftar di [fonnte.com](https://fonnte.com), tambah *Device*, lalu scan QR dengan WhatsApp **nomor toko**.
+2. Salin *token* perangkat ke `FONNTE_TOKEN` di `backend/.env`, isi `WHATSAPP_PROVIDER=fonnte` dan `PUBLIC_WEB_URL`.
+3. Restart backend. Log harus menulis `WhatsApp: penyedia fonnte`.
+4. **Uji dulu ke nomormu sendiri**: buat satu reservasi dengan nomor sendiri, invoice harus masuk dalam beberapa detik.
+
+Catatan penting: Fonnte bukan layanan resmi Meta. Pakai nomor khusus toko (bukan nomor pribadi), jangan kirim massal,
+dan jaga perangkat di Fonnte tetap *connected* (status di dashboard). Kalau perangkat terputus, pesan tertahan di antrean
+dan terkirim sendiri setelah tersambung lagi (selama belum melewati 5 percobaan). Format permintaan ke Fonnte sudah
+sesuai dokumentasi dan diuji dengan penyedia tiruan, tetapi belum diuji dengan token Fonnte asli.
+
 ## Yang belum ada
 
-- Pengiriman e-tiket lewat email/WhatsApp (web tidak lagi mengklaim e-tiket dikirim ke email).
+- Pengiriman e-tiket lewat email (web tidak lagi mengklaim e-tiket dikirim ke email).
 - Pembatalan otomatis kalau pelanggan tidak check-in 10 menit sebelum jadwal (aturan ini tertulis di web
   tapi belum dijalankan siapa pun; butuh pekerjaan terjadwal atau dilakukan kasir).
 - Pembayaran. Harga di web adalah biaya layanan; tidak ada DP.

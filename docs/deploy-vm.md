@@ -58,6 +58,13 @@ yang diteruskan ke `BACKEND_URL`, jadi port 4000 **tidak perlu** dibuka ke luar 
 
 `npm run build` mengunduh font dari Google, jadi VM harus punya internet saat build.
 
+## 5b. WhatsApp otomatis
+
+Pesan invoice, kabar ubah/batal, dan pengingat memakai Fonnte. Langkahnya ada di `backend/README.md` bagian
+"WhatsApp otomatis". Singkatnya, di `backend/.env` isi `WHATSAPP_PROVIDER=fonnte`, `FONNTE_TOKEN=...`, dan
+`PUBLIC_WEB_URL=https://alamat-web-mu`, lalu `pm2 restart pitstop-backend`. Tanpa itu backend memakai mode `console`
+(pesan hanya tercetak di log, tidak ada yang terkirim).
+
 ## 6. HTTPS (wajib untuk kamera Try-On di HP)
 
 Pilih salah satu:
@@ -83,6 +90,7 @@ cd ../frontend && npm install && npm run build && pm2 restart pitstop-web
 - [ ] Buka web, daftar layanan dan kapster tampil (artinya web berhasil membaca backend)
 - [ ] Buat satu reservasi dari HP, lalu buka Cek Reservasi dari perangkat lain: harus ketemu
 - [ ] Buat reservasi kedua di jam dan kapster yang sama dari perangkat lain: kapster harus tampil "Penuh"
+- [ ] Buat reservasi dengan nomor WhatsApp-mu sendiri: invoice masuk dalam beberapa detik dan e-tiket menulis "Invoice sudah dikirim"
 - [ ] `pm2 status` menunjukkan `pitstop-backend` dan `pitstop-web` berstatus online
 
 ## Kalau ada masalah

@@ -1,6 +1,9 @@
 const { badRequest, conflict, notFound } = require('../lib/errors')
-const { nowInZone, toMinutes, toTime } = require('../lib/time')
+const { normalizePhone } = require('../lib/phone')
+const { toMinutes, toTime } = require('../lib/time')
+const { enqueueMessage } = require('../notifications/outbox')
 const { assertBookableDate, fitsShopHours, isBarberFree, loadBusyIntervals, loadService, loadSlotTimes } = require('./availability')
+const { minutesUntil, nowText, SELECT_RESERVATION, toDto } = require('./reservation-queries')
 const { loadSettings } = require('./settings')
 
 const CODE_PATTERN = /^PS-\d{4}$/
@@ -15,42 +18,6 @@ function normalizeCode(input) {
 
 function generateCode() {
   return `PS-${Math.floor(1000 + Math.random() * 9000)}`
-}
-
-const SELECT_RESERVATION = `
-  SELECT r.code, r.service_id, r.service_name, r.duration_minutes, r.price,
-         r.barber_id, b.name AS barber_name,
-         to_char(r.starts_at, 'YYYY-MM-DD') AS date,
-         to_char(r.starts_at, 'HH24:MI')    AS time,
-         to_char(r.starts_at, 'YYYY-MM-DD HH24:MI') AS starts_text,
-         r.customer_name, r.customer_email, r.hairstyle, r.status, r.reschedule_count, r.created_at
-    FROM reservations r
-    JOIN barbers b ON b.id = r.barber_id`
-
-function toDto(row) {
-  return {
-    code: row.code,
-    serviceId: row.service_id,
-    serviceName: row.service_name,
-    durationMinutes: row.duration_minutes,
-    price: row.price,
-    barberId: row.barber_id,
-    barberName: row.barber_name,
-    date: row.date,
-    time: row.time,
-    customerName: row.customer_name,
-    customerEmail: row.customer_email,
-    hairstyle: row.hairstyle ?? undefined,
-    status: row.status,
-    rescheduleCount: row.reschedule_count,
-    createdAt: new Date(row.created_at).toISOString(),
-  }
-}
-
-/** Waktu sekarang di zona toko sebagai teks "YYYY-MM-DD HH:MM", bisa dibandingkan langsung dengan starts_text. */
-function nowText(settings, clock) {
-  const now = nowInZone(settings.timezone, clock())
-  return `${now.date} ${toTime(now.minutes)}`
 }
 
 /** Kunci per kapster per hari: dua pemesanan serentak untuk kapster dan hari yang sama dijalankan bergantian. */
@@ -82,12 +49,19 @@ async function assertSlotFree(tx, { settings, clock, barber, service, date, time
   return { startMinutes, endMinutes: startMinutes + duration }
 }
 
+/** Pengingat dilewati kalau jadwalnya sudah lebih dekat dari waktu pengingat (atau pengingat dimatikan). */
+function reminderAlreadyDue(startsText, settings, clock) {
+  return settings.reminderMinutesBefore <= 0 || minutesUntil(startsText, settings, clock) <= settings.reminderMinutesBefore
+}
+
 function isUniqueViolation(error, constraint) {
   return error && error.code === '23505' && (!constraint || String(error.constraint ?? '').includes(constraint))
 }
 
-async function createReservation({ db, clock }, input) {
+async function createReservation({ db, clock, webUrl }, input) {
   const settings = await loadSettings(db)
+  const phone = normalizePhone(input.customerPhone)
+  if (!phone) throw badRequest('invalid_phone', 'Nomor WhatsApp tidak valid. Contoh: 081234567890.')
   const service = await loadService(db, input.serviceId)
 
   for (let attempt = 1; attempt <= MAX_CODE_ATTEMPTS; attempt++) {
@@ -112,16 +86,20 @@ async function createReservation({ db, clock }, input) {
         await tx.query(
           `INSERT INTO reservations
              (code, service_id, barber_id, service_name, duration_minutes, price,
-              starts_at, ends_at, customer_name, customer_email, customer_phone, hairstyle)
-           VALUES ($1, $2, $3, $4, $5, $6, $7::timestamp, $8::timestamp, $9, $10, $11, $12)`,
+              starts_at, ends_at, customer_name, customer_email, customer_phone, hairstyle, reminder_sent_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7::timestamp, $8::timestamp, $9, $10, $11, $12, $13::timestamptz)`,
           [
             code, service.id, barber.id, service.name, service.duration_minutes, service.price,
             `${input.date} ${toTime(startMinutes)}`, `${input.date} ${toTime(endMinutes)}`,
-            input.customerName, input.customerEmail, input.customerPhone ?? null, input.hairstyle ?? null,
+            input.customerName, input.customerEmail, phone, input.hairstyle ?? null,
+            // Booking yang jadwalnya sudah dekat tidak perlu pengingat lagi (invoice sudah cukup).
+            reminderAlreadyDue(`${input.date} ${toTime(startMinutes)}`, settings, clock) ? clock().toISOString() : null,
           ],
         )
         const { rows } = await tx.query(`${SELECT_RESERVATION} WHERE r.code = $1`, [code])
-        return toDto(rows[0])
+        const reservation = toDto(rows[0])
+        await enqueueMessage(tx, { reservationId: rows[0].id, kind: 'created', phone, reservation, settings, webUrl, now: clock().toISOString() })
+        return reservation
       })
     } catch (error) {
       // Kode kebetulan kembar: ulangi dengan kode baru. Selain itu, lempar apa adanya.
@@ -149,7 +127,7 @@ async function lookupReservation({ db }, { code, email }) {
   return toDto(await findOwnedReservation(db, { code, email }))
 }
 
-async function rescheduleReservation({ db, clock }, { code, email, barberId, date, time }) {
+async function rescheduleReservation({ db, clock, webUrl }, { code, email, barberId, date, time }) {
   const settings = await loadSettings(db)
   try {
     return await db.transaction(async (tx) => {
@@ -172,12 +150,19 @@ async function rescheduleReservation({ db, clock }, { code, email, barberId, dat
       await tx.query(
         `UPDATE reservations
             SET barber_id = $2, starts_at = $3::timestamp, ends_at = $4::timestamp,
-                reschedule_count = reschedule_count + 1, updated_at = now()
+                reschedule_count = reschedule_count + 1, updated_at = now(),
+                reminder_sent_at = $5::timestamptz
           WHERE code = $1`,
-        [current.code, barber.id, `${date} ${toTime(startMinutes)}`, `${date} ${toTime(endMinutes)}`],
+        [
+          current.code, barber.id, `${date} ${toTime(startMinutes)}`, `${date} ${toTime(endMinutes)}`,
+          // Pengingat dijadwalkan ulang untuk jadwal baru, kecuali jadwal baru sudah dekat.
+          reminderAlreadyDue(`${date} ${toTime(startMinutes)}`, settings, clock) ? clock().toISOString() : null,
+        ],
       )
       const { rows } = await tx.query(`${SELECT_RESERVATION} WHERE r.code = $1`, [current.code])
-      return toDto(rows[0])
+      const reservation = toDto(rows[0])
+      await enqueueMessage(tx, { reservationId: rows[0].id, kind: 'rescheduled', phone: rows[0].customer_phone, reservation, settings, webUrl, now: clock().toISOString() })
+      return reservation
     })
   } catch (error) {
     if (isUniqueViolation(error, 'reservations_barber_start_active')) {
@@ -187,7 +172,7 @@ async function rescheduleReservation({ db, clock }, { code, email, barberId, dat
   }
 }
 
-async function cancelReservation({ db, clock }, { code, email }) {
+async function cancelReservation({ db, clock, webUrl }, { code, email }) {
   const settings = await loadSettings(db)
   return db.transaction(async (tx) => {
     const current = await findOwnedReservation(tx, { code, email }, { forUpdate: true })
@@ -197,7 +182,9 @@ async function cancelReservation({ db, clock }, { code, email }) {
 
     await tx.query(`UPDATE reservations SET status = 'cancelled', cancelled_at = now(), updated_at = now() WHERE code = $1`, [current.code])
     const { rows } = await tx.query(`${SELECT_RESERVATION} WHERE r.code = $1`, [current.code])
-    return toDto(rows[0])
+    const reservation = toDto(rows[0])
+    await enqueueMessage(tx, { reservationId: rows[0].id, kind: 'cancelled', phone: rows[0].customer_phone, reservation, settings, webUrl, now: clock().toISOString() })
+    return reservation
   })
 }
 

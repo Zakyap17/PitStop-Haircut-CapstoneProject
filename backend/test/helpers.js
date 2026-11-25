@@ -6,11 +6,11 @@ const { runMigrations } = require('../src/db/migrate')
 const WEDNESDAY_9AM = '2026-11-25T02:00:00Z'
 
 /** Menjalankan API di port acak dengan database PGlite baru dan jam yang bisa digeser. */
-async function startTestServer({ now = WEDNESDAY_9AM, limits = { write: 1000, access: 1000 } } = {}) {
+async function startTestServer({ now = WEDNESDAY_9AM, limits = { write: 1000, access: 1000 }, webUrl } = {}) {
   const db = await createDb({ databaseUrl: '', dataDir: undefined })
   await runMigrations(db)
   const clock = { current: new Date(now) }
-  const app = createApp({ db, clock: () => clock.current, limits })
+  const app = createApp({ db, clock: () => clock.current, limits, webUrl })
   const server = await new Promise((resolve) => {
     const instance = app.listen(0, '127.0.0.1', () => resolve(instance))
   })
@@ -49,6 +49,7 @@ const booking = (overrides = {}) => ({
   time: '14:00',
   customerName: 'Budi Santoso',
   customerEmail: 'budi@example.com',
+  customerPhone: '081234567890',
   ...overrides,
 })
 

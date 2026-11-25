@@ -17,6 +17,10 @@ async function loadSettings(db) {
     maxReschedules: number('max_reschedules', 2),
     minLeadMinutes: number('min_lead_minutes', 0),
     maxActivePerEmail: number('max_active_per_email', 3),
+    shopName: text('shop_name', 'Pit Stop Barbershop'),
+    shopAddress: text('shop_address', ''),
+    shopMapsUrl: text('shop_maps_url', ''),
+    reminderMinutesBefore: number('reminder_minutes_before', 120),
   }
 }
 
