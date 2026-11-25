@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Eyebrow } from '@/components/shared/eyebrow'
-import { LiquidImage } from '@/components/shared/liquid-image'
+import { PhotoFrame } from '@/components/shared/photo-frame'
 import { Lines, Reveal, Words } from '@/components/shared/reveal'
 import { useCatalog } from '@/components/providers/catalog-provider'
 import { cn } from '@/lib/utils'
@@ -83,10 +83,9 @@ export function TestimonialsSection() {
             className="fade-up order-1 sm:order-2 sm:w-64"
             style={{ '--dur': '640ms', '--y': '0px' } as React.CSSProperties}
           >
-            <LiquidImage
+            <PhotoFrame
               src={current.image}
               alt={`Hasil potongan untuk ${current.name}`}
-              maxScale={22}
               className="aspect-[4/5] w-full rounded-sm"
               sizes="(min-width: 640px) 16rem, 100vw"
             />

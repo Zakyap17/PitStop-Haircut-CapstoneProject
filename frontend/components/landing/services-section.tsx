@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Clock } from 'lucide-react'
-import { LiquidImage } from '@/components/shared/liquid-image'
+import { PhotoFrame } from '@/components/shared/photo-frame'
 import { getCatalog } from '@/lib/catalog'
 import { formatRupiah } from '@/lib/format'
 
@@ -21,14 +21,14 @@ export async function ServicesSection() {
             </p>
           </div>
           <div className="grid grid-cols-5 gap-3">
-            <LiquidImage
+            <PhotoFrame
               src="/images/interior/interior-kids.png"
               alt="Kursi mobil balap anak di Pit Stop Barbershop"
               sizes="(min-width: 1024px) 25vw, 60vw"
               className="col-span-3 aspect-[4/5] rounded-2xl ring-1 ring-foreground/15"
             />
             <div className="col-span-2 flex flex-col gap-3">
-              <LiquidImage
+              <PhotoFrame
                 src="/images/interior/interior-wide.png"
                 alt="Interior Pit Stop Barbershop dengan panel biru"
                 sizes="(min-width: 1024px) 18vw, 40vw"

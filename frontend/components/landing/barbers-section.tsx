@@ -39,10 +39,12 @@ export async function BarbersSection() {
                   <dt className="text-xs text-muted-foreground">Spesialis</dt>
                   <dd className="font-medium">{barber.specialty}</dd>
                 </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Pengalaman</dt>
-                  <dd className="font-medium">{barber.experienceYears} tahun</dd>
-                </div>
+                {barber.experienceYears !== null && (
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Pengalaman</dt>
+                    <dd className="font-medium">{barber.experienceYears} tahun</dd>
+                  </div>
+                )}
               </dl>
               <p className="mt-4 text-xs text-muted-foreground">
                 Libur tiap {barber.offDays.map((d) => dayNames[d]).join(', ')}

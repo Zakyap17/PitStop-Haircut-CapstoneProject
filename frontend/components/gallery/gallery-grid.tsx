@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Star, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { useCatalog } from '@/components/providers/catalog-provider'
 import { haircutCategories } from '@/lib/catalog-utils'
@@ -75,10 +75,6 @@ export function GalleryGrid() {
                     {haircut.category} · {haircut.barber}
                   </span>
                 </span>
-                <span className="flex items-center gap-1 text-xs font-semibold">
-                  <Star className="size-3 fill-accent text-accent" aria-hidden="true" />
-                  {haircut.rating}
-                </span>
               </span>
             </button>
           </li>
@@ -114,7 +110,7 @@ export function GalleryGrid() {
               <div>
                 <h2 className="font-display text-3xl uppercase">{selected.name}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {selected.category} · Kapster {selected.barber} · Rating {selected.rating}
+                  {selected.category} · Kapster {selected.barber}
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">

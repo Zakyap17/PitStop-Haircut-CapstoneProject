@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCatalog } from '@/components/providers/catalog-provider'
 import { haircutCategories } from '@/lib/catalog-utils'
 import { cn } from '@/lib/utils'
@@ -136,10 +136,8 @@ export function PortfolioSection() {
 
           <div className="flex flex-col items-center gap-2" aria-live="polite">
             <p className="font-serif text-4xl">{current.name}</p>
-            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Kapster {current.barber} · {current.category}
-              <Star className="size-3.5 fill-primary text-primary" aria-hidden="true" />
-              <span className="font-semibold text-foreground">{current.rating.toFixed(1)}</span>
             </p>
             <div className="mt-2 flex gap-1.5">
               {cuts.map((cut, index) => (
