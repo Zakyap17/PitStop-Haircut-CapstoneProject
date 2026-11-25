@@ -1,0 +1,19 @@
+# Pagar tingkat repo: berkas yang tidak boleh ikut ke GitHub dari folder mana pun.
+# (frontend/ dan backend/ punya .gitignore sendiri untuk node_modules, .env, dan hasil build.)
+
+# Berkas rahasia: nilai asli (password database, token WhatsApp). Yang boleh hanya templat *.env.example.
+.env
+.env.*
+!.env.example
+
+# Konfigurasi alat AI/MCP pribadi (bisa memuat alamat project dan izin luas); simpan di pengaturan pribadi, bukan di repo.
+.mcp.json
+
+# Cadangan, berkas sementara, dan sisa uji
+*.bak
+*.tmp
+*.orig
+*.log
+.data/
+Thumbs.db
+.DS_Store
