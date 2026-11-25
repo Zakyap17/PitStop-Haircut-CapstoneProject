@@ -57,7 +57,7 @@ export function RescheduleForm() {
   if (!isReservationActive(reservation)) {
     return (
       <EmptyState
-        title={reservation.status === 'cancelled' ? 'Reservasi sudah dibatalkan.' : 'Reservasi sudah selesai.'}
+        title={reservation.status === 'dibatalkan' ? 'Booking sudah dibatalkan.' : 'Booking sudah tidak aktif.'}
         text="Reservasi ini tidak bisa diubah jadwalnya lagi. Buat reservasi baru untuk datang lagi."
         href="/#reservasi"
         cta="Buat Reservasi Baru"
@@ -97,7 +97,7 @@ export function RescheduleForm() {
     setSubmitting(true)
     setSubmitError(null)
     try {
-      const updated = await api.rescheduleReservation(reservation.code, { email: reservation.customerEmail, barberId, date: isoDate, time })
+      const updated = await api.rescheduleReservation(reservation.code, { phone: reservation.customerPhone, barberId, date: isoDate, time })
       setCurrentReservation(updated)
       router.push('/e-ticket')
     } catch (error) {

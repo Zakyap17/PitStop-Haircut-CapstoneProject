@@ -8,6 +8,9 @@ import { toIsoDate } from '@/lib/format'
 import type { Barber } from '@/types/barber'
 import type { Availability } from '@/types/catalog'
 
+/** Nilai barberId untuk "tanpa preferensi": server memilihkan capster yang kosong. */
+export const ANY_BARBER = 'any'
+
 export type BarberState = 'available' | 'off' | 'busy'
 
 type AvailabilityState = { status: 'idle' | 'loading' | 'ready' | 'error'; data: Availability | null; error: string | null }
@@ -60,7 +63,8 @@ export function useScheduleSelection(serviceId: string | null) {
       setTimeState(null)
       return
     }
-    if (barberId && slot && !slot.barbers.includes(barberId)) setBarberId(null)
+    // "any" (tanpa preferensi) tetap berlaku selama jamnya masih punya capster kosong.
+    if (barberId && barberId !== ANY_BARBER && slot && !slot.barbers.includes(barberId)) setBarberId(null)
   }, [ready, time, barberId])
 
   const barberState = (barber: Barber): BarberState => {
@@ -81,7 +85,7 @@ export function useScheduleSelection(serviceId: string | null) {
     setTimeState(nextTime)
     // Kapster yang sudah dipilih tapi tidak kosong di jam baru dilepas.
     const slot = slotFor(nextTime)
-    if (barberId && slot && !slot.barbers.includes(barberId)) setBarberId(null)
+    if (barberId && barberId !== ANY_BARBER && slot && !slot.barbers.includes(barberId)) setBarberId(null)
   }
 
   const reload = useCallback(() => setReloadTick((tick) => tick + 1), [])

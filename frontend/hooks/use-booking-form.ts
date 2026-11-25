@@ -10,8 +10,6 @@ import { isValidPhone } from '@/lib/phone'
 import { setCurrentReservation } from '@/lib/reservation-storage'
 import { clearTryOnChoice } from '@/lib/try-on-storage'
 
-const EMAIL_PATTERN = /\S+@\S+\.\S+/
-
 /** Kode error dari backend yang artinya jadwalnya berubah: data ketersediaan perlu dimuat ulang. */
 const SCHEDULE_CONFLICTS = new Set(['slot_taken', 'slot_unavailable', 'date_out_of_range', 'invalid_time'])
 
@@ -23,7 +21,6 @@ export function useBookingForm() {
 
   const [serviceId, setServiceId] = useState(services[0]?.id ?? '')
   const [customerName, setCustomerName] = useState('')
-  const [customerEmail, setCustomerEmail] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -62,7 +59,6 @@ export function useBookingForm() {
     time !== null &&
     barberId !== null &&
     customerName.trim().length > 1 &&
-    EMAIL_PATTERN.test(customerEmail) &&
     isValidPhone(customerPhone) &&
     !submitting
 
@@ -79,7 +75,6 @@ export function useBookingForm() {
         date: schedule.isoDate,
         time,
         customerName: customerName.trim(),
-        customerEmail: customerEmail.trim(),
         customerPhone: customerPhone.trim(),
         hairstyle: tryOnChoice?.name,
       })
@@ -105,8 +100,6 @@ export function useBookingForm() {
     setServiceId,
     customerName,
     setCustomerName,
-    customerEmail,
-    setCustomerEmail,
     customerPhone,
     setCustomerPhone,
     isValid,

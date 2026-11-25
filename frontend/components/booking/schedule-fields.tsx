@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import type { ScheduleSelection } from '@/hooks/use-schedule-selection'
+import { ANY_BARBER, type ScheduleSelection } from '@/hooks/use-schedule-selection'
 
 /** Gaya chip pilihan (dipakai juga oleh pilihan layanan di form reservasi). */
 export const chipClass = (selected: boolean) =>
@@ -70,6 +70,15 @@ export function ScheduleFields({ schedule, dateLegend, barberLegend }: ScheduleF
       <fieldset className="min-w-0">
         <legend className="mb-3 text-sm font-semibold">{barberLegend}</legend>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <button
+            type="button"
+            aria-pressed={schedule.barberId === ANY_BARBER}
+            onClick={() => schedule.setBarberId(ANY_BARBER)}
+            className={cn(chipClass(schedule.barberId === ANY_BARBER), 'col-span-2 text-left sm:col-span-4')}
+          >
+            <span className="block">Siapa saja</span>
+            <span className="block text-xs opacity-70">Tanpa preferensi, kami pilihkan kapster yang kosong</span>
+          </button>
           {schedule.barbers.map((barber) => {
             const state = schedule.barberState(barber)
             return (

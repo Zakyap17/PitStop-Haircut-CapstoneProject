@@ -5,7 +5,7 @@ import { BrandLogo } from '@/components/shared/brand-logo'
 
 export const metadata: Metadata = {
   title: 'Cek Reservasi — Pit Stop Barbershop',
-  description: 'Buka kembali e-tiket reservasimu dengan kode reservasi dan email.',
+  description: 'Buka kembali e-tiket bookingmu dengan kode booking dan nomor WhatsApp.',
 }
 
 export default function CheckReservationPage() {
@@ -16,7 +16,7 @@ export default function CheckReservationPage() {
         <p className="text-[13px] font-semibold tracking-[2.4px] text-accent uppercase">Reservasi</p>
         <h1 className="font-display text-5xl leading-[1.05] tracking-[-0.025em] uppercase sm:text-6xl">Cek reservasimu.</h1>
         <p className="max-w-[460px] leading-normal text-muted-foreground">
-          Masukkan kode reservasi dan email yang kamu pakai saat memesan untuk membuka e-tiketmu lagi.
+          Masukkan kode booking dan nomor WhatsApp yang kamu pakai saat memesan untuk membuka e-tiketmu lagi.
         </p>
       </div>
       <CheckReservationForm />

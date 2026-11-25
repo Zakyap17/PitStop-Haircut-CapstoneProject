@@ -13,12 +13,17 @@ export function buildBookableDays(count: number): Date[] {
 }
 
 export function isReservationCancelled(reservation: Reservation): boolean {
-  return reservation.status === 'cancelled'
+  return reservation.status === 'dibatalkan'
 }
 
-/** Reservasi yang masih bisa diubah atau dibatalkan pelanggan (belum dibatalkan, selesai, atau tidak datang). */
+/** Masih menunggu DP dibayar (slot ditahan sampai batas waktu). */
+export function isAwaitingDp(reservation: Reservation): boolean {
+  return reservation.status === 'menunggu_pembayaran'
+}
+
+/** Booking yang jadwalnya masih bisa diubah pelanggan (menunggu DP atau sudah dikonfirmasi). */
 export function isReservationActive(reservation: Reservation): boolean {
-  return reservation.status === 'confirmed'
+  return reservation.status === 'menunggu_pembayaran' || reservation.status === 'dikonfirmasi'
 }
 
 /** Apakah jadwal reservasi ini sudah lewat (menurut jam perangkat; backend yang memutuskan di akhir). */

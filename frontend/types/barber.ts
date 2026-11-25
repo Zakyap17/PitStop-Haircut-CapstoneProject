@@ -3,7 +3,8 @@ export type Barber = {
   name: string
   role: string
   specialty: string
-  experienceYears: number
+  /** Lama pengalaman (tahun); null kalau belum diisi di database. */
+  experienceYears: number | null
   /** Hari libur, 0 = Minggu ... 6 = Sabtu (sesuai Date.getDay()). */
   offDays: number[]
 }

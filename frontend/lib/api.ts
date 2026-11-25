@@ -40,12 +40,12 @@ async function request<T>(method: 'GET' | 'POST', path: string, body?: unknown):
 
 export type NewReservation = {
   serviceId: string
-  barberId: string
+  /** Kosong atau "any" = tanpa preferensi capster. */
+  barberId?: string
   date: string
   time: string
   customerName: string
-  customerEmail: string
-  /** Nomor WhatsApp tujuan invoice. */
+  /** Nomor WhatsApp pemesan: kunci untuk cek, ubah, dan batal, juga tujuan pesan bukti booking dan invoice. */
   customerPhone: string
   hairstyle?: string
 }
@@ -55,11 +55,11 @@ export const api = {
 
   createReservation: (input: NewReservation) => request<{ reservation: Reservation }>('POST', '/api/reservations', input).then((result) => result.reservation),
 
-  lookupReservation: (code: string, email: string) => request<{ reservation: Reservation }>('POST', '/api/reservations/lookup', { code, email }).then((result) => result.reservation),
+  lookupReservation: (code: string, phone: string) => request<{ reservation: Reservation }>('POST', '/api/reservations/lookup', { code, phone }).then((result) => result.reservation),
 
-  rescheduleReservation: (code: string, input: { email: string; barberId: string; date: string; time: string }) =>
+  rescheduleReservation: (code: string, input: { phone: string; barberId: string; date: string; time: string }) =>
     request<{ reservation: Reservation }>('POST', `/api/reservations/${encodeURIComponent(code)}/reschedule`, input).then((result) => result.reservation),
 
-  cancelReservation: (code: string, email: string) =>
-    request<{ reservation: Reservation }>('POST', `/api/reservations/${encodeURIComponent(code)}/cancel`, { email }).then((result) => result.reservation),
+  cancelReservation: (code: string, phone: string) =>
+    request<{ reservation: Reservation }>('POST', `/api/reservations/${encodeURIComponent(code)}/cancel`, { phone }).then((result) => result.reservation),
 }

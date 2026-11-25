@@ -25,13 +25,13 @@ export function BookingSection() {
             Kunci slotmu, <em className="text-accent">skip</em> antrean
           </h2>
           <p className="max-w-md leading-relaxed text-muted-foreground">
-            Pilih layanan, jam, dan kapster yang tersedia. Kamu mendapat e-tiket berisi kode reservasi untuk
-            check-in di kasir, dan invoice dikirim otomatis ke WhatsApp-mu.
+            Pilih layanan, jam, dan kapster yang tersedia. Slotmu ditahan sampai DP dibayar. Setelah DP dikonfirmasi, bukti booking berisi kode dan QR untuk
+            check-in dikirim ke WhatsApp-mu.
           </p>
           <div className="rounded-2xl border border-foreground/10 bg-card/60 p-5 text-sm">
             <p className="font-semibold">Aturan kedatangan</p>
             <p className="mt-2 leading-relaxed text-muted-foreground">
-              Konfirmasi nama atau email di kasir sebelum layanan dimulai. Jika belum check-in 10 menit sebelum jam
+              Konfirmasi nama atau nomor WhatsApp di kasir sebelum layanan dimulai. Jika belum check-in 10 menit sebelum jam
               reservasi, pesanan otomatis dibatalkan dan slot dibuka untuk walk-in.
             </p>
           </div>
@@ -91,18 +91,6 @@ export function BookingSection() {
               />
             </label>
             <label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-              Email
-              <input
-                required
-                type="email"
-                value={form.customerEmail}
-                onChange={(event) => form.setCustomerEmail(event.target.value)}
-                autoComplete="email"
-                placeholder="nama@email.com"
-                className={inputClass}
-              />
-            </label>
-            <label className="flex flex-col gap-1.5 text-xs text-muted-foreground sm:col-span-2">
               Nomor WhatsApp
               <input
                 required
@@ -115,7 +103,7 @@ export function BookingSection() {
                 aria-describedby="phone-hint"
                 className={inputClass}
               />
-              <span id="phone-hint">Invoice, kabar perubahan jadwal, dan pengingat dikirim otomatis ke nomor ini.</span>
+              <span id="phone-hint">Instruksi DP, bukti booking, dan pengingat dikirim otomatis ke nomor ini. Nomor ini juga kunci untuk mengecek bookingmu.</span>
             </label>
           </fieldset>
 

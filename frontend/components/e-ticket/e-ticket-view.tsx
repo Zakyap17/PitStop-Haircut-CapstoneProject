@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Check, X } from 'lucide-react'
+import { Check, Clock, X } from 'lucide-react'
 import { CancelConfirmation } from '@/components/e-ticket/cancel-confirmation'
 import { DownloadButtons } from '@/components/e-ticket/download-buttons'
-import { InvoiceStatus } from '@/components/e-ticket/invoice-status'
+import { DpPanel } from '@/components/e-ticket/dp-panel'
+import { WhatsappStatus } from '@/components/e-ticket/whatsapp-status'
 import { TicketCard } from '@/components/e-ticket/ticket-card'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { api, ApiError } from '@/lib/api'
-import { isReservationActive, isReservationCancelled, isReservationPast } from '@/lib/booking-rules'
+import { isAwaitingDp, isReservationActive, isReservationCancelled, isReservationPast } from '@/lib/booking-rules'
 import { downloadReservationIcs } from '@/lib/calendar'
 import { loadReservation, setCurrentReservation } from '@/lib/reservation-storage'
 import { cn } from '@/lib/utils'
@@ -27,7 +28,7 @@ export function ETicketView() {
     // Kalau server tidak terjangkau, tiket tersimpan tetap ditampilkan.
     let cancelled = false
     api
-      .lookupReservation(stored.code, stored.customerEmail)
+      .lookupReservation(stored.code, stored.customerPhone)
       .then((fresh) => {
         if (cancelled) return
         setCurrentReservation(fresh)
@@ -46,7 +47,7 @@ export function ETicketView() {
     setCancelling(true)
     setCancelError(null)
     try {
-      const updated = await api.cancelReservation(current.code, current.customerEmail)
+      const updated = await api.cancelReservation(current.code, current.customerPhone)
       setCurrentReservation(updated)
       setReservation(updated)
       setConfirmingCancel(false)
@@ -63,7 +64,7 @@ export function ETicketView() {
   if (reservation === null) {
     return (
       <div className="flex flex-col items-center gap-6 text-center">
-        <h1 className="font-display text-4xl leading-[1.05] tracking-[-0.025em] uppercase sm:text-5xl">Belum ada reservasi.</h1>
+        <h1 className="font-display text-4xl leading-[1.05] tracking-[-0.025em] uppercase sm:text-5xl">Belum ada booking.</h1>
         <p className="max-w-[420px] text-muted-foreground">Buat reservasi dulu di halaman utama, lalu e-tiketmu akan muncul di sini.</p>
         <Link href="/#reservasi" className={buttonVariants({ size: 'pill' })}>
           Buat Reservasi
@@ -84,7 +85,7 @@ export function ETicketView() {
             Slot sudah dilepas.
           </h1>
           <p className="max-w-[520px] leading-normal text-muted-foreground">
-            Reservasi ini dibatalkan dan kodenya tidak berlaku lagi. Mau datang lain waktu? Buat reservasi baru kapan saja.
+            Booking ini dibatalkan dan kodenya tidak berlaku lagi. Mau datang lain waktu? Buat reservasi baru kapan saja.
           </p>
         </div>
         <TicketCard reservation={reservation} cancelled />
@@ -100,38 +101,49 @@ export function ETicketView() {
     )
   }
 
-  const wasRescheduled = (reservation.rescheduleCount ?? 0) > 0
-  const canCancel = isReservationActive(reservation) && !isReservationPast(reservation)
+  const wasRescheduled = reservation.rescheduleCount > 0
+  const awaitingDp = isAwaitingDp(reservation)
+  const past = isReservationPast(reservation)
+  // Pelanggan hanya bisa membatalkan sendiri selama DP belum dibayar; setelahnya lewat kasir.
+  const canCancel = awaitingDp && !past
+  const confirmed = reservation.status === 'dikonfirmasi'
 
   return (
     <div className="flex w-full flex-col items-center gap-8">
-      <span className="flex size-16 items-center justify-center rounded-full bg-success text-white">
-        <Check className="size-8" strokeWidth={3} aria-hidden="true" />
+      <span className={cn('flex size-16 items-center justify-center rounded-full text-white', awaitingDp ? 'bg-accent' : 'bg-success')}>
+        {awaitingDp ? <Clock className="size-8" strokeWidth={3} aria-hidden="true" /> : <Check className="size-8" strokeWidth={3} aria-hidden="true" />}
       </span>
 
       <div className="flex flex-col items-center gap-2.5 text-center">
-        <p className="text-[13px] font-semibold tracking-[2.4px] text-accent uppercase">{wasRescheduled ? 'Jadwal diperbarui' : 'Reservasi berhasil'}</p>
+        <p className="text-[13px] font-semibold tracking-[2.4px] text-accent uppercase">
+          {awaitingDp ? 'Menunggu DP' : wasRescheduled ? 'Jadwal diperbarui' : confirmed ? 'Booking terkonfirmasi' : 'Status booking'}
+        </p>
         <h1 className="font-display text-5xl leading-[1.05] tracking-[-0.025em] text-balance text-foreground uppercase sm:text-6xl lg:text-[64px]">
-          {wasRescheduled ? 'Jadwal barumu tersimpan.' : 'Slot kamu sudah dikunci.'}
+          {awaitingDp ? 'Slot ditahan, bayar DP.' : wasRescheduled ? 'Jadwal barumu tersimpan.' : confirmed ? 'Slot kamu sudah dikunci.' : 'Terima kasih.'}
         </h1>
         <p className="max-w-[520px] leading-normal text-muted-foreground">
-          {wasRescheduled
-            ? 'Jadwal lama otomatis dibatalkan dan slotnya dibuka kembali. Tunjukkan kode yang sama ke kasir saat datang.'
-            : 'Simpan kode ini atau unduh e-tiketnya, lalu tunjukkan ke kasir saat datang.'}
+          {awaitingDp
+            ? 'Slotmu ditahan sementara. Selesaikan DP sebelum batas waktu supaya bookingmu terkonfirmasi.'
+            : confirmed
+              ? 'Simpan kode ini atau unduh e-tiketnya, lalu tunjukkan ke kasir saat datang.'
+              : 'Booking ini sudah tidak aktif.'}
         </p>
       </div>
 
+      {awaitingDp && <DpPanel reservation={reservation} />}
       <TicketCard reservation={reservation} />
-      <InvoiceStatus invoice={reservation.invoice} />
+      <WhatsappStatus whatsapp={reservation.whatsapp} />
 
       <div className="flex flex-wrap justify-center gap-3.5">
         <Button size="pill" onClick={() => downloadReservationIcs(reservation)}>
           Tambah ke Kalender
         </Button>
         <DownloadButtons reservation={reservation} />
-        <Link href="/ubah-reservasi" className={cn(buttonVariants({ variant: 'outline-strong', size: 'pill' }), 'px-7')}>
-          Ubah Jadwal
-        </Link>
+        {isReservationActive(reservation) && !past && (
+          <Link href="/ubah-reservasi" className={cn(buttonVariants({ variant: 'outline-strong', size: 'pill' }), 'px-7')}>
+            Ubah Jadwal
+          </Link>
+        )}
         <Link href="/" className={cn(buttonVariants({ variant: 'outline-strong', size: 'pill' }), 'px-7')}>
           Kembali ke Beranda
         </Link>
@@ -142,9 +154,10 @@ export function ETicketView() {
           <CancelConfirmation onDismiss={() => setConfirmingCancel(false)} onConfirm={() => confirmCancel(reservation)} busy={cancelling} error={cancelError} />
         ) : (
           <button type="button" onClick={() => setConfirmingCancel(true)} className="text-sm text-muted-foreground underline underline-offset-4 hover:text-destructive">
-            Batalkan reservasi
+            Batalkan booking
           </button>
         ))}
+      {confirmed && !past && <p className="max-w-[520px] text-center text-sm text-muted-foreground">DP sudah dibayar. Perlu membatalkan atau mengubah jadwal? Hubungi kasir.</p>}
     </div>
   )
 }

@@ -10,17 +10,17 @@ import { setCurrentReservation } from '@/lib/reservation-storage'
 const inputClass =
   'w-full rounded-xl border border-input bg-background/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none'
 
-/** Form pencarian reservasi (kode + email). Jika ketemu, e-tiketnya dibuka. */
+/** Form pencarian booking (kode + nomor WhatsApp). Jika ketemu, e-tiketnya dibuka. */
 export function CheckReservationForm() {
   const router = useRouter()
   const [code, setCode] = useState('')
 
-  // Tautan dari pesan WhatsApp membawa ?kode=PS-1234 supaya pelanggan cukup mengisi emailnya.
+  // Tautan dari pesan WhatsApp membawa ?kode=PS-1234 supaya pelanggan cukup mengisi nomor WhatsApp-nya.
   useEffect(() => {
     const fromLink = new URLSearchParams(window.location.search).get('kode')
     if (fromLink) setCode(fromLink.toUpperCase().slice(0, 12))
   }, [])
-  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [message, setMessage] = useState<string | null>(null)
   const [checking, setChecking] = useState(false)
 
@@ -29,7 +29,7 @@ export function CheckReservationForm() {
     setChecking(true)
     setMessage(null)
     try {
-      const reservation = await api.lookupReservation(code, email.trim())
+      const reservation = await api.lookupReservation(code, phone.trim())
       setCurrentReservation(reservation)
       router.push('/e-ticket')
     } catch (error) {
@@ -58,17 +58,18 @@ export function CheckReservationForm() {
       </label>
 
       <label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-        Email saat reservasi
+        Nomor WhatsApp saat booking
         <input
           required
-          type="email"
-          value={email}
+          type="tel"
+          inputMode="tel"
+          value={phone}
           onChange={(event) => {
-            setEmail(event.target.value)
+            setPhone(event.target.value)
             setMessage(null)
           }}
-          autoComplete="email"
-          placeholder="nama@email.com"
+          autoComplete="tel"
+          placeholder="081234567890"
           className={inputClass}
         />
       </label>
