@@ -82,7 +82,7 @@ export default function BarbersPage() {
                   </ul>
                 </div>
 
-                <Link href="/#reservasi" className={cn(buttonVariants({ size: 'pill' }), 'mt-auto w-full')}>
+                <Link href={`/?kapster=${encodeURIComponent(barber.name)}#reservasi`} className={cn(buttonVariants({ size: 'pill' }), 'mt-auto w-full')}>
                   Reservasi dengan {barber.name}
                 </Link>
               </div>
