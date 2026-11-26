@@ -31,4 +31,7 @@ const capsterExperience = (alias) => `(to_jsonb(${alias})->>'pengalaman_tahun'):
 /** Hari libur mingguan (angka hari); larik kosong kalau kolomnya tidak ada. Libur per tanggal ada di jadwal_capster. */
 const capsterOffDays = (alias) => `ARRAY(SELECT (jsonb_array_elements_text(to_jsonb(${alias})->'hari_libur'))::int)`
 
-module.exports = { serviceKey, galleryKey, capsterKey, capsterRole, capsterExperience, capsterOffDays }
+/** Saklar tersedia dari admin (capster.tersedia); dianggap tersedia kalau kolomnya belum ada. */
+const capsterAvailable = (alias) => `COALESCE((to_jsonb(${alias})->>'tersedia')::boolean, true)`
+
+module.exports = { capsterAvailable, serviceKey, galleryKey, capsterKey, capsterRole, capsterExperience, capsterOffDays }

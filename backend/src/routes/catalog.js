@@ -1,5 +1,5 @@
 const express = require('express')
-const { capsterExperience, capsterKey, capsterOffDays, capsterRole, galleryKey, serviceKey } = require('../db/keys')
+const { capsterAvailable, capsterExperience, capsterKey, capsterOffDays, capsterRole, galleryKey, serviceKey } = require('../db/keys')
 const { loadSettings } = require('../services/settings')
 
 /** Gaya rambut di galeri (dipakai katalog dan analisa try-on AI). */
@@ -43,7 +43,7 @@ async function loadCatalog(db) {
     ),
     db.query(
       `SELECT ${capsterKey('c')} AS slug, c.nama_capster, ${capsterRole('c')} AS jabatan, c.spesialisasi,
-              ${capsterExperience('c')} AS pengalaman_tahun, ${capsterOffDays('c')} AS hari_libur, c.foto
+              ${capsterExperience('c')} AS pengalaman_tahun, ${capsterOffDays('c')} AS hari_libur, c.foto, ${capsterAvailable('c')} AS tersedia
          FROM capster c WHERE c.status_aktif ORDER BY c.id_capster`,
     ),
     loadHaircuts(db),
@@ -60,6 +60,8 @@ async function loadCatalog(db) {
       specialty: row.spesialisasi ?? '',
       experienceYears: row.pengalaman_tahun ?? null,
       photo: photoUrl(row.slug, row.foto),
+      // Saklar dari admin: false = tetap tampil tetapi tidak bisa dipilih (cuti, sakit).
+      available: row.tersedia,
       offDays: row.hari_libur,
     })),
     haircuts,

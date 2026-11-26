@@ -68,9 +68,13 @@ export function useScheduleSelection(serviceId: string | null) {
   }, [ready, time, barberId])
 
   const barberState = (barber: Barber): BarberState => {
+    // Dimatikan admin (cuti, sakit) atau libur mingguan: tampil tetapi tidak bisa dipilih.
+    if (barber.available === false) return 'off'
     if (selectedDay && barber.offDays.includes(selectedDay.getDay())) return 'off'
-    // Tidak punya satu pun jam kosong di hari ini (libur per tanggal atau penuh seharian): tampil tidak tersedia sejak awal.
-    if (ready && !ready.slots.some((slot) => slot.barbers.includes(barber.id))) return 'busy'
+    // Kapster lain masih punya jam di hari ini sedangkan dia tidak (libur per tanggal atau penuh seharian): tampil tidak tersedia
+    // sejak awal. Kalau tidak ada satu pun kapster yang punya jam (hari sudah lewat atau penuh semua), itu urusan pilihan jam
+    // ("Semua jam di hari ini sudah penuh atau lewat"), bukan kesalahan kapsternya, jadi kartunya tidak diabukan.
+    if (ready && ready.slots.some((slot) => slot.barbers.length > 0) && !ready.slots.some((slot) => slot.barbers.includes(barber.id))) return 'busy'
     const slot = time ? slotFor(time) : undefined
     if (ready && slot && !slot.barbers.includes(barber.id)) return 'busy'
     return 'available'

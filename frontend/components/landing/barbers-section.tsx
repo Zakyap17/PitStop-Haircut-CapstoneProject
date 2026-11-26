@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BarberPortrait } from '@/components/shared/barber-portrait'
 import { getCatalog } from '@/lib/catalog'
 
 const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
@@ -28,9 +29,7 @@ export async function BarbersSection() {
               className="group relative flex flex-col overflow-hidden rounded-3xl border border-foreground/10 bg-background p-6 transition-colors hover:border-primary"
             >
               <div className="checker absolute -right-10 -top-10 size-32 rotate-12 opacity-30" aria-hidden="true" />
-              <span className="relative flex size-16 items-center justify-center rounded-full bg-primary font-serif text-3xl text-primary-foreground">
-                {barber.name[0]}
-              </span>
+              <BarberPortrait name={barber.name} photo={barber.photo} className="relative" />
               <span className="mt-6 font-mono text-xs text-muted-foreground">No. {String(index + 1).padStart(2, '0')}</span>
               <h3 className="font-serif text-3xl">{barber.name}</h3>
               <p className="text-sm text-muted-foreground">{barber.role}</p>
@@ -46,9 +45,7 @@ export async function BarbersSection() {
                   </div>
                 )}
               </dl>
-              <p className="mt-4 text-xs text-muted-foreground">
-                Libur tiap {barber.offDays.map((d) => dayNames[d]).join(', ')}
-              </p>
+              {barber.offDays.length > 0 && <p className="mt-4 text-xs text-muted-foreground">Libur tiap {barber.offDays.map((d) => dayNames[d]).join(', ')}</p>}
             </li>
           ))}
         </ul>

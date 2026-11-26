@@ -9,4 +9,6 @@ export type Barber = {
   offDays: number[]
   /** Alamat foto capster (bisa lewat /api/barbers/:id/photo); null = belum ada foto, tampilkan inisial. */
   photo: string | null
+  /** Saklar dari admin: false = tetap tampil tetapi abu-abu dan tidak bisa dipilih (cuti, sakit). */
+  available: boolean
 }

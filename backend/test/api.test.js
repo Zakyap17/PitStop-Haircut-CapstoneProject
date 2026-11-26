@@ -23,7 +23,7 @@ describe('katalog (dari tabel resmi)', () => {
     assert.deepEqual(body.testimonials, [])
     assert.equal(body.booking.timeSlots.length, 10)
     assert.deepEqual(body.services[0], { id: 'haircut-dewasa', name: 'Haircut Dewasa', description: 'Konsultasi, potong, cuci, dan styling pomade.', price: 50000, durationMinutes: 45 })
-    assert.deepEqual(body.barbers[0], { id: 'rizky', name: 'Rizky', role: 'Head Kapster', specialty: 'Fade & Crop', experienceYears: 8, offDays: [1], photo: null })
+    assert.deepEqual(body.barbers[0], { id: 'rizky', name: 'Rizky', role: 'Head Kapster', specialty: 'Fade & Crop', experienceYears: 8, offDays: [1], photo: null, available: true })
     assert.deepEqual(Object.keys(body.haircuts[0]).sort(), ['barber', 'barberId', 'category', 'id', 'image', 'name'], 'tanpa rating')
     assert.equal(body.haircuts[0].barberId, 'rizky')
   })

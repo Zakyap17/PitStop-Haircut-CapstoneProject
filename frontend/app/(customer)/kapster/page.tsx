@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { PageShell } from '@/components/pages/page-shell'
+import { BarberPortrait, BarberStatus } from '@/components/shared/barber-portrait'
 import { buttonVariants } from '@/components/ui/button'
 import { getCatalog } from '@/lib/catalog'
 import { cn } from '@/lib/utils'
@@ -41,12 +42,11 @@ export default async function BarbersPage() {
             <li key={barber.name} className="grid gap-8 rounded-3xl border border-foreground/10 bg-card/70 p-6 backdrop-blur md:p-8 lg:grid-cols-[320px_1fr]">
               <div className="flex flex-col gap-5">
                 <div className="flex items-center gap-4">
-                  <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-primary font-display text-3xl text-primary-foreground">
-                    {barber.name[0]}
-                  </span>
+                  <BarberPortrait name={barber.name} photo={barber.photo} dimmed={barber.available === false} />
                   <div>
                     <h2 className="font-display text-4xl uppercase leading-none">{barber.name}</h2>
                     <p className="mt-1 text-sm text-muted-foreground">{barber.role}</p>
+                    <BarberStatus available={barber.available !== false} className="mt-2" />
                   </div>
                 </div>
 
@@ -84,9 +84,15 @@ export default async function BarbersPage() {
                   </ul>
                 </div>
 
-                <Link href={`/?kapster=${encodeURIComponent(barber.id)}#reservasi`} className={cn(buttonVariants({ size: 'pill' }), 'mt-auto w-full')}>
-                  Reservasi dengan {barber.name}
-                </Link>
+                {barber.available !== false ? (
+                  <Link href={`/?kapster=${encodeURIComponent(barber.id)}#reservasi`} className={cn(buttonVariants({ size: 'pill' }), 'mt-auto w-full')}>
+                    Reservasi dengan {barber.name}
+                  </Link>
+                ) : (
+                  <span aria-disabled="true" className={cn(buttonVariants({ size: 'pill', variant: 'outline-strong' }), 'mt-auto w-full cursor-not-allowed opacity-60')}>
+                    Sedang tidak tersedia
+                  </span>
+                )}
               </div>
 
               <div>

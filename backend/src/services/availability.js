@@ -1,5 +1,5 @@
-const { capsterKey, capsterOffDays, serviceKey } = require('../db/keys')
-const { badRequest, notFound } = require('../lib/errors')
+const { capsterAvailable, capsterKey, capsterOffDays, serviceKey } = require('../db/keys')
+const { badRequest, conflict, notFound } = require('../lib/errors')
 const { addDays, isValidIsoDate, nowInZone, toMinutes, toTime, weekdayOf } = require('../lib/time')
 const { ACTIVE_STATUSES } = require('./booking-queries')
 
@@ -53,11 +53,11 @@ async function loadService(db, key) {
   return rows[0]
 }
 
-/** Capster aktif, berurutan menurut id. */
+/** Capster aktif dan tersedia (saklar admin menyala), berurutan menurut id. Yang sedang tidak tersedia tidak ikut dipilihkan. */
 async function loadCapsters(db) {
   const { rows } = await db.query(
     `SELECT c.id_capster::int AS id, ${capsterKey('c')} AS slug, c.nama_capster AS name, ${capsterOffDays('c')} AS off_days
-       FROM capster c WHERE c.status_aktif ORDER BY c.id_capster`,
+       FROM capster c WHERE c.status_aktif AND ${capsterAvailable('c')} ORDER BY c.id_capster`,
   )
   return rows
 }
@@ -65,12 +65,14 @@ async function loadCapsters(db) {
 async function loadCapsterBySlug(db, key) {
   const { rows } = await db.query(
     `SELECT * FROM (
-       SELECT c.id_capster::int AS id, ${capsterKey('c')} AS slug, c.nama_capster AS name, ${capsterOffDays('c')} AS off_days
+       SELECT c.id_capster::int AS id, ${capsterKey('c')} AS slug, c.nama_capster AS name, ${capsterOffDays('c')} AS off_days,
+              ${capsterAvailable('c')} AS available
          FROM capster c WHERE c.status_aktif
      ) capster WHERE slug = $1`,
     [key],
   )
   if (rows.length === 0) throw notFound('Kapster tidak ditemukan.')
+  if (!rows[0].available) throw conflict('barber_unavailable', `Kapster ${rows[0].name} sedang tidak tersedia. Pilih kapster lain.`)
   return rows[0]
 }
 
