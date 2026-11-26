@@ -22,6 +22,8 @@ const schemas = {
     customerName: z.string().trim().min(2).max(100),
     customerPhone: phone,
     hairstyle: z.string().trim().max(80).optional(),
+    // Kode OTP 6 digit dari WhatsApp; wajib kalau OTP aktif (diperiksa di createBooking).
+    otpCode: z.string().trim().regex(/^\d{6}$/).optional(),
   }),
   lookup: z.object({ code: text(20), phone }),
   reschedule: z.object({ phone, barberId: text(60), date: isoDate, time: hhmm }),

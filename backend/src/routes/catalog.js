@@ -34,7 +34,7 @@ function photoUrl(slug, foto) {
   return null
 }
 
-async function loadCatalog(db) {
+async function loadCatalog(db, { otpRequired = false } = {}) {
   const [settings, services, barbers, haircuts, testimonials, slots] = await Promise.all([
     loadSettings(db),
     db.query(
@@ -75,16 +75,18 @@ async function loadCatalog(db) {
       daysAhead: settings.bookingDaysAhead,
       maxReschedules: settings.maxReschedules,
       timeSlots: slots.rows.map((row) => row.time),
+      // Booking baru wajib memakai kode OTP dari WhatsApp (web menampilkan langkah verifikasi).
+      otpRequired,
     },
   }
 }
 
-function catalogRouter({ db }) {
+function catalogRouter({ db, otpRequired }) {
   const router = express.Router()
   router.get('/catalog', async (req, res) => {
     // Boleh di-cache sebentar oleh Next/CDN; perubahan dari admin terlihat dalam semenit.
     res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=60')
-    res.json(await loadCatalog(db))
+    res.json(await loadCatalog(db, { otpRequired }))
   })
   // Foto capster dari data URL di database. Tidak ada foto = 404, web menampilkan avatar inisial.
   router.get('/barbers/:key/photo', async (req, res) => {

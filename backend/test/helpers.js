@@ -7,13 +7,13 @@ const { expireUnpaidBookings, processOutbox, scanConfirmedBookings, scanSettledB
 const WEDNESDAY_9AM = '2026-11-25T02:00:00Z'
 
 /** Menjalankan API di port acak dengan database PGlite baru dan jam yang bisa digeser. */
-async function startTestServer({ now = WEDNESDAY_9AM, limits = { write: 1000, access: 1000 }, webUrl, tryOnProvider, tryOnGenerate, afterMigrate } = {}) {
+async function startTestServer({ now = WEDNESDAY_9AM, limits = { write: 1000, access: 1000 }, webUrl, tryOnProvider, tryOnGenerate, afterMigrate, whatsappProvider, otpRequired = false } = {}) {
   const db = await createDb({ databaseUrl: '', dataDir: undefined })
   await runMigrations(db)
   // Tes boleh mengubah skema setelah migrasi, mis. meniru perubahan dari sisi internal (lihat schema-compat.test.js).
   if (afterMigrate) await afterMigrate(db)
   const clock = { current: new Date(now) }
-  const app = createApp({ db, clock: () => clock.current, limits, webUrl, tryOnProvider, tryOnGenerate })
+  const app = createApp({ db, clock: () => clock.current, limits, webUrl, tryOnProvider, tryOnGenerate, whatsappProvider, otpRequired })
   const server = await new Promise((resolve) => {
     const instance = app.listen(0, '127.0.0.1', () => resolve(instance))
   })

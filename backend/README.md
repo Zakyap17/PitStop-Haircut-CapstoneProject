@@ -114,6 +114,34 @@ sehingga hanya satu yang berhasil. Kode atau nomor salah selalu dijawab "tidak d
 - Katalog memuat `photo` per kapster (atau `null`). Foto yang tersimpan sebagai data URL di kolom `capster.foto` dilayani oleh
   `GET /api/barbers/:id/photo`; foto berupa path atau tautan dipakai apa adanya.
 
+### Verifikasi OTP WhatsApp
+
+Booking baru wajib diverifikasi dengan kode OTP supaya pemesan terbukti pemilik nomor WhatsApp-nya. Alurnya:
+
+1. `POST /api/otp/request` dengan `{ phone, customerName }` mengirim kode 6 digit ke WhatsApp nomor itu (langsung lewat penyedia WhatsApp,
+   bukan lewat antrean pesan). Jawabannya `{ to, expiresInSeconds: 300, resendAfterSeconds: 60 }`.
+2. `POST /api/reservations` ditambah field `otpCode`. Kode diperiksa sebelum booking dibuat. Kode yang benar ditandai terpakai di dalam
+   transaksi booking, jadi kalau booking gagal (mis. slot keburu diambil) kodenya tidak hangus.
+
+Aturannya: kode berlaku 5 menit dan hanya sekali pakai, terikat ke nomornya, boleh salah 5 kali (setelah itu dikunci dan harus minta
+kode baru), jeda minta ulang 60 detik, paling banyak 3 permintaan per nomor per 10 menit, dan 20 permintaan per IP per 10 menit
+(`OTP_RATE_LIMIT`). Database hanya menyimpan hash (HMAC-SHA256) di `otp_riwayat`, tidak pernah kodenya. Kolom `percobaan` dan
+`dibuat_pada` ditambahkan di `otp_riwayat` oleh migrasi 008. `OTP_REQUIRED=false` mematikan OTP (katalog melaporkan
+`booking.otpRequired` supaya web menyesuaikan). Kode bisa dibaca di log backend hanya kalau `WHATSAPP_PROVIDER=console`.
+
+### Riwayat booking
+
+Pelanggan bisa melihat riwayat cukurnya (tanggal, jam, layanan, kapster, gaya pilihan, harga, status) di halaman `/riwayat`, dibuka dengan OTP:
+
+1. `POST /api/otp/request` dengan `{ phone, purpose: "history" }`. Kode hanya dikirim ke nomor yang pernah memesan. Nomor lain dijawab sama
+   persis tanpa mengirim apa pun dan tanpa membuat baris customer, supaya endpoint ini tidak bisa dipakai menebak siapa saja yang pernah jadi
+   pelanggan atau mengirim WhatsApp ke nomor sembarang.
+2. `POST /api/history` dengan `{ phone, otpCode }` mengembalikan `{ customerName, bookings }` (paling baru dulu, maksimal 100), bentuk tiap
+   booking sama dengan hasil cek booking. Kode ditandai terpakai, jadi untuk membuka lagi harus minta kode baru.
+
+Riwayat selalu wajib OTP, termasuk saat `OTP_REQUIRED=false` (itu hanya untuk pembuatan booking). Catatan internal admin
+(`riwayat_layanan.catatan`) sengaja tidak dikirim ke pelanggan.
+
 ## WhatsApp otomatis
 
 | Kapan | Pesan |

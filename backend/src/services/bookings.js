@@ -14,6 +14,7 @@ const {
   loadService,
   loadSlotTimes,
 } = require('./availability')
+const { consumeOtp, verifyOtp } = require('./otp')
 const { SELECT_BOOKING, minutesUntil, nowText, toDto } = require('./booking-queries')
 const { loadSettings } = require('./settings')
 
@@ -93,10 +94,13 @@ async function findOwnedBooking(client, { code, phone }, { forUpdate = false } =
  * DP dicatat di pembayaran, dan pesan "instruksi DP" masuk antrean. barberId kosong atau "any" = tanpa preferensi
  * (dipilihkan capster yang kosong dengan booking paling sedikit hari itu).
  */
-async function createBooking({ db, clock, webUrl }, input) {
+async function createBooking({ db, clock, webUrl, otpRequired }, input) {
   const settings = await loadSettings(db)
   const phone = normalizePhone(input.customerPhone)
   if (!phone) throw badRequest('invalid_phone', 'Nomor WhatsApp tidak valid. Contoh: 081234567890.')
+  // Verifikasi kepemilikan nomor: kode OTP dari WhatsApp. Diperiksa sebelum transaksi (salah = percobaan dihitung walau booking tidak jadi),
+  // dan baru ditandai terpakai di dalam transaksi, jadi kalau booking gagal (mis. slot keburu diambil) kodenya masih berlaku.
+  const otp = otpRequired ? await verifyOtp({ db, clock }, { phone, code: input.otpCode }) : null
   const service = await loadService(db, input.serviceId)
   // Waktu yang ditahan: durasi dibulatkan ke atas ke kelipatan satu slot (hair coloring 90 menit menahan 2 slot).
   const reserved = await loadReservedMinutes(db, service.duration)
@@ -115,6 +119,8 @@ async function createBooking({ db, clock, webUrl }, input) {
             [input.customerName, phone],
           )
         ).rows[0]
+
+        if (otp && !(await consumeOtp(tx, otp.otpId))) throw badRequest('otp_required', 'Kode verifikasi sudah dipakai. Minta kode baru.')
 
         const active = await tx.query(
           `SELECT count(*)::int AS n FROM booking

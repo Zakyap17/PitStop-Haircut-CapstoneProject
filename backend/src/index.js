@@ -41,10 +41,14 @@ async function main() {
   // tanpa memasang gaya di foto (butuh model gambar berbayar).
   const tryOnGenerate = process.env.TRYON_GENERATE_IMAGE !== 'false'
   console.log(tryOnProvider ? `Try-on AI: penyedia ${tryOnProvider.name}, ${tryOnGenerate ? 'analisa + pasang gaya di foto' : 'mode analisa saja'}` : 'Try-on AI: belum aktif (isi TRYON_API_KEY di .env).')
-  const app = createApp({ db, corsOrigins, trustProxy: process.env.TRUST_PROXY, limits, webUrl, tryOnProvider, tryOnGenerate })
-
-  // Pengiriman WhatsApp: pesan masuk antrean saat reservasi berubah, worker ini yang mengirimnya.
+  // Penyedia WhatsApp: dipakai worker pesan (invoice, bukti booking, pengingat) dan untuk mengirim kode OTP.
   const provider = createProviderFromEnv()
+  // OTP wajib sebelum booking dibuat. OTP_REQUIRED=false mematikannya (mis. untuk demo tanpa kuota WhatsApp).
+  const otpRequired = process.env.OTP_REQUIRED !== 'false'
+  if (process.env.OTP_RATE_LIMIT) limits.otp = Number(process.env.OTP_RATE_LIMIT)
+  console.log(`OTP WhatsApp: ${otpRequired ? 'wajib sebelum booking' : 'dimatikan (OTP_REQUIRED=false)'}`)
+  const app = createApp({ db, corsOrigins, trustProxy: process.env.TRUST_PROXY, limits, webUrl, tryOnProvider, tryOnGenerate, whatsappProvider: provider, otpRequired })
+
   console.log(`WhatsApp: penyedia ${provider.name}${provider.name === 'console' ? ' (pesan hanya dicetak di log, tidak dikirim)' : ''}`)
   if (!webUrl) console.warn('PUBLIC_WEB_URL kosong: pesan WhatsApp tidak akan memuat tautan cek/ubah reservasi.')
   const stopWorker = startNotificationWorker({ db, provider, webUrl })
