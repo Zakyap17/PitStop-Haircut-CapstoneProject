@@ -12,7 +12,16 @@
  */
 async function createPostgresDb(connectionString) {
   const { Pool } = require('pg')
-  const pool = new Pool({ connectionString, max: Number(process.env.DATABASE_POOL_MAX ?? 10) })
+  const pool = new Pool({
+    connectionString,
+    max: Number(process.env.DATABASE_POOL_MAX ?? 10),
+    // Pooler Supabase memutus koneksi yang nganggur dan jaringan laptop bisa putus sebentar. Keepalive mengurangi putusnya,
+    // dan koneksi yang tetap putus dibuang dari pool lalu diganti saat dibutuhkan lagi.
+    keepAlive: true,
+    idleTimeoutMillis: 30_000,
+  })
+  // Tanpa penangan ini, error pada koneksi nganggur (mis. ECONNRESET) tidak tertangkap dan mematikan seluruh backend.
+  pool.on('error', (error) => console.error(`[db] koneksi nganggur terputus (${error.code ?? error.message}); akan dibuka ulang saat dibutuhkan.`))
 
   const wrap = (client) => ({
     query: (text, params) => client.query(text, params),
