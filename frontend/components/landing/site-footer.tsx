@@ -10,6 +10,7 @@ const pages = [
   { href: '/kapster', label: 'Profil Kapster' },
   { href: '/galeri', label: 'Galeri' },
   { href: '/lokasi', label: 'Lokasi & Jam Buka' },
+  { href: '/riwayat', label: 'Riwayat Cukur' },
 ]
 
 const socials = [
@@ -22,9 +23,23 @@ export async function SiteFooter() {
   const { booking } = await getCatalog()
   return (
     <footer id="kontak" className="px-4 pt-24 md:px-10 md:pt-36">
-      <Eyebrow>Masuk Pit</Eyebrow>
+      <Eyebrow>Giliranmu</Eyebrow>
       <Reveal as="h2" className="mt-6 max-w-[18ch] font-display text-6xl uppercase leading-[0.95] tracking-tight sm:text-8xl">
-        <Lines lines={['Rambut sudah', 'waktunya', 'ganti ban?']} />
+        <Lines
+          lines={[
+            'Waktunya',
+            'rambutmu',
+            {
+              text: 'masuk Pit Stop.',
+              // "Pit Stop" memakai font tulisan tangan yang sama dengan logo di navbar.
+              node: (
+                <>
+                  masuk <span className="font-script text-[1.12em] tracking-normal normal-case">Pit Stop.</span>
+                </>
+              ),
+            },
+          ]}
+        />
       </Reveal>
       <Reveal className="fade-up mt-8 max-w-[44ch] text-lg leading-relaxed text-muted-foreground md:text-xl">
         <p>Kunci slotmu sekarang. Walk-in tetap dilayani sesuai slot yang tersedia.</p>

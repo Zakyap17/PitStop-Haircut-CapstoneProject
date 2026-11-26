@@ -62,27 +62,30 @@ export function Letters({ text, baseDelay = 0, stagger = 52 }: { text: string; b
   )
 }
 
+/** Satu baris judul: teks biasa, atau teks dengan tampilan khusus (mis. sebagian kata memakai font lain). `text` dipakai untuk pembaca layar. */
+export type LineContent = string | { text: string; node: ReactNode }
+
 export function Lines({
   lines,
   baseDelay = 0,
   stagger = 90,
   duration = 900,
 }: {
-  lines: string[]
+  lines: LineContent[]
   baseDelay?: number
   stagger?: number
   duration?: number
 }) {
   return (
     <>
-      <span className="sr-only">{lines.join(' ')}</span>
+      <span className="sr-only">{lines.map((line) => (typeof line === 'string' ? line : line.text)).join(' ')}</span>
       {lines.map((line, index) => (
-        <span key={line} className="reveal-line" aria-hidden="true">
+        <span key={typeof line === 'string' ? line : line.text} className="reveal-line" aria-hidden="true">
           <span
             className="reveal-unit"
             style={{ '--delay': `${baseDelay + index * stagger}ms`, '--dur': `${duration}ms` } as CSSProperties}
           >
-            {line}
+            {typeof line === 'string' ? line : line.node}
           </span>
         </span>
       ))}
