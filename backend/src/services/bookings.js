@@ -1,18 +1,18 @@
 const { badRequest, conflict, notFound } = require('../lib/errors')
-const { normalizePhone } = require('../lib/phone')
+const { maskPhone, normalizePhone } = require('../lib/phone')
 const { toMinutes, toTime } = require('../lib/time')
 const { enqueueMessage, expireInTx } = require('../notifications/outbox')
 const {
   assertBookableDate,
   fitsShopHours,
   isCapsterFree,
-  loadBusyIntervals,
   loadCapsterBySlug,
   loadCapsters,
-  loadReservedMinutes,
-  loadSchedules,
+  loadDayState,
   loadService,
   loadSlotTimes,
+  reserveMinutes,
+  slotLengthMinutes,
 } = require('./availability')
 const { consumeOtp, verifyOtp } = require('./otp')
 const { SELECT_BOOKING, minutesUntil, nowText, toDto } = require('./booking-queries')
@@ -55,15 +55,14 @@ async function computeDp(tx, total, settings) {
 
 /** Memastikan capster itu kosong di jam itu. Dipanggil di dalam transaksi setelah kunci diambil. Mengembalikan true/false. */
 async function isFreeNow(tx, { settings, clock, capster, date, startMinutes, duration, excludeCode = null }) {
-  const [schedules, busy] = await Promise.all([loadSchedules(tx, date), loadBusyIntervals(tx, date, { settings, clock, excludeCode })])
+  const { schedules, busy } = await loadDayState(tx, date, { settings, clock, excludeCode })
   return isCapsterFree({ capster, date, startMinutes, duration, busy, schedules })
 }
 
 /** Memeriksa jam mulai yang dipilih: tanggal, jam yang disediakan, dan jam buka toko. Mengembalikan menit mulai. */
-async function assertSlotAllowed(tx, { settings, clock, date, time, duration }) {
+async function assertSlotAllowed(tx, { settings, clock, date, time, duration, slotTimes }) {
   assertBookableDate(date, settings, clock)
-  const slots = await loadSlotTimes(tx)
-  if (!slots.includes(time)) throw badRequest('invalid_time', 'Jam yang dipilih tidak tersedia.')
+  if (!slotTimes.includes(time)) throw badRequest('invalid_time', 'Jam yang dipilih tidak tersedia.')
   const startMinutes = toMinutes(time)
   if (!fitsShopHours({ startMinutes, duration, date, settings, clock })) {
     throw conflict('slot_unavailable', 'Jam ini tidak bisa dipesan untuk layanan tersebut (di luar jam buka, bertabrakan dengan istirahat, atau sudah lewat).')
@@ -103,33 +102,36 @@ async function createBooking({ db, clock, webUrl, otpRequired }, input) {
   const otp = otpRequired ? await verifyOtp({ db, clock }, { phone, code: input.otpCode }) : null
   const service = await loadService(db, input.serviceId)
   // Waktu yang ditahan: durasi dibulatkan ke atas ke kelipatan satu slot (hair coloring 90 menit menahan 2 slot).
-  const reserved = await loadReservedMinutes(db, service.duration)
+  const slotTimes = await loadSlotTimes(db)
+  const reserved = reserveMinutes(service.duration, slotLengthMinutes(slotTimes))
   const wantsAny = !input.barberId || input.barberId === 'any'
 
   for (let attempt = 1; attempt <= MAX_CODE_ATTEMPTS; attempt++) {
     try {
       return await db.transaction(async (tx) => {
-        const startMinutes = await assertSlotAllowed(tx, { settings, clock, date: input.date, time: input.time, duration: reserved })
+        const startMinutes = await assertSlotAllowed(tx, { settings, clock, date: input.date, time: input.time, duration: reserved, slotTimes })
         const endMinutes = startMinutes + reserved
 
+        // Data customer dan jumlah booking aktifnya dalam satu query (satu kali bolak-balik ke database).
         const customer = (
           await tx.query(
-            `INSERT INTO customer (nama_customer, no_whatsapp) VALUES ($1, $2)
-             ON CONFLICT (no_whatsapp) DO UPDATE SET nama_customer = EXCLUDED.nama_customer RETURNING id_customer::int AS id`,
-            [input.customerName, phone],
+            `WITH c AS (
+               INSERT INTO customer (nama_customer, no_whatsapp) VALUES ($1, $2)
+               ON CONFLICT (no_whatsapp) DO UPDATE SET nama_customer = EXCLUDED.nama_customer RETURNING id_customer
+             )
+             SELECT c.id_customer::int AS id,
+                    (SELECT count(*)::int FROM booking b
+                      WHERE b.id_customer = c.id_customer AND b.status_booking IN ('menunggu_pembayaran', 'dikonfirmasi')
+                        AND (b.tanggal_booking + b.jam_mulai) > $3::timestamp) AS active
+               FROM c`,
+            [input.customerName, phone, nowText(settings, clock)],
           )
         ).rows[0]
 
-        if (otp && !(await consumeOtp(tx, otp.otpId))) throw badRequest('otp_required', 'Kode verifikasi sudah dipakai. Minta kode baru.')
-
-        const active = await tx.query(
-          `SELECT count(*)::int AS n FROM booking
-            WHERE id_customer = $1 AND status_booking IN ('menunggu_pembayaran', 'dikonfirmasi') AND (tanggal_booking + jam_mulai) > $2::timestamp`,
-          [customer.id, nowText(settings, clock)],
-        )
-        if (active.rows[0].n >= settings.maxActivePerCustomer) {
+        if (customer.active >= settings.maxActivePerCustomer) {
           throw conflict('too_many_active', `Satu nomor WhatsApp maksimal punya ${settings.maxActivePerCustomer} booking aktif. Selesaikan atau batalkan salah satunya dulu.`)
         }
+        if (otp && !(await consumeOtp(tx, otp.otpId))) throw badRequest('otp_required', 'Kode verifikasi sudah dipakai. Minta kode baru.')
 
         let candidates
         if (wantsAny) {
@@ -164,7 +166,7 @@ async function createBooking({ db, clock, webUrl, otpRequired }, input) {
           `INSERT INTO booking (kode_booking, id_customer, id_capster, tipe_booking, tanggal_booking, jam_mulai, jam_selesai,
                                 status_booking, total_harga, nominal_dp, gaya_try_on, pengingat_terkirim_at, created_at, updated_at)
            VALUES ($1, $2, $3, 'online', $4::date, $5::time, $6::time, $7, $8, $9, $10, $11::timestamptz, $12::timestamptz, $12::timestamptz)
-           RETURNING id_booking::int AS id`,
+           RETURNING id_booking::int AS id, kode_booking AS code`,
           [
             generateCode(), customer.id, chosen.id, input.date, toTime(startMinutes), toTime(endMinutes), status, service.price, dp, input.hairstyle ?? null,
             // Booking yang jadwalnya sudah dekat tidak perlu pengingat lagi.
@@ -173,14 +175,47 @@ async function createBooking({ db, clock, webUrl, otpRequired }, input) {
           ],
         )
         const bookingId = inserted.rows[0].id
-        await tx.query(`INSERT INTO booking_layanan (id_booking, id_layanan, harga_satuan, subtotal) VALUES ($1, $2, $3, $3)`, [bookingId, service.id, service.price])
+        // Rincian layanan dan pembayaran DP dalam satu query.
         if (dp > 0) {
-          await tx.query(`INSERT INTO pembayaran (id_booking, jenis_pembayaran, metode_pembayaran, nominal, status_pembayaran) VALUES ($1, 'dp', 'manual', $2, 'menunggu')`, [bookingId, dp])
+          await tx.query(
+            `WITH layanan_baru AS (INSERT INTO booking_layanan (id_booking, id_layanan, harga_satuan, subtotal) VALUES ($1, $2, $3, $3))
+             INSERT INTO pembayaran (id_booking, jenis_pembayaran, metode_pembayaran, nominal, status_pembayaran) VALUES ($1, 'dp', 'manual', $4, 'menunggu')`,
+            [bookingId, service.id, service.price, dp],
+          )
+        } else {
+          await tx.query(`INSERT INTO booking_layanan (id_booking, id_layanan, harga_satuan, subtotal) VALUES ($1, $2, $3, $3)`, [bookingId, service.id, service.price])
         }
 
-        const { dto } = await loadBooking(tx, bookingId, settings)
-        await enqueueMessage(tx, { bookingId, kind: status === 'dikonfirmasi' ? 'bukti_booking' : 'instruksi_dp', phone, reservation: dto, settings, webUrl, now })
-        return (await loadBooking(tx, bookingId, settings)).dto // dimuat ulang agar status pesan WhatsApp ikut
+        // Bentuk booking disusun dari data yang sudah ada di memori, tanpa membaca ulang dari database (dua query lebih sedikit).
+        const row = {
+          id: bookingId,
+          code: inserted.rows[0].code,
+          status,
+          tipe_booking: 'online',
+          capster_id: chosen.id,
+          capster_slug: chosen.slug,
+          nama_capster: chosen.name,
+          date: input.date,
+          time: toTime(startMinutes),
+          starts_text: startsText,
+          duration: reserved,
+          total: service.price,
+          dp_nominal: dp,
+          created_at: now,
+          alasan_batal: null,
+          reschedule_count: 0,
+          gaya_try_on: input.hairstyle ?? null,
+          customer_id: customer.id,
+          nama_customer: input.customerName,
+          no_whatsapp: phone,
+          service_slug: service.slug,
+          nama_layanan: service.name,
+          service_minutes: service.duration,
+          dp_status: dp > 0 ? 'menunggu' : null,
+          wa_status: null,
+        }
+        await enqueueMessage(tx, { bookingId, kind: status === 'dikonfirmasi' ? 'bukti_booking' : 'instruksi_dp', phone, reservation: toDto(row, settings), settings, webUrl, now })
+        return toDto({ ...row, wa_status: 'menunggu' }, settings) // pesan WhatsApp sudah diantrekan
       })
     } catch (error) {
       if (isUniqueViolation(error, 'kode_booking') && attempt < MAX_CODE_ATTEMPTS) continue // kode kebetulan kembar: ulangi
@@ -198,6 +233,7 @@ async function lookupBooking({ db }, { code, phone }) {
 
 async function rescheduleBooking({ db, clock, webUrl }, { code, phone, barberId, date, time }) {
   const settings = await loadSettings(db)
+  const slotTimes = await loadSlotTimes(db)
   try {
     return await db.transaction(async (tx) => {
       const current = await findOwnedBooking(tx, { code, phone }, { forUpdate: true })
@@ -215,8 +251,8 @@ async function rescheduleBooking({ db, clock, webUrl }, { code, phone, barberId,
       await expireInTx(tx, { settings, clock, webUrl, capsterId: capster.id, date })
       // Waktu yang ditahan dihitung dari durasi layanan pada booking ini (dibulatkan ke kelipatan slot). Booking lama yang
       // layanannya tidak terbaca memakai selang yang tersimpan.
-      const reserved = await loadReservedMinutes(tx, current.service_minutes ?? current.duration)
-      const startMinutes = await assertSlotAllowed(tx, { settings, clock, date, time, duration: reserved })
+      const reserved = reserveMinutes(current.service_minutes ?? current.duration, slotLengthMinutes(slotTimes))
+      const startMinutes = await assertSlotAllowed(tx, { settings, clock, date, time, duration: reserved, slotTimes })
       if (!(await isFreeNow(tx, { settings, clock, capster, date, startMinutes, duration: reserved, excludeCode: current.code }))) {
         throw conflict('slot_taken', `Kapster ${capster.name} sudah penuh atau libur di jam itu. Pilih jam atau kapster lain.`)
       }

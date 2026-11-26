@@ -1,5 +1,6 @@
 const { capsterAvailable, capsterKey, capsterOffDays, serviceKey } = require('../db/keys')
 const { badRequest, conflict, notFound } = require('../lib/errors')
+const { cached } = require('../lib/ttl-cache')
 const { addDays, isValidIsoDate, nowInZone, toMinutes, toTime, weekdayOf } = require('../lib/time')
 const { ACTIVE_STATUSES } = require('./booking-queries')
 
@@ -15,7 +16,7 @@ function assertBookableDate(date, settings, clock) {
 
 /** Jam mulai yang bisa dipesan, berurutan. */
 async function loadSlotTimes(db) {
-  const { rows } = await db.query('SELECT time FROM booking_slots WHERE is_active ORDER BY time')
+  const { rows } = await cached(db, 'slot-times', 20_000, () => db.query('SELECT time FROM booking_slots WHERE is_active ORDER BY time'))
   return rows.map((row) => row.time)
 }
 
@@ -105,6 +106,32 @@ async function loadBusyIntervals(db, date, { settings, clock, excludeCode = null
   return rows.map((row) => ({ capsterId: row.capster_id, start: toMinutes(row.s), end: toMinutes(row.e) }))
 }
 
+/**
+ * Jadwal kerja capster dan booking yang menahan slot pada satu tanggal, dalam SATU query (UNION ALL). Dipakai di dalam transaksi booking,
+ * tempat dua query terpisah berarti dua kali bolak-balik ke database. Hasilnya sama dengan loadSchedules ditambah loadBusyIntervals.
+ */
+async function loadDayState(db, date, { settings, clock, excludeCode = null }) {
+  const { rows } = await db.query(
+    `SELECT 'jadwal' AS kind, id_capster::int AS capster_id, to_char(jam_mulai, 'HH24:MI') AS s, to_char(jam_selesai, 'HH24:MI') AS e, status_slot::text AS status
+       FROM jadwal_capster WHERE tanggal = $1::date
+     UNION ALL
+     SELECT 'booking', id_capster::int, to_char(jam_mulai, 'HH24:MI'), to_char(jam_selesai, 'HH24:MI'), NULL::text
+       FROM booking
+      WHERE tanggal_booking = $1::date
+        AND status_booking = ANY($2::text[])
+        AND (status_booking <> 'menunggu_pembayaran' OR created_at > $3::timestamptz - make_interval(mins => $4))
+        AND ($5::text IS NULL OR kode_booking <> $5)`,
+    [date, ACTIVE_STATUSES, clock().toISOString(), settings.dpHoldMinutes, excludeCode],
+  )
+  const schedules = {}
+  const busy = []
+  for (const row of rows) {
+    if (row.kind === 'jadwal') (schedules[row.capster_id] ??= []).push({ start: toMinutes(row.s), end: toMinutes(row.e), status: row.status })
+    else busy.push({ capsterId: row.capster_id, start: toMinutes(row.s), end: toMinutes(row.e) })
+  }
+  return { schedules, busy }
+}
+
 /** Apakah layanan berdurasi `duration` yang mulai pukul `startMinutes` muat di jam toko, tidak menabrak istirahat, dan belum lewat. */
 function fitsShopHours({ startMinutes, duration, date, settings, clock }) {
   const endMinutes = startMinutes + duration
@@ -169,6 +196,9 @@ async function getAvailability({ db, settings, clock }, { date, serviceId }) {
 module.exports = {
   assertBookableDate,
   loadSlotTimes,
+  loadDayState,
+  reserveMinutes,
+  slotLengthMinutes,
   loadReservedMinutes,
   loadService,
   loadCapsters,

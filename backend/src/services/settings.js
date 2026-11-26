@@ -1,6 +1,8 @@
-/** Pengaturan toko dari tabel settings, sudah diubah ke tipe yang dipakai kode. */
+const { cached } = require('../lib/ttl-cache')
+
+/** Pengaturan toko dari tabel settings, sudah diubah ke tipe yang dipakai kode. Di-cache 20 detik untuk database jauh. */
 async function loadSettings(db) {
-  const { rows } = await db.query('SELECT key, value FROM settings')
+  const { rows } = await cached(db, 'settings', 20_000, () => db.query('SELECT key, value FROM settings'))
   const raw = Object.fromEntries(rows.map((row) => [row.key, row.value]))
 
   const text = (key, fallback) => (raw[key] === undefined ? fallback : raw[key])
