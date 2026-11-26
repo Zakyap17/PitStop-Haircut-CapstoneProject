@@ -39,7 +39,7 @@ export function CheckReservationForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-md flex-col gap-5 rounded-3xl border border-border bg-card p-6 sm:p-8">
+    <form onSubmit={handleSubmit} className="flex w-full max-w-md flex-col gap-5 surface-paper rounded-2xl p-6 shadow-[0_24px_50px_-28px_rgba(0,0,0,0.7)] sm:p-8">
       <label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
         Kode booking
         <input

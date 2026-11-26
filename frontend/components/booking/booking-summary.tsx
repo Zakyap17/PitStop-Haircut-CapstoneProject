@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils'
 
 const label = 'text-[11px] font-medium tracking-[0.18em] text-muted-foreground uppercase'
 /** Tiang barber: garis serong krem dan biru. */
-const POLE = { backgroundImage: 'repeating-linear-gradient(135deg, #f3f1ea 0 7px, #3f6fe0 7px 14px)' } as const
+const POLE = { backgroundImage: 'repeating-linear-gradient(135deg, #e8e8ed 0 7px, #004cff 7px 14px)' } as const
 
 /**
  * Tiket ringkasan booking di samping form. Terisi langsung saat pelanggan memilih, memuat total biaya dan tombol konfirmasi,
@@ -36,7 +36,7 @@ export function BookingSummary({ form, formId }: { form: BookingForm; formId: st
 
   return (
     <aside aria-label="Ringkasan booking" className="lg:sticky lg:top-24">
-      <div className="relative overflow-hidden rounded-2xl border border-border-strong bg-card">
+      <div className="surface-paper relative overflow-hidden rounded-2xl shadow-[0_24px_50px_-28px_rgba(0,0,0,0.7)]">
         <div aria-hidden="true" className="h-2.5" style={POLE} />
 
         <div className="px-6 pt-5 pb-6">
@@ -84,9 +84,9 @@ export function BookingSummary({ form, formId }: { form: BookingForm; formId: st
         </div>
 
         {/* garis sobekan dengan takik, seperti e-tiket */}
-        <div aria-hidden="true" className="relative h-0 border-t-2 border-dashed border-border-strong">
-          <span className="absolute top-0 -left-3 size-6 -translate-y-1/2 rounded-full border border-border-strong bg-background" />
-          <span className="absolute top-0 -right-3 size-6 -translate-y-1/2 rounded-full border border-border-strong bg-background" />
+        <div aria-hidden="true" className="relative h-0 border-t-2 border-dashed border-ink/25">
+          <span className="absolute top-0 -left-3 size-6 -translate-y-1/2 rounded-full bg-page" />
+          <span className="absolute top-0 -right-3 size-6 -translate-y-1/2 rounded-full bg-page" />
         </div>
 
         <div className="px-6 pt-6 pb-6">

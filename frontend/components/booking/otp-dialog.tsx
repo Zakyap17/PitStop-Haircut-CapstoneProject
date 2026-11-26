@@ -61,7 +61,7 @@ export function OtpDialog({ form }: { form: BookingForm }) {
         event.preventDefault()
         if (!form.submitting) form.closeOtp()
       }}
-      className="m-auto w-[min(92vw,440px)] rounded-2xl border border-border-strong bg-card p-0 text-foreground backdrop:bg-black/70"
+      className="m-auto w-[min(92vw,440px)] surface-paper rounded-2xl p-0 backdrop:bg-black/70"
     >
       <form onSubmit={submit} className="flex flex-col gap-5 p-6 sm:p-8">
         <div className="flex items-start gap-3.5">

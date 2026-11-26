@@ -15,6 +15,12 @@
   --color-border-strong: var(--border-strong);
   --color-success: var(--success);
   --color-navy: var(--navy);
+  --color-paper: var(--paper);
+  --color-page: var(--page-bg);
+  --color-paper-dim: var(--paper-dim);
+  --color-paper-line: var(--paper-line);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
   --color-soft: var(--soft);
   --color-success-fg: var(--success-fg);
   --color-warn-fg: var(--warn-fg);
@@ -49,25 +55,33 @@
 :root {
   color-scheme: dark;
   --background: #091c33;
-  --foreground: #f3f1ea;
+  --foreground: #e8e8ed;
   --card: #102b48;
   --card-foreground: #f3f1ea;
   --popover: #102b48;
   --popover-foreground: #f3f1ea;
-  --primary: #1f4bff;
+  --primary: #004cff;
+  /* Palet resmi Pit Stop (lihat docs/palet-warna.md): Porcelain #e8e8ed, Carbon #17181d, Ultramarine #004cff di atas latar navy halaman.
+     Porcelain dan Carbon jadi "kertas" dan "tinta" untuk kotak interaktif dan tiket; Ultramarine satu-satunya aksen. */
+  --paper: #e8e8ed;
+  --paper-dim: #d8d9e0;
+  --paper-line: #c9cad3;
+  --ink: #17181d;
+  --ink-muted: #5b5f6b;
   --primary-foreground: #ffffff;
   --secondary: #143353;
   --secondary-foreground: #f3f1ea;
   --muted: #0e2540;
   --muted-foreground: #93a7c4;
-  --accent: #5483ff;
-  --accent-foreground: #ffffff;
+  /* Biru terang untuk teks dan garis di atas gelap (7,1:1). Ultramarine murni hanya 2,9:1 di atas navy, jadi hanya dipakai sebagai isian. */
+  --accent: #7aa2ff;
+  --accent-foreground: #17181d;
   --destructive: #ff4d3d;
   --border: rgba(243, 241, 234, 0.12);
   --border-strong: #2c4666;
   --success: #2fbf71;
   --input: rgba(243, 241, 234, 0.18);
-  --ring: #5483ff;
+  --ring: #7aa2ff;
   --line-strong: rgba(243, 241, 234, 0.24);
   --radius: 0.75rem;
 }
@@ -87,6 +101,48 @@
   --border-strong: #35547a;
   --input: rgba(243, 241, 234, 0.2);
   background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Warna latar halaman, dibekukan di sini supaya tetap terbaca dari dalam kotak .surface-paper yang mengganti --background
+   (dipakai untuk takik tiket yang harus sewarna dengan halaman). */
+:root,
+.theme-alt {
+  --page-bg: var(--background);
+}
+
+/* Kotak kertas: permukaan Porcelain solid di atas halaman gelap. Semua warna di dalamnya (teks, garis, input, aksen) beralih ke skema terang,
+   jadi komponen yang memakai token warna otomatis terbaca di atas kertas. Kontras teks utama 14,5:1, teks redup 5,2:1, aksen Ultramarine
+   4,9:1, garis kontrol 3,1:1. */
+.surface-paper {
+  color-scheme: light;
+  --background: #f6f6f9;
+  --foreground: #17181d;
+  --card: #f6f6f9;
+  --card-foreground: #17181d;
+  --muted-foreground: #5b5f6b;
+  --border: #cfd0d8;
+  --border-strong: #6f7380;
+  --input: #6f7380;
+  --accent: #004cff;
+  --accent-foreground: #ffffff;
+  --ring: #004cff;
+  background-color: var(--paper);
+  color: var(--foreground);
+}
+
+/* Pulau gelap di dalam kotak kertas (mis. kartu kapster): mengembalikan skema gelap bawaan. */
+.surface-dark {
+  color-scheme: dark;
+  --background: #091c33;
+  --foreground: #e8e8ed;
+  --card: #102b48;
+  --card-foreground: #e8e8ed;
+  --muted-foreground: #93a7c4;
+  --border: rgba(232, 232, 237, 0.12);
+  --border-strong: #2c4666;
+  --accent: #7aa2ff;
+  --accent-foreground: #17181d;
   color: var(--foreground);
 }
 

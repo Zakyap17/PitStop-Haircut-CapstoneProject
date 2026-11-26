@@ -21,7 +21,7 @@ export default function RescheduleReservationPage() {
         </p>
       </div>
       <RescheduleForm />
-      <Link href="/e-ticket" className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground">
+      <Link href="/e-ticket" className="inline-flex min-h-11 items-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground">
         Kembali ke e-tiket
       </Link>
     </main>

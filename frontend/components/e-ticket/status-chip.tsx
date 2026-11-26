@@ -10,9 +10,17 @@ const TONES: Record<Tone, string> = {
 }
 
 /** Penanda status berupa teks berwarna dengan titik. Warna bukan satu-satunya penanda: selalu ada kata statusnya. */
-export function StatusChip({ tone, children }: { tone: Tone; children: React.ReactNode }) {
+const TONES_ON_LIGHT: Record<Tone, string> = {
+  waiting: 'bg-amber-100 text-amber-900 ring-amber-400/60',
+  confirmed: 'bg-emerald-100 text-emerald-900 ring-emerald-500/50',
+  cancelled: 'bg-red-100 text-red-900 ring-red-400/60',
+  neutral: 'bg-ink/8 text-ink ring-ink/25',
+}
+
+/** `onLight` = dipakai di atas kotak kertas (warna gelap di atas latar terang), bawaannya di atas halaman gelap. */
+export function StatusChip({ tone, children, onLight = false }: { tone: Tone; children: React.ReactNode; onLight?: boolean }) {
   return (
-    <span className={cn('inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold tracking-[0.14em] uppercase ring-1', TONES[tone])}>
+    <span className={cn('inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold tracking-[0.14em] uppercase ring-1', (onLight ? TONES_ON_LIGHT : TONES)[tone])}>
       <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
       {children}
     </span>

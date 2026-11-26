@@ -112,9 +112,9 @@ export function RescheduleForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex w-full min-w-0 max-w-2xl flex-col gap-7 rounded-3xl border border-border bg-card p-6 sm:p-8"
+      className="flex w-full min-w-0 max-w-2xl flex-col gap-7 surface-paper rounded-2xl p-6 shadow-[0_24px_50px_-28px_rgba(0,0,0,0.7)] sm:p-8"
     >
-      <div className="rounded-2xl border border-foreground/10 bg-background p-4 text-sm">
+      <div className="rounded-xl border border-border bg-background p-4 text-sm">
         <p className="text-xs tracking-[1.6px] text-muted-foreground uppercase">Jadwal sekarang · {reservation.code}</p>
         <p className="mt-1.5 font-semibold">
           {formatLongDate(fromIsoDate(reservation.date))} · {reservation.time} · Kapster {reservation.barberName}

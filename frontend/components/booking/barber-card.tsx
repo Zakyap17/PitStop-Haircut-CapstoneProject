@@ -39,7 +39,7 @@ function Razor({ className }: { className?: string }) {
 }
 
 /** Garis serong krem dan biru seperti tiang barbershop. */
-const POLE = { backgroundImage: 'repeating-linear-gradient(135deg, #f3f1ea 0 7px, #3f6fe0 7px 14px)' } as const
+const POLE = { backgroundImage: 'repeating-linear-gradient(135deg, #e8e8ed 0 7px, #7aa2ff 7px 14px)' } as const
 /** Garis tipis diagonal samar sebagai tekstur latar. */
 const TEXTURE = { backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0 1.5px, transparent 1.5px 12px)' } as const
 
@@ -67,7 +67,7 @@ export function BarberCard({ name, photo, state, selected, onSelect }: BarberCar
       onClick={onSelect}
       style={{ ...TEXTURE, containerType: 'inline-size' }}
       className={cn(
-        'group relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-background text-left ring-1 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+        'surface-dark group relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-background text-left ring-1 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
         selected ? 'ring-2 ring-accent' : 'ring-foreground/15',
         unavailable ? 'cursor-not-allowed' : !selected && 'hover:ring-foreground/40',
       )}
@@ -99,7 +99,7 @@ export function BarberCard({ name, photo, state, selected, onSelect }: BarberCar
 
         {/* garis potong putus-putus dengan gunting */}
         <span aria-hidden="true" className="absolute inset-x-0 bottom-[32%] flex items-center">
-          <span className="ml-[5%] flex size-[9cqw] items-center justify-center rounded-full bg-accent text-white motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:-rotate-12">
+          <span className="ml-[5%] flex size-[9cqw] items-center justify-center rounded-full bg-accent text-accent-foreground motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:-rotate-12">
             <Scissors className="size-[5cqw] rotate-180" strokeWidth={2.2} />
           </span>
           <span className="mr-[5%] ml-1.5 h-0 flex-1 border-t-2 border-dashed border-white/40" />

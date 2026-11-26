@@ -47,7 +47,7 @@ export function HeroSection() {
           <div key={diamond.id} data-diamond className="absolute" style={{ top: diamond.top, left: diamond.left, width: diamond.size, height: diamond.size, opacity: diamond.opacity }}>
             <div
               className="size-full rotate-45 rounded-xl"
-              style={{ backgroundImage: 'conic-gradient(#f3f1ea 25%, transparent 0 50%, #f3f1ea 0 75%, transparent 0)', backgroundSize: '50% 50%' }}
+              style={{ backgroundImage: 'conic-gradient(#e8e8ed 25%, transparent 0 50%, #e8e8ed 0 75%, transparent 0)', backgroundSize: '50% 50%' }}
             />
           </div>
         ))}

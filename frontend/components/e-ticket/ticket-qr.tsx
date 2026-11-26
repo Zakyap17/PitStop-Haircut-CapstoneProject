@@ -29,8 +29,8 @@ export function TicketQr({ value, size = 168 }: { value: string; size?: number }
       shapeRendering="crispEdges"
       className="rounded-xl"
     >
-      <rect width={total} height={total} fill="#f4f1ea" />
-      <path d={path} fill="#091c33" />
+      <rect width={total} height={total} fill="#e8e8ed" />
+      <path d={path} fill="#17181d" />
     </svg>
   )
 }

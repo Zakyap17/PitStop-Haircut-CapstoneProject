@@ -56,7 +56,7 @@ export function ServiceList({ services, selectedId, onSelect }: ServiceListProps
             }}
             className={cn(
               'flex items-start gap-3.5 rounded-lg border p-4 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
-              selected ? 'border-accent bg-accent/10' : 'border-border-strong hover:border-foreground/50',
+              selected ? 'border-accent bg-background ring-1 ring-accent' : 'border-border-strong hover:border-foreground/50',
             )}
           >
             <span
@@ -67,7 +67,7 @@ export function ServiceList({ services, selectedId, onSelect }: ServiceListProps
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-base font-semibold">{service.name}</span>
-              <span className="block text-xs text-muted-foreground">
+              <span className={cn('block text-xs', selected ? 'text-foreground/80' : 'text-muted-foreground')}>
                 {service.durationMinutes} menit{slots > 1 && ` · menahan ${slots} slot`}
               </span>
             </span>

@@ -98,7 +98,7 @@ export function HistoryView() {
 
   if (step.name === 'code') {
     return (
-      <form onSubmit={openHistory} className="flex w-full max-w-md flex-col gap-5 rounded-2xl border border-border-strong bg-card p-6 sm:p-8">
+      <form onSubmit={openHistory} className="flex w-full max-w-md flex-col gap-5 surface-paper rounded-2xl p-6 shadow-[0_24px_50px_-28px_rgba(0,0,0,0.7)] sm:p-8">
         <div className="flex items-start gap-3.5">
           <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
             <MessageCircle className="size-5" />
@@ -146,7 +146,7 @@ export function HistoryView() {
   }
 
   return (
-    <form onSubmit={sendCode} className="flex w-full max-w-md flex-col gap-5 rounded-2xl border border-border-strong bg-card p-6 sm:p-8">
+    <form onSubmit={sendCode} className="flex w-full max-w-md flex-col gap-5 surface-paper rounded-2xl p-6 shadow-[0_24px_50px_-28px_rgba(0,0,0,0.7)] sm:p-8">
       <label className="flex flex-col gap-2 text-sm font-medium">
         Nomor WhatsApp
         <input
@@ -204,7 +204,7 @@ function HistoryResult({ history, onClose, onOpenTicket }: { history: History; o
           ['Terakhir', latest ? formatLongDate(fromIsoDate(latest.date)).replace(/^\w+, /, '') : '-'],
           ['Kapster langganan', favorite ?? '-'],
         ].map(([label, value]) => (
-          <div key={label} className="rounded-xl border border-border-strong bg-card p-4">
+          <div key={label} className="surface-paper rounded-xl p-4">
             <dt className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">{label}</dt>
             <dd className="mt-1.5 font-display text-xl leading-tight sm:text-2xl">{value}</dd>
           </div>
@@ -229,7 +229,7 @@ function Section({ title, items, emptyText, onOpenTicket }: { title: string; ite
             const date = fromIsoDate(item.date)
             const status = STATUS[item.status]
             return (
-              <li key={item.code} className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-3 rounded-xl border border-border-strong bg-card p-4 sm:grid-cols-[auto_1fr_auto] sm:p-5">
+              <li key={item.code} className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-3 surface-paper rounded-xl p-4 sm:grid-cols-[auto_1fr_auto] sm:p-5">
                 <div className="flex w-14 flex-col items-center justify-center rounded-lg border border-border bg-background py-2 text-center">
                   <span className="text-[10px] tracking-[0.14em] text-muted-foreground uppercase">{date.toLocaleDateString('id-ID', { month: 'short' })}</span>
                   <span className="font-display text-2xl leading-none">{date.getDate()}</span>
@@ -244,7 +244,7 @@ function Section({ title, items, emptyText, onOpenTicket }: { title: string; ite
                   <p className="mt-1 text-xs text-muted-foreground">{item.code}</p>
                 </div>
                 <div className="col-span-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-border pt-3 sm:col-span-1 sm:flex-col sm:items-end sm:border-t-0 sm:pt-0">
-                  <StatusChip tone={status.tone}>{status.label}</StatusChip>
+                  <StatusChip tone={status.tone} onLight>{status.label}</StatusChip>
                   <p className="font-display text-lg tabular-nums">{formatRupiah(item.price)}</p>
                   {onOpenTicket && (
                     <button type="button" onClick={() => onOpenTicket(item)} className="text-sm whitespace-nowrap text-accent underline underline-offset-4 hover:text-foreground">

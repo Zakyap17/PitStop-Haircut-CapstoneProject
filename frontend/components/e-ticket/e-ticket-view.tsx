@@ -16,7 +16,7 @@ import { loadReservation, setCurrentReservation } from '@/lib/reservation-storag
 import { cn } from '@/lib/utils'
 import type { Reservation } from '@/types/reservation'
 
-const quietLink = 'text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground'
+const quietLink = 'inline-flex min-h-11 items-center text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground'
 
 /** Judul halaman: penanda status, judul singkat, dan satu kalimat penjelas. Tiketnya sendiri yang jadi pusat perhatian. */
 function PageHeader({ chip, title, text }: { chip: React.ReactNode; title: string; text: string }) {

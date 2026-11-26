@@ -19,7 +19,7 @@ export default function HistoryPage() {
         <p className="max-w-[480px] leading-normal text-muted-foreground">Lihat kapan terakhir kamu cukur, dengan siapa, dan gaya apa. Dibuka dengan kode verifikasi dari WhatsApp.</p>
       </div>
       <HistoryView />
-      <Link href="/" className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground">
+      <Link href="/" className="inline-flex min-h-11 items-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground">
         Kembali ke beranda
       </Link>
     </main>

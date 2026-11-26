@@ -45,7 +45,7 @@ export function BookingSection() {
         </header>
 
         <div className="mt-14 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-14">
-          <form id={FORM_ID} onSubmit={form.submit} className="flex min-w-0 flex-col gap-8">
+          <form id={FORM_ID} onSubmit={form.submit} className="surface-paper flex min-w-0 flex-col gap-8 rounded-2xl p-6 shadow-[0_24px_50px_-28px_rgba(0,0,0,0.7)] sm:p-8 md:p-10">
             <fieldset className="min-w-0">
               <StepLegend step={1} title="Layanan" hint="Pilih satu" />
               <ServiceList services={form.services} selectedId={form.serviceId} onSelect={form.setServiceId} />
