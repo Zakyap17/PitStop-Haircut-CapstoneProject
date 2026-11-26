@@ -107,10 +107,12 @@ export function BookingSummary({ form, formId }: { form: BookingForm; formId: st
           )}
 
           <Button type="submit" form={formId} size="pill" disabled={!form.isValid} className="mt-5 w-full">
-            {form.submitting ? 'Memproses…' : 'Konfirmasi Reservasi'}
+            {form.submitting ? (form.otpRequired && !form.otp ? 'Mengirim kode…' : 'Memproses…') : 'Konfirmasi Reservasi'}
           </Button>
           <p aria-live="polite" className="mt-2.5 min-h-4 text-center text-xs text-muted-foreground">
-            {!form.isValid && !form.submitting && missing.length > 0 && `Lengkapi dulu: ${missing.join(', ')}.`}
+            {!form.isValid && !form.submitting && missing.length > 0
+              ? `Lengkapi dulu: ${missing.join(', ')}.`
+              : form.otpRequired && !form.submitting && 'Kami kirim kode verifikasi ke WhatsApp-mu sebelum booking dibuat.'}
           </p>
         </div>
       </div>

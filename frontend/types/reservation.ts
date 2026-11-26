@@ -29,3 +29,9 @@ export type Reservation = {
   /** Pesan WhatsApp terakhir untuk booking ini. `to` sudah disamarkan. */
   whatsapp: { to: string; status: 'pending' | 'sent' | 'failed' } | null
 }
+
+/** Riwayat booking satu pelanggan (paling baru dulu), dari POST /api/history. */
+export type History = {
+  customerName: string | null
+  bookings: Reservation[]
+}

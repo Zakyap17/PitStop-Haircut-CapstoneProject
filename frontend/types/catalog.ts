@@ -14,6 +14,8 @@ export type BookingRules = {
   daysAhead: number
   maxReschedules: number
   timeSlots: string[]
+  /** Booking baru wajib memakai kode OTP dari WhatsApp. Backend lama tanpa OTP tidak mengirim field ini. */
+  otpRequired?: boolean
 }
 
 /** Semua data yang dipakai halaman customer, diambil dari backend lewat GET /api/catalog. */

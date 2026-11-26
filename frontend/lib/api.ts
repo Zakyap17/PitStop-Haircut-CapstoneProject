@@ -1,6 +1,6 @@
 import type { EncodedImage } from '@/lib/image-encode'
 import type { Availability } from '@/types/catalog'
-import type { Reservation } from '@/types/reservation'
+import type { History, Reservation } from '@/types/reservation'
 import type { FaceAnalysis } from '@/types/try-on'
 
 /** Error dari backend: code dari API (mis. "slot_taken") dan pesan yang siap ditampilkan ke pengguna. */
@@ -50,10 +50,22 @@ export type NewReservation = {
   /** Nomor WhatsApp pemesan: kunci untuk cek, ubah, dan batal, juga tujuan pesan bukti booking dan invoice. */
   customerPhone: string
   hairstyle?: string
+  /** Kode OTP 6 digit dari WhatsApp; wajib kalau backend mengaktifkan OTP. */
+  otpCode?: string
 }
 
 export const api = {
   getAvailability: (date: string, serviceId: string) => request<Availability>('GET', `/api/availability?date=${encodeURIComponent(date)}&serviceId=${encodeURIComponent(serviceId)}`),
+
+  /**
+   * Meminta kode OTP 6 digit dikirim ke WhatsApp nomor itu. `to` adalah nomor yang sudah disamarkan. purpose "history" (nama tidak perlu) hanya
+   * mengirim kode ke nomor yang pernah memesan, dan jawabannya sama untuk nomor lain supaya tidak membocorkan siapa pelanggan.
+   */
+  requestOtp: (input: { phone: string; customerName?: string; purpose?: 'booking' | 'history' }) =>
+    request<{ to: string; expiresInSeconds: number; resendAfterSeconds: number }>('POST', '/api/otp/request', input),
+
+  /** Riwayat booking milik satu nomor WhatsApp, dibuka dengan kode OTP (sekali pakai). */
+  getHistory: (phone: string, otpCode: string) => request<History>('POST', '/api/history', { phone, otpCode }),
 
   createReservation: (input: NewReservation) => request<{ reservation: Reservation }>('POST', '/api/reservations', input).then((result) => result.reservation),
 

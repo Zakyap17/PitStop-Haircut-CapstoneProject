@@ -20,6 +20,12 @@ export default function CheckReservationPage() {
         </p>
       </div>
       <CheckReservationForm />
+      <p className="text-sm text-muted-foreground">
+        Lupa kodenya?{' '}
+        <Link href="/riwayat" className="text-accent underline underline-offset-4 hover:text-foreground">
+          Lihat riwayat pakai nomor WhatsApp
+        </Link>
+      </p>
       <Link href="/" className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground">
         Kembali ke beranda
       </Link>

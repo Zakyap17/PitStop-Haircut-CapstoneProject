@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { BookingSummary } from '@/components/booking/booking-summary'
+import { OtpDialog } from '@/components/booking/otp-dialog'
 import { useCatalog } from '@/components/providers/catalog-provider'
 import { ScheduleFields } from '@/components/booking/schedule-fields'
 import { ServiceList } from '@/components/booking/service-list'
@@ -94,6 +95,7 @@ export function BookingSection() {
           </form>
 
           <BookingSummary form={form} formId={FORM_ID} />
+          <OtpDialog form={form} />
         </div>
       </div>
     </section>
