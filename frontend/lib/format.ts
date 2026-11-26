@@ -43,3 +43,10 @@ export function fromIsoDate(isoDate: string): Date {
 export function formatRupiahTight(value: number): string {
   return formatRupiah(value).replace(/\u00A0/g, '')
 }
+
+/** Jam selesai dari jam mulai "HH:MM" ditambah durasi menit, contoh ("14:00", 60) -> "15:00". */
+export function addMinutesToTime(time: string, minutes: number): string {
+  const [hours, mins] = time.split(':').map(Number)
+  const total = (hours * 60 + mins + minutes) % (24 * 60)
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
+}

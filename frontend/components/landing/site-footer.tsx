@@ -40,7 +40,7 @@ export async function SiteFooter() {
       </a>
 
       <p className="mt-6 text-sm text-muted-foreground">
-        Sudah punya reservasi?{' '}
+        Sudah punya booking?{' '}
         <Link href="/cek-reservasi" className="text-accent underline underline-offset-4 hover:text-foreground">
           Cek di sini
         </Link>

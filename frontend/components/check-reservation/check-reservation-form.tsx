@@ -8,7 +8,7 @@ import { api, ApiError } from '@/lib/api'
 import { setCurrentReservation } from '@/lib/reservation-storage'
 
 const inputClass =
-  'w-full rounded-xl border border-input bg-background/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none'
+  'w-full rounded-xl border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none'
 
 /** Form pencarian booking (kode + nomor WhatsApp). Jika ketemu, e-tiketnya dibuka. */
 export function CheckReservationForm() {
@@ -33,15 +33,15 @@ export function CheckReservationForm() {
       setCurrentReservation(reservation)
       router.push('/e-ticket')
     } catch (error) {
-      setMessage(error instanceof ApiError ? error.message : 'Reservasi gagal dicari. Coba lagi.')
+      setMessage(error instanceof ApiError ? error.message : 'Booking gagal dicari. Coba lagi.')
       setChecking(false)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-md flex-col gap-5 rounded-3xl border border-foreground/10 bg-card/80 p-6 backdrop-blur sm:p-8">
+    <form onSubmit={handleSubmit} className="flex w-full max-w-md flex-col gap-5 rounded-3xl border border-border bg-card p-6 sm:p-8">
       <label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-        Kode reservasi
+        Kode booking
         <input
           required
           value={code}
@@ -82,7 +82,7 @@ export function CheckReservationForm() {
 
       <Button type="submit" size="pill" className="w-full" disabled={checking}>
         <Search className="size-4" aria-hidden="true" />
-        {checking ? 'Mencari…' : 'Cek Reservasi'}
+        {checking ? 'Mencari…' : 'Cek Booking'}
       </Button>
     </form>
   )

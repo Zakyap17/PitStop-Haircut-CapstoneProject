@@ -46,10 +46,10 @@ export function RescheduleForm() {
   if (reservation === null) {
     return (
       <EmptyState
-        title="Tidak ada reservasi."
-        text="Buka reservasimu lewat Cek Reservasi dulu, lalu pilih Ubah Jadwal dari e-tiketnya."
+        title="Tidak ada booking"
+        text="Buka bookingmu lewat Cek Booking dulu, lalu pilih Ubah jadwal dari e-tiketnya."
         href="/cek-reservasi"
-        cta="Cek Reservasi"
+        cta="Cek Booking"
       />
     )
   }
@@ -58,9 +58,9 @@ export function RescheduleForm() {
     return (
       <EmptyState
         title={reservation.status === 'dibatalkan' ? 'Booking sudah dibatalkan.' : 'Booking sudah tidak aktif.'}
-        text="Reservasi ini tidak bisa diubah jadwalnya lagi. Buat reservasi baru untuk datang lagi."
+        text="Booking ini tidak bisa diubah jadwalnya lagi. Buat booking baru untuk datang lagi."
         href="/#reservasi"
-        cta="Buat Reservasi Baru"
+        cta="Buat Booking Baru"
       />
     )
   }
@@ -68,10 +68,10 @@ export function RescheduleForm() {
   if (isReservationPast(reservation)) {
     return (
       <EmptyState
-        title="Jadwal sudah lewat."
-        text="Reservasi yang jadwalnya sudah lewat tidak bisa diubah. Buat reservasi baru untuk datang lagi."
+        title="Jadwal sudah lewat"
+        text="Booking yang jadwalnya sudah lewat tidak bisa diubah. Buat booking baru untuk datang lagi."
         href="/#reservasi"
-        cta="Buat Reservasi Baru"
+        cta="Buat Booking Baru"
       />
     )
   }
@@ -80,8 +80,8 @@ export function RescheduleForm() {
   if (changeCount >= maxReschedules) {
     return (
       <EmptyState
-        title="Batas ubah jadwal tercapai."
-        text={`Jadwal satu reservasi hanya bisa diubah ${maxReschedules} kali. Hubungi kasir kalau kamu masih perlu mengubahnya.`}
+        title="Batas ubah jadwal tercapai"
+        text={`Jadwal satu booking hanya bisa diubah ${maxReschedules} kali. Hubungi kasir kalau kamu masih perlu mengubahnya.`}
         href="/e-ticket"
         cta="Kembali ke E-Tiket"
       />
@@ -111,9 +111,9 @@ export function RescheduleForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex w-full min-w-0 max-w-2xl flex-col gap-7 rounded-3xl border border-foreground/10 bg-card/80 p-6 backdrop-blur sm:p-8"
+      className="flex w-full min-w-0 max-w-2xl flex-col gap-7 rounded-3xl border border-border bg-card p-6 sm:p-8"
     >
-      <div className="rounded-2xl border border-foreground/10 bg-background/40 p-4 text-sm">
+      <div className="rounded-2xl border border-foreground/10 bg-background p-4 text-sm">
         <p className="text-xs tracking-[1.6px] text-muted-foreground uppercase">Jadwal sekarang · {reservation.code}</p>
         <p className="mt-1.5 font-semibold">
           {formatLongDate(fromIsoDate(reservation.date))} · {reservation.time} · Kapster {reservation.barberName}

@@ -14,8 +14,8 @@ export default function RescheduleReservationPage() {
     <main id="konten" className="flex min-h-svh flex-col items-center justify-center gap-8 px-6 py-16">
       <BrandLogo href="/" />
       <div className="flex flex-col items-center gap-3 text-center">
-        <p className="text-[13px] font-semibold tracking-[2.4px] text-accent uppercase">Reservasi</p>
-        <h1 className="font-display text-5xl leading-[1.05] tracking-[-0.025em] uppercase sm:text-6xl">Ubah jadwal.</h1>
+        <p className="text-[13px] font-semibold tracking-[2.4px] text-accent uppercase">Booking</p>
+        <h1 className="font-display text-4xl leading-[1.05] tracking-[0.01em] uppercase sm:text-5xl">Ubah jadwal</h1>
         <p className="max-w-[460px] leading-normal text-muted-foreground">
           Pilih tanggal, jam, atau kapster yang baru. Layanan dan data dirimu tidak berubah.
         </p>

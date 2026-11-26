@@ -27,7 +27,7 @@ export function DownloadButtons({ reservation }: { reservation: Reservation }) {
 
   return (
     <>
-      <Button size="pill" variant="outline-strong" className="px-7" disabled={busy} onClick={() => run(downloadReservationImage)}>
+      <Button size="pill" className="px-7" disabled={busy} onClick={() => run(downloadReservationImage)}>
         <Download className="size-4" aria-hidden="true" />
         Unduh E-Tiket
       </Button>
@@ -39,7 +39,7 @@ export function DownloadButtons({ reservation }: { reservation: Reservation }) {
       )}
       {failed && (
         <p role="alert" className="w-full text-center text-sm text-destructive">
-          Gambar e-tiket gagal dibuat. Coba lagi, atau catat kode reservasimu.
+          Gambar e-tiket gagal dibuat. Coba lagi, atau catat kode bookingmu.
         </p>
       )}
     </>

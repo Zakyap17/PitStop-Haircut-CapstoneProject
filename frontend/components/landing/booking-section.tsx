@@ -8,7 +8,7 @@ import { formatRupiah } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 const inputClass =
-  'rounded-xl border border-input bg-background/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none'
+  'rounded-xl border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none'
 
 export function BookingSection() {
   const form = useBookingForm()
@@ -16,9 +16,10 @@ export function BookingSection() {
   return (
     <section
       id="reservasi"
-      className="theme-alt checker-backdrop relative overflow-hidden border-t border-foreground/10 bg-[radial-gradient(circle_at_20%_0%,oklch(0.34_0.1_250)_0%,var(--background)_60%)] py-24 md:py-32"
+      className="theme-alt relative overflow-hidden bg-background pb-24 md:pb-32"
     >
-      <div className="mx-auto grid max-w-7xl gap-12 px-4 md:px-8 lg:grid-cols-[1fr_1.3fr]">
+      <div aria-hidden="true" className="checker-strip h-8" />
+      <div className="mx-auto mt-24 grid max-w-7xl gap-12 px-4 md:mt-32 md:px-8 lg:grid-cols-[1fr_1.3fr]">
         <div className="flex min-w-0 flex-col gap-6">
           <p className="text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">Reservasi Online</p>
           <h2 className="font-serif text-5xl leading-none text-balance md:text-6xl">
@@ -28,23 +29,22 @@ export function BookingSection() {
             Pilih layanan, jam, dan kapster yang tersedia. Slotmu ditahan sampai DP dibayar. Setelah DP dikonfirmasi, bukti booking berisi kode dan QR untuk
             check-in dikirim ke WhatsApp-mu.
           </p>
-          <div className="rounded-2xl border border-foreground/10 bg-card/60 p-5 text-sm">
+          <div className="rounded-xl border border-border-strong bg-card p-5 text-sm">
             <p className="font-semibold">Aturan kedatangan</p>
             <p className="mt-2 leading-relaxed text-muted-foreground">
               Konfirmasi nama atau nomor WhatsApp di kasir sebelum layanan dimulai. Jika belum check-in 10 menit sebelum jam
-              reservasi, pesanan otomatis dibatalkan dan slot dibuka untuk walk-in.
+              booking, pesanan otomatis dibatalkan dan slot dibuka untuk walk-in.
             </p>
           </div>
           <p className="text-sm text-muted-foreground">
-            Sudah punya kode reservasi?{' '}
+            Sudah punya kode booking?{' '}
             <Link href="/cek-reservasi" className="text-accent underline underline-offset-4 hover:text-foreground">
-              Cek reservasi
+              Cek booking
             </Link>
           </p>
-          <div className="checker mt-auto hidden h-16 rounded-2xl opacity-60 lg:block" aria-hidden="true" />
         </div>
 
-        <form onSubmit={form.submit} className="flex min-w-0 flex-col gap-7 rounded-3xl border border-foreground/10 bg-card/80 p-6 backdrop-blur md:p-8">
+        <form onSubmit={form.submit} className="flex min-w-0 flex-col gap-7 rounded-2xl border border-border-strong bg-card p-6 md:p-8">
           {form.tryOnChoice && (
             <div className="flex items-center justify-between gap-3 rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
               <p>

@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { buildQrMatrix, QR_QUIET_ZONE } from '@/lib/qr'
 
 /**
- * QR code berisi kode reservasi (contoh "PS-8259"). Kasir memindainya untuk mencari reservasi.
+ * QR code berisi kode booking (contoh "PS-8259"). Kasir memindainya untuk mencari booking.
  * Digambar sebagai SVG dari matriks modul, bukan dari HTML mentah, dan memakai warna terang di sekelilingnya
  * (zona tenang) agar tetap terbaca di tema gelap.
  */
@@ -22,7 +22,7 @@ export function TicketQr({ value, size = 168 }: { value: string; size?: number }
   return (
     <svg
       role="img"
-      aria-label={`QR code reservasi ${value}`}
+      aria-label={`QR code booking ${value}`}
       viewBox={`0 0 ${total} ${total}`}
       width={size}
       height={size}
