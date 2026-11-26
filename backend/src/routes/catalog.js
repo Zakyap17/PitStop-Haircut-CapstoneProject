@@ -1,6 +1,23 @@
 const express = require('express')
 const { loadSettings } = require('../services/settings')
 
+/** Gaya rambut di galeri (dipakai katalog dan analisa try-on AI). */
+async function loadHaircuts(db) {
+  const { rows } = await db.query(
+    `SELECT g.slug, g.judul, g.kategori, g.file_gambar, c.slug AS capster_slug, c.nama_capster
+       FROM galeri g JOIN capster c ON c.id_capster = g.id_capster
+      WHERE g.slug IS NOT NULL AND c.status_aktif ORDER BY g.urutan, g.id_galeri`,
+  )
+  return rows.map((row) => ({
+    id: row.slug,
+    name: row.judul,
+    barberId: row.capster_slug,
+    barber: row.nama_capster,
+    category: row.kategori ?? 'Lainnya',
+    image: row.file_gambar,
+  }))
+}
+
 /** Data yang dipakai halaman customer, dari tabel resmi: layanan, capster, galeri, plus testimoni dan aturan booking. */
 async function loadCatalog(db) {
   const [settings, services, barbers, haircuts, testimonials, slots] = await Promise.all([
@@ -13,11 +30,7 @@ async function loadCatalog(db) {
       `SELECT slug, nama_capster, jabatan, spesialisasi, pengalaman_tahun, hari_libur FROM capster
         WHERE status_aktif AND slug IS NOT NULL ORDER BY id_capster`,
     ),
-    db.query(
-      `SELECT g.slug, g.judul, g.kategori, g.file_gambar, c.slug AS capster_slug, c.nama_capster
-         FROM galeri g JOIN capster c ON c.id_capster = g.id_capster
-        WHERE g.slug IS NOT NULL AND c.status_aktif ORDER BY g.urutan, g.id_galeri`,
-    ),
+    loadHaircuts(db),
     db.query('SELECT quote, name, role, image_path FROM testimonials WHERE is_active ORDER BY sort_order, id'),
     db.query('SELECT time FROM booking_slots WHERE is_active ORDER BY time'),
   ])
@@ -32,14 +45,7 @@ async function loadCatalog(db) {
       experienceYears: row.pengalaman_tahun ?? null,
       offDays: row.hari_libur,
     })),
-    haircuts: haircuts.rows.map((row) => ({
-      id: row.slug,
-      name: row.judul,
-      barberId: row.capster_slug,
-      barber: row.nama_capster,
-      category: row.kategori ?? 'Lainnya',
-      image: row.file_gambar,
-    })),
+    haircuts,
     testimonials: testimonials.rows.map((row) => ({ quote: row.quote, name: row.name, role: row.role, image: row.image_path })),
     booking: {
       timezone: settings.timezone,
@@ -64,4 +70,4 @@ function catalogRouter({ db }) {
   return router
 }
 
-module.exports = { catalogRouter, loadCatalog }
+module.exports = { catalogRouter, loadCatalog, loadHaircuts }

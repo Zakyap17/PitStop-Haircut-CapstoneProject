@@ -9,6 +9,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Try-on AI bisa memakan puluhan detik; batas bawaan proxy rewrite terlalu pendek dan memutus permintaannya.
+  experimental: {
+    proxyTimeout: 120_000,
+  },
   // Browser memanggil /api/... di alamat web ini; Next meneruskannya ke backend (BACKEND_URL).
   // Alamat backend tidak terlihat di browser, tidak ada masalah CORS, dan tidak ada mixed-content saat web memakai HTTPS.
   async rewrites() {

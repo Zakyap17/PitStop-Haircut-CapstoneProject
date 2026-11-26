@@ -5,6 +5,7 @@ const { createDb } = require('./db')
 const { pendingMigrations, runMigrations } = require('./db/migrate')
 const { createProviderFromEnv } = require('./notifications/providers')
 const { startNotificationWorker } = require('./notifications/worker')
+const { createTryOnProviderFromEnv } = require('./tryon/providers')
 
 const PORT = Number(process.env.PORT || 4000)
 const HOST = process.env.HOST || '0.0.0.0'
@@ -33,7 +34,14 @@ async function main() {
   if (process.env.RATE_LIMIT_ACCESS) limits.access = Number(process.env.RATE_LIMIT_ACCESS)
   // Alamat publik web customer, dipakai untuk tautan di pesan WhatsApp (contoh https://pitstop.example.com).
   const webUrl = process.env.PUBLIC_WEB_URL || undefined
-  const app = createApp({ db, corsOrigins, trustProxy: process.env.TRUST_PROXY, limits, webUrl })
+  if (process.env.TRYON_RATE_LIMIT) limits.tryOn = Number(process.env.TRYON_RATE_LIMIT)
+  // Virtual Try-On AI: aktif kalau TRYON_API_KEY terisi. Tanpa itu, web menampilkan fitur ini sebagai belum aktif.
+  const tryOnProvider = createTryOnProviderFromEnv()
+  // TRYON_GENERATE_IMAGE=false = mode analisa saja: AI hanya menganalisa wajah dan merekomendasikan gaya (gratis dengan model :free),
+  // tanpa memasang gaya di foto (butuh model gambar berbayar).
+  const tryOnGenerate = process.env.TRYON_GENERATE_IMAGE !== 'false'
+  console.log(tryOnProvider ? `Try-on AI: penyedia ${tryOnProvider.name}, ${tryOnGenerate ? 'analisa + pasang gaya di foto' : 'mode analisa saja'}` : 'Try-on AI: belum aktif (isi TRYON_API_KEY di .env).')
+  const app = createApp({ db, corsOrigins, trustProxy: process.env.TRUST_PROXY, limits, webUrl, tryOnProvider, tryOnGenerate })
 
   // Pengiriman WhatsApp: pesan masuk antrean saat reservasi berubah, worker ini yang mengirimnya.
   const provider = createProviderFromEnv()

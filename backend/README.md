@@ -132,6 +132,36 @@ Memantau: `SELECT jenis_pesan, status_kirim, percobaan, error_terakhir FROM noti
 Fonnte bukan layanan resmi Meta. Pakai nomor khusus toko, jangan kirim massal, dan jaga perangkat di Fonnte tetap
 *connected*. Kalau terputus, pesan tertahan di antrean dan terkirim sendiri setelah tersambung lagi.
 
+## Virtual Try-On AI
+
+Pelanggan mengunggah foto, memilih gaya rambut, lalu AI mengganti rambut di foto itu. Browser memperkecil foto dan foto referensi
+gaya, mengirimnya ke `POST /api/try-on`, dan backend meneruskannya ke penyedia AI memakai token dari `.env`. Token tidak pernah
+sampai ke browser, dan foto tidak disimpan di server maupun database.
+
+Memasang (cukup isi `.env`, lalu restart backend):
+
+1. Buat kunci API. Gemini (bawaan): https://aistudio.google.com/apikey. OpenAI: https://platform.openai.com/api-keys.
+2. Isi `TRYON_API_KEY=` dengan kunci itu. Untuk OpenAI isi juga `TRYON_PROVIDER=openai`, untuk OpenRouter `TRYON_PROVIDER=openrouter`.
+   `TRYON_MODEL` (model pemasangan gaya) dan `TRYON_ANALYSIS_MODEL` (model analisa wajah) opsional.
+   OpenRouter: analisa wajah memakai model gratis (`:free`), tetapi pemasangan gaya butuh model yang menerima foto (`input_references`)
+   dan itu berbayar, jadi akunnya perlu saldo kredit. Model `:free` yang hanya teks-ke-gambar (mis. Recraft Flash) tidak bisa
+   dipakai. Daftar model yang mendukung edit foto: `https://openrouter.ai/api/v1/images/models`.
+3. Log harus menulis `Try-on AI: penyedia gemini` (atau `openai`). Kalau token kosong, log menulis "belum aktif" dan web
+   menampilkan fitur ini sebagai belum diaktifkan (tidak ada hasil palsu).
+
+| Endpoint | Fungsi |
+|---|---|
+| `GET /api/try-on/status` | `{ "enabled", "canGenerate" }`. `enabled` = analisa wajah aktif, `canGenerate` = pasang gaya di foto aktif. Dipakai web untuk menampilkan atau menyembunyikan tombol AI. |
+| `POST /api/try-on/analyze` | Body `{ photo }`. Jawaban `{ faceShape, hairType, summary, recommendedIds }`: AI menilai wajah dan memilih gaya dari galeri toko yang cocok. |
+| `POST /api/try-on` | Body `{ photo, reference, haircutName }`, tiap gambar `{ mimeType, base64 }` (JPEG/PNG/WebP). Jawaban `{ image: "data:..." }`. |
+
+**Mode analisa saja:** isi `TRYON_GENERATE_IMAGE=false`. Analisa wajah dan rekomendasi gaya tetap jalan (bisa gratis dengan model `:free`
+di OpenRouter), tetapi `POST /api/try-on` dijawab 503 dan web tidak menampilkan tombol pasang gaya. Cocok kalau tidak ada saldo untuk model
+gambar. Hapus baris itu kapan saja untuk menyalakan pasang gaya di foto.
+
+Batas: 8 MB per permintaan, 20 try-on per 10 menit per IP (`TRYON_RATE_LIMIT`). Tiap try-on memakai kuota berbayar di penyedia AI.
+Kegagalan penyedia dijawab 502 dengan pesan ramah; detailnya hanya masuk log server.
+
 ## Yang belum ada
 
 - Pembayaran DP otomatis lewat payment gateway (sekarang DP manual, dikonfirmasi admin).

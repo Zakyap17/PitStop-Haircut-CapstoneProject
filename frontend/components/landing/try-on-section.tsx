@@ -2,8 +2,8 @@ import { Camera, Sparkles, Upload } from 'lucide-react'
 import { TryOnStudio } from '@/components/try-on/try-on-studio'
 
 const steps = [
-  { icon: Camera, title: 'Aktifkan kamera', text: 'Atau unggah foto wajah. Semua diproses di browser kamu.' },
-  { icon: Sparkles, title: 'Swipe template', text: 'Geser berbagai gaya rambut dan bandingkan langsung dengan wajahmu.' },
+  { icon: Camera, title: 'Ambil atau unggah foto', text: 'Pakai kamera atau foto wajah yang menghadap depan dengan cahaya cukup.' },
+  { icon: Sparkles, title: 'Dapat rekomendasi AI', text: 'AI membaca bentuk wajahmu lalu memilihkan gaya rambut yang cocok. Geser dan bandingkan.' },
   { icon: Upload, title: 'Bawa ke kapster', text: 'Simpan pilihanmu dan lampirkan saat reservasi.' },
 ]
 

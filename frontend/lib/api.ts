@@ -1,5 +1,7 @@
+import type { EncodedImage } from '@/lib/image-encode'
 import type { Availability } from '@/types/catalog'
 import type { Reservation } from '@/types/reservation'
+import type { FaceAnalysis } from '@/types/try-on'
 
 /** Error dari backend: code dari API (mis. "slot_taken") dan pesan yang siap ditampilkan ke pengguna. */
 export class ApiError extends Error {
@@ -59,6 +61,16 @@ export const api = {
 
   rescheduleReservation: (code: string, input: { phone: string; barberId: string; date: string; time: string }) =>
     request<{ reservation: Reservation }>('POST', `/api/reservations/${encodeURIComponent(code)}/reschedule`, input).then((result) => result.reservation),
+
+  /** Status try-on AI di backend: enabled = analisa wajah aktif, canGenerate = pasang gaya di foto juga aktif. */
+  getTryOnStatus: () => request<{ enabled: boolean; canGenerate: boolean }>('GET', '/api/try-on/status'),
+
+  /** Langkah 1 try-on: AI menilai wajah di foto dan memilih gaya galeri yang cocok. */
+  analyzeFace: (photo: EncodedImage) => request<FaceAnalysis>('POST', '/api/try-on/analyze', { photo }),
+
+  /** Langkah 2 try-on: meminta AI mengganti gaya rambut di foto. Mengembalikan gambar hasil sebagai data URL. Bisa memakan 10 sampai 60 detik. */
+  generateTryOn: (input: { photo: EncodedImage; reference: EncodedImage; haircutName: string }) =>
+    request<{ image: string }>('POST', '/api/try-on', input).then((result) => result.image),
 
   cancelReservation: (code: string, phone: string) =>
     request<{ reservation: Reservation }>('POST', `/api/reservations/${encodeURIComponent(code)}/cancel`, { phone }).then((result) => result.reservation),

@@ -3,17 +3,20 @@ const express = require('express')
 const { HttpError } = require('./lib/errors')
 const { catalogRouter } = require('./routes/catalog')
 const { reservationsRouter } = require('./routes/reservations')
+const { tryOnRouter } = require('./routes/try-on')
 
 /**
  * Membuat aplikasi Express. Dipisah dari index.js supaya tes bisa membuatnya dengan database dan jam palsu.
- * @param {{ db: object, clock?: () => Date, corsOrigins?: string[] | '*', trustProxy?: string, limits?: { write?: number, access?: number } }} options
+ * @param {{ db: object, clock?: () => Date, corsOrigins?: string[] | '*', trustProxy?: string, limits?: { write?: number, access?: number, tryOn?: number }, tryOnProvider?: object | null, tryOnGenerate?: boolean }} options
  */
-function createApp({ db, clock = () => new Date(), corsOrigins = '*', trustProxy, limits, webUrl } = {}) {
+function createApp({ db, clock = () => new Date(), corsOrigins = '*', trustProxy, limits, webUrl, tryOnProvider = null, tryOnGenerate = true } = {}) {
   const app = express()
   if (trustProxy) app.set('trust proxy', trustProxy === 'true' ? true : /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy)
   app.disable('x-powered-by')
 
   app.use(cors({ origin: corsOrigins === '*' ? true : corsOrigins }))
+  // Try-on menerima foto (beberapa MB), jadi rutenya dimuat sebelum parser JSON global yang hanya 20 KB.
+  app.use('/api', tryOnRouter({ db, tryOnProvider, canGenerate: tryOnGenerate, limits }))
   app.use(express.json({ limit: '20kb' }))
 
   const ctx = { db, clock, limits, webUrl }
