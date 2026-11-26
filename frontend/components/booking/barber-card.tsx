@@ -108,10 +108,10 @@ export function BarberCard({ name, photo, state, selected, onSelect }: BarberCar
       </span>
 
       {/* plakat nama */}
-      <span aria-hidden="true" className="absolute inset-x-[7%] bottom-[10%] flex items-center justify-between gap-2 rounded-md bg-foreground px-[5cqw] py-[2.2cqw] text-background">
+      <span aria-hidden="true" className="absolute inset-x-[7%] bottom-[10%] flex items-center justify-between gap-2 rounded-md bg-foreground px-[5cqw] py-[2.2cqw] text-background @max-[210px]:flex-col @max-[210px]:items-start @max-[210px]:gap-1">
         <span className={cn('min-w-0', unavailable && 'opacity-60')}>
           <span className="block truncate font-serif text-[clamp(0.95rem,7.5cqw,1.4rem)] leading-tight uppercase">{name}</span>
-          <span className="block text-[clamp(0.55rem,3.2cqw,0.7rem)] font-semibold tracking-[0.18em] uppercase opacity-60">Kapster</span>
+          <span className="block text-[clamp(0.55rem,3.2cqw,0.7rem)] font-semibold tracking-[0.18em] uppercase opacity-60 @max-[210px]:hidden">Kapster</span>
         </span>
         <span className="flex shrink-0 items-center gap-1.5 text-[clamp(0.55rem,3.2cqw,0.7rem)] font-semibold tracking-[0.1em] whitespace-nowrap uppercase">
           <span className={cn('size-2.5 rounded-full', state === 'available' ? 'bg-emerald-600' : 'bg-red-600')} />

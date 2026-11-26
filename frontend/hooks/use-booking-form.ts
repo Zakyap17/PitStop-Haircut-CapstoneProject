@@ -108,3 +108,5 @@ export function useBookingForm() {
     submit,
   }
 }
+
+export type BookingForm = ReturnType<typeof useBookingForm>

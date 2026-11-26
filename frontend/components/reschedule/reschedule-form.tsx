@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CalendarClock } from 'lucide-react'
 import { ScheduleFields } from '@/components/booking/schedule-fields'
+import { StepLegend } from '@/components/booking/step-legend'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { useCatalog } from '@/components/providers/catalog-provider'
 import { useScheduleSelection } from '@/hooks/use-schedule-selection'
@@ -123,7 +124,7 @@ export function RescheduleForm() {
         </p>
       </div>
 
-      <ScheduleFields schedule={schedule} dateLegend="1. Tanggal & jam baru" barberLegend="2. Kapster tersedia" />
+      <ScheduleFields schedule={schedule} dateLegend={<StepLegend step={1} title="Tanggal & jam baru" />} barberLegend={<StepLegend step={2} title="Kapster" />} />
 
       {isSameSchedule && <p className="text-sm text-muted-foreground">Pilih tanggal, jam, atau kapster yang berbeda dari jadwal sekarang.</p>}
 

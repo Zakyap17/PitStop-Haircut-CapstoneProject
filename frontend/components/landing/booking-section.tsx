@@ -1,139 +1,100 @@
 'use client'
 
 import Link from 'next/link'
-import { CalendarCheck } from 'lucide-react'
-import { ScheduleFields, chipClass } from '@/components/booking/schedule-fields'
+import { BookingSummary } from '@/components/booking/booking-summary'
 import { useCatalog } from '@/components/providers/catalog-provider'
+import { ScheduleFields } from '@/components/booking/schedule-fields'
+import { ServiceList } from '@/components/booking/service-list'
+import { StepLegend } from '@/components/booking/step-legend'
 import { useBookingForm } from '@/hooks/use-booking-form'
-import { slotsNeeded } from '@/lib/booking-rules'
-import { formatRupiah } from '@/lib/format'
-import { cn } from '@/lib/utils'
+
+const FORM_ID = 'form-reservasi'
 
 const inputClass =
-  'rounded-xl border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none'
+  'h-12 rounded-lg border border-input bg-background px-4 text-base text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none'
 
+/**
+ * Reservasi online: langkah-langkah terbuka di kiri (layanan, tanggal dan jam, kapster, data pelanggan) dan tiket ringkasan
+ * di kanan yang terisi langsung saat memilih, lengkap dengan tombol konfirmasi.
+ */
 export function BookingSection() {
   const form = useBookingForm()
   const { booking: rules } = useCatalog()
 
   return (
-    <section
-      id="reservasi"
-      className="theme-alt relative overflow-hidden bg-background pb-24 md:pb-32"
-    >
+    <section id="reservasi" className="theme-alt relative overflow-hidden bg-background pb-24 md:pb-32">
       <div aria-hidden="true" className="checker-strip h-8" />
-      <div className="mx-auto mt-24 grid max-w-7xl gap-12 px-4 md:mt-32 md:px-8 lg:grid-cols-[1fr_1.3fr]">
-        <div className="flex min-w-0 flex-col gap-6">
-          <p className="text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">Reservasi Online</p>
-          <h2 className="font-serif text-5xl leading-none text-balance md:text-6xl">
-            Kunci slotmu, <em className="text-accent">skip</em> antrean
-          </h2>
-          <p className="max-w-md leading-relaxed text-muted-foreground">
-            Pilih layanan, jam, dan kapster yang tersedia. Slotmu ditahan sampai DP dibayar. Setelah DP dikonfirmasi, bukti booking berisi kode dan QR untuk
-            check-in dikirim ke WhatsApp-mu.
-          </p>
-          <div className="rounded-xl border border-border-strong bg-card p-5 text-sm">
-            <p className="font-semibold">Aturan kedatangan</p>
-            <p className="mt-2 leading-relaxed text-muted-foreground">
-              Konfirmasi nama atau nomor WhatsApp di kasir sebelum layanan dimulai. Jika belum check-in 10 menit sebelum jam
-              booking, pesanan otomatis dibatalkan dan slot dibuka untuk walk-in.
+      <div className="mx-auto mt-20 max-w-7xl px-4 md:mt-28 md:px-8">
+        <header className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">Reservasi Online</p>
+            <h2 className="mt-4 font-serif text-5xl leading-none text-balance md:text-6xl">
+              Kunci slotmu, <em className="text-accent">skip</em> antrean
+            </h2>
+          </div>
+          <div className="max-w-sm text-sm leading-relaxed text-muted-foreground">
+            <p>Pilih layanan, jam, dan kapster. Setelah DP dikonfirmasi, bukti booking dan QR check-in dikirim ke WhatsApp-mu.</p>
+            <p className="mt-2">
+              Sudah punya kode booking?{' '}
+              <Link href="/cek-reservasi" className="text-accent underline underline-offset-4 hover:text-foreground">
+                Cek booking
+              </Link>
             </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Sudah punya kode booking?{' '}
-            <Link href="/cek-reservasi" className="text-accent underline underline-offset-4 hover:text-foreground">
-              Cek booking
-            </Link>
-          </p>
+        </header>
+
+        <div className="mt-14 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-14">
+          <form id={FORM_ID} onSubmit={form.submit} className="flex min-w-0 flex-col gap-8">
+            <fieldset className="min-w-0">
+              <StepLegend step={1} title="Layanan" hint="Pilih satu" />
+              <ServiceList services={form.services} selectedId={form.serviceId} onSelect={form.setServiceId} />
+            </fieldset>
+
+            <ScheduleFields
+              schedule={form}
+              dateLegend={<StepLegend step={2} title="Tanggal & jam" hint={`${rules.daysAhead} hari ke depan`} />}
+              barberLegend={<StepLegend step={3} title="Kapster" />}
+            />
+
+            <div className="border-t border-border pt-8">
+              <fieldset className="min-w-0">
+                <StepLegend step={4} title="Data kamu" />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="flex flex-col gap-2 text-sm font-medium">
+                    Nama
+                    <input
+                      required
+                      value={form.customerName}
+                      onChange={(event) => form.setCustomerName(event.target.value)}
+                      autoComplete="name"
+                      placeholder="Nama lengkap"
+                      className={inputClass}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-2 text-sm font-medium">
+                    Nomor WhatsApp
+                    <input
+                      required
+                      type="tel"
+                      inputMode="tel"
+                      value={form.customerPhone}
+                      onChange={(event) => form.setCustomerPhone(event.target.value)}
+                      autoComplete="tel"
+                      placeholder="081234567890"
+                      aria-describedby="phone-hint"
+                      className={inputClass}
+                    />
+                  </label>
+                </div>
+                <p id="phone-hint" className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                  Instruksi DP, bukti booking, dan pengingat dikirim otomatis ke nomor ini. Nomor ini juga kunci untuk mengecek bookingmu.
+                </p>
+              </fieldset>
+            </div>
+          </form>
+
+          <BookingSummary form={form} formId={FORM_ID} />
         </div>
-
-        <form onSubmit={form.submit} className="flex min-w-0 flex-col gap-7 rounded-2xl border border-border-strong bg-card p-6 md:p-8">
-          {form.tryOnChoice && (
-            <div className="flex items-center justify-between gap-3 rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
-              <p>
-                <span className="text-muted-foreground">Gaya pilihanmu dari Try-On: </span>
-                <span className="font-semibold">{form.tryOnChoice.name}</span>
-                <span className="text-muted-foreground"> · kapster {form.tryOnChoice.barber}</span>
-              </p>
-              <button type="button" onClick={form.clearTryOnChoice} className="shrink-0 text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground">
-                Hapus
-              </button>
-            </div>
-          )}
-          <fieldset>
-            <legend className="mb-3 text-sm font-semibold">1. Layanan</legend>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {form.services.map((service) => (
-                <button
-                  key={service.id}
-                  type="button"
-                  onClick={() => form.setServiceId(service.id)}
-                  aria-pressed={form.serviceId === service.id}
-                  className={cn(chipClass(form.serviceId === service.id), 'text-left')}
-                >
-                  <span className="block">{service.name}</span>
-                  <span className="block text-xs opacity-70">
-                    {formatRupiah(service.price)}
-                    {slotsNeeded(service.durationMinutes, rules.timeSlots) > 1 && ` · ${slotsNeeded(service.durationMinutes, rules.timeSlots)} slot`}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
-          <ScheduleFields schedule={form} dateLegend="2. Tanggal & jam" barberLegend="3. Kapster tersedia" />
-
-          <fieldset className="grid gap-3 sm:grid-cols-2">
-            <legend className="mb-3 text-sm font-semibold">4. Data pelanggan</legend>
-            <label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-              Nama
-              <input
-                required
-                value={form.customerName}
-                onChange={(event) => form.setCustomerName(event.target.value)}
-                autoComplete="name"
-                placeholder="Nama lengkap"
-                className={inputClass}
-              />
-            </label>
-            <label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-              Nomor WhatsApp
-              <input
-                required
-                type="tel"
-                inputMode="tel"
-                value={form.customerPhone}
-                onChange={(event) => form.setCustomerPhone(event.target.value)}
-                autoComplete="tel"
-                placeholder="081234567890"
-                aria-describedby="phone-hint"
-                className={inputClass}
-              />
-              <span id="phone-hint">Instruksi DP, bukti booking, dan pengingat dikirim otomatis ke nomor ini. Nomor ini juga kunci untuk mengecek bookingmu.</span>
-            </label>
-          </fieldset>
-
-          {form.submitError && (
-            <p role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm leading-relaxed">
-              {form.submitError}
-            </p>
-          )}
-
-          <div className="flex flex-col items-start justify-between gap-4 border-t border-foreground/10 pt-6 sm:flex-row sm:items-center">
-            <div>
-              <p className="text-xs text-muted-foreground">Total biaya</p>
-              <p className="font-serif text-3xl">{formatRupiah(form.service.price)}</p>
-            </div>
-            <button
-              type="submit"
-              disabled={!form.isValid}
-              className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-40"
-            >
-              <CalendarCheck className="size-4" aria-hidden="true" />
-              {form.submitting ? 'Memproses…' : 'Konfirmasi Reservasi'}
-            </button>
-          </div>
-        </form>
       </div>
     </section>
   )
