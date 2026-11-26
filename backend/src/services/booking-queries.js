@@ -1,3 +1,4 @@
+const { capsterKey, serviceKey } = require('../db/keys')
 const { maskPhone } = require('../lib/phone')
 const { nowInZone, toTime } = require('../lib/time')
 
@@ -10,7 +11,7 @@ const ACTIVE_STATUSES = ['menunggu_pembayaran', 'dikonfirmasi', 'sedang_dilayani
  */
 const SELECT_BOOKING = `
   SELECT b.id_booking::int AS id, b.kode_booking AS code, b.status_booking AS status, b.tipe_booking,
-         ca.id_capster::int AS capster_id, ca.slug AS capster_slug, ca.nama_capster,
+         ca.id_capster::int AS capster_id, ${capsterKey('ca')} AS capster_slug, ca.nama_capster,
          to_char(b.tanggal_booking, 'YYYY-MM-DD') AS date,
          to_char(b.jam_mulai, 'HH24:MI') AS time,
          to_char(b.tanggal_booking, 'YYYY-MM-DD') || ' ' || to_char(b.jam_mulai, 'HH24:MI') AS starts_text,
@@ -18,7 +19,7 @@ const SELECT_BOOKING = `
          round(b.total_harga)::int AS total, round(b.nominal_dp)::int AS dp_nominal,
          b.created_at, b.alasan_batal, b.jumlah_ubah_jadwal AS reschedule_count, b.gaya_try_on,
          cu.id_customer::int AS customer_id, cu.nama_customer, cu.no_whatsapp,
-         l.slug AS service_slug, l.nama_layanan,
+         l.slug AS service_slug, l.nama_layanan, l.durasi_menit AS service_minutes,
          (SELECT p.status_pembayaran FROM pembayaran p WHERE p.id_booking = b.id_booking AND p.jenis_pembayaran = 'dp'
            ORDER BY p.id_pembayaran DESC LIMIT 1) AS dp_status,
          (SELECT n.status_kirim FROM notifikasi_whatsapp n WHERE n.id_booking = b.id_booking
@@ -27,7 +28,7 @@ const SELECT_BOOKING = `
     JOIN customer cu ON cu.id_customer = b.id_customer
     JOIN capster ca ON ca.id_capster = b.id_capster
     LEFT JOIN LATERAL (
-      SELECT ly.slug, ly.nama_layanan FROM booking_layanan bl JOIN layanan ly ON ly.id_layanan = bl.id_layanan
+      SELECT ${serviceKey('ly')} AS slug, ly.nama_layanan, ly.durasi_menit FROM booking_layanan bl JOIN layanan ly ON ly.id_layanan = bl.id_layanan
        WHERE bl.id_booking = b.id_booking ORDER BY bl.id_detail LIMIT 1
     ) l ON true`
 
@@ -41,7 +42,9 @@ function toDto(row, settings) {
     code: row.code,
     serviceId: row.service_slug ?? null,
     serviceName: row.nama_layanan ?? 'Layanan',
-    durationMinutes: row.duration,
+    // Durasi layanan (untuk ditampilkan) dan waktu yang ditahan di kapster (kelipatan slot, mis. hair coloring 90 menit menahan 120).
+    durationMinutes: row.service_minutes ?? row.duration,
+    reservedMinutes: row.duration,
     price: row.total,
     barberId: row.capster_slug ?? String(row.capster_id),
     barberName: row.nama_capster,

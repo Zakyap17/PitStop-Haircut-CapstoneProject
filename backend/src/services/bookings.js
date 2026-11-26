@@ -2,7 +2,18 @@ const { badRequest, conflict, notFound } = require('../lib/errors')
 const { normalizePhone } = require('../lib/phone')
 const { toMinutes, toTime } = require('../lib/time')
 const { enqueueMessage, expireInTx } = require('../notifications/outbox')
-const { assertBookableDate, fitsShopHours, isCapsterFree, loadBusyIntervals, loadCapsterBySlug, loadCapsters, loadSchedules, loadService, loadSlotTimes } = require('./availability')
+const {
+  assertBookableDate,
+  fitsShopHours,
+  isCapsterFree,
+  loadBusyIntervals,
+  loadCapsterBySlug,
+  loadCapsters,
+  loadReservedMinutes,
+  loadSchedules,
+  loadService,
+  loadSlotTimes,
+} = require('./availability')
 const { SELECT_BOOKING, minutesUntil, nowText, toDto } = require('./booking-queries')
 const { loadSettings } = require('./settings')
 
@@ -87,13 +98,15 @@ async function createBooking({ db, clock, webUrl }, input) {
   const phone = normalizePhone(input.customerPhone)
   if (!phone) throw badRequest('invalid_phone', 'Nomor WhatsApp tidak valid. Contoh: 081234567890.')
   const service = await loadService(db, input.serviceId)
+  // Waktu yang ditahan: durasi dibulatkan ke atas ke kelipatan satu slot (hair coloring 90 menit menahan 2 slot).
+  const reserved = await loadReservedMinutes(db, service.duration)
   const wantsAny = !input.barberId || input.barberId === 'any'
 
   for (let attempt = 1; attempt <= MAX_CODE_ATTEMPTS; attempt++) {
     try {
       return await db.transaction(async (tx) => {
-        const startMinutes = await assertSlotAllowed(tx, { settings, clock, date: input.date, time: input.time, duration: service.duration })
-        const endMinutes = startMinutes + service.duration
+        const startMinutes = await assertSlotAllowed(tx, { settings, clock, date: input.date, time: input.time, duration: reserved })
+        const endMinutes = startMinutes + reserved
 
         const customer = (
           await tx.query(
@@ -128,7 +141,7 @@ async function createBooking({ db, clock, webUrl }, input) {
         for (const capster of candidates) {
           await lockCapsterDay(tx, capster.id, input.date)
           await expireInTx(tx, { settings, clock, webUrl, capsterId: capster.id, date: input.date })
-          if (await isFreeNow(tx, { settings, clock, capster, date: input.date, startMinutes, duration: service.duration })) {
+          if (await isFreeNow(tx, { settings, clock, capster, date: input.date, startMinutes, duration: reserved })) {
             chosen = capster
             break
           }
@@ -194,9 +207,11 @@ async function rescheduleBooking({ db, clock, webUrl }, { code, phone, barberId,
       const capster = await loadCapsterBySlug(tx, barberId)
       await lockCapsterDay(tx, capster.id, date)
       await expireInTx(tx, { settings, clock, webUrl, capsterId: capster.id, date })
-      // Durasi yang tersimpan di booking, bukan durasi menu terbaru.
-      const startMinutes = await assertSlotAllowed(tx, { settings, clock, date, time, duration: current.duration })
-      if (!(await isFreeNow(tx, { settings, clock, capster, date, startMinutes, duration: current.duration, excludeCode: current.code }))) {
+      // Waktu yang ditahan dihitung dari durasi layanan pada booking ini (dibulatkan ke kelipatan slot). Booking lama yang
+      // layanannya tidak terbaca memakai selang yang tersimpan.
+      const reserved = await loadReservedMinutes(tx, current.service_minutes ?? current.duration)
+      const startMinutes = await assertSlotAllowed(tx, { settings, clock, date, time, duration: reserved })
+      if (!(await isFreeNow(tx, { settings, clock, capster, date, startMinutes, duration: reserved, excludeCode: current.code }))) {
         throw conflict('slot_taken', `Kapster ${capster.name} sudah penuh atau libur di jam itu. Pilih jam atau kapster lain.`)
       }
 
@@ -206,7 +221,7 @@ async function rescheduleBooking({ db, clock, webUrl }, { code, phone, barberId,
         `UPDATE booking SET id_capster = $2, tanggal_booking = $3::date, jam_mulai = $4::time, jam_selesai = $5::time,
                 jumlah_ubah_jadwal = jumlah_ubah_jadwal + 1, pengingat_terkirim_at = $6::timestamptz, updated_at = $7::timestamptz
           WHERE id_booking = $1`,
-        [current.id, capster.id, date, toTime(startMinutes), toTime(startMinutes + current.duration), reminderAlreadyDue(startsText, settings, clock) ? now : null, now],
+        [current.id, capster.id, date, toTime(startMinutes), toTime(startMinutes + reserved), reminderAlreadyDue(startsText, settings, clock) ? now : null, now],
       )
       const { dto } = await loadBooking(tx, current.id, settings)
       await enqueueMessage(tx, { bookingId: current.id, kind: 'jadwal_diubah', phone: current.no_whatsapp, reservation: dto, settings, webUrl, now })

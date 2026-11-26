@@ -105,6 +105,15 @@ libur capster, tumpang tindih durasi, jam yang sudah lewat, jangkauan hari, bata
 nomor WhatsApp, dan batas percobaan per IP. Pemesanan serentak untuk slot yang sama diurutkan dengan kunci database
 sehingga hanya satu yang berhasil. Kode atau nomor salah selalu dijawab "tidak ditemukan".
 
+### Slot yang ditahan dan foto capster
+
+- Waktu yang ditahan untuk satu booking adalah durasi layanan **dibulatkan ke atas ke kelipatan satu slot**. Slot per jam: potong
+  45 menit menahan 1 slot (60 menit), hair coloring 90 menit menahan 2 slot (120 menit). `jam_selesai` di tabel `booking` diisi
+  dengan akhir waktu yang ditahan itu. `GET /api/availability` menjawab `durationMinutes`, `reservedMinutes`, dan `slotsNeeded`, dan
+  hanya jam yang cukup untuk semua slot berurutan (di luar istirahat dan jam tutup) yang punya kapster.
+- Katalog memuat `photo` per kapster (atau `null`). Foto yang tersimpan sebagai data URL di kolom `capster.foto` dilayani oleh
+  `GET /api/barbers/:id/photo`; foto berupa path atau tautan dipakai apa adanya.
+
 ## WhatsApp otomatis
 
 | Kapan | Pesan |

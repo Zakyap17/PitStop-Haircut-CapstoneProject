@@ -23,7 +23,7 @@ describe('katalog (dari tabel resmi)', () => {
     assert.deepEqual(body.testimonials, [])
     assert.equal(body.booking.timeSlots.length, 10)
     assert.deepEqual(body.services[0], { id: 'haircut-dewasa', name: 'Haircut Dewasa', description: 'Konsultasi, potong, cuci, dan styling pomade.', price: 50000, durationMinutes: 45 })
-    assert.deepEqual(body.barbers[0], { id: 'rizky', name: 'Rizky', role: 'Head Kapster', specialty: 'Fade & Crop', experienceYears: 8, offDays: [1] })
+    assert.deepEqual(body.barbers[0], { id: 'rizky', name: 'Rizky', role: 'Head Kapster', specialty: 'Fade & Crop', experienceYears: 8, offDays: [1], photo: null })
     assert.deepEqual(Object.keys(body.haircuts[0]).sort(), ['barber', 'barberId', 'category', 'id', 'image', 'name'], 'tanpa rating')
     assert.equal(body.haircuts[0].barberId, 'rizky')
   })
@@ -87,6 +87,7 @@ describe('membuat booking (DP manual)', () => {
     const r = created.body.reservation
     assert.match(r.code, /^PS-\d{4}$/)
     assert.deepEqual([r.serviceId, r.serviceName, r.durationMinutes, r.price, r.barberName, r.date, r.time, r.status], ['hair-coloring', 'Hair Coloring', 90, 120000, 'Rizky', '2026-11-25', '10:00', 'menunggu_pembayaran'])
+    assert.deepEqual([r.durationMinutes, r.reservedMinutes], [90, 120], 'layanan 90 menit menahan 2 slot (120 menit)')
     assert.equal(r.customerPhone, '6281234560001')
     assert.deepEqual([r.dp.nominal, r.dp.status], [25000, 'menunggu'])
     assert.equal(r.dp.payBefore, '2026-11-25T04:00:00.000Z', 'batas bayar = 2 jam dari jam server (09:00 + 2 jam WIB)')
@@ -97,7 +98,7 @@ describe('membuat booking (DP manual)', () => {
               (SELECT count(*)::int FROM booking_layanan bl WHERE bl.id_booking = b.id_booking) AS layanan,
               (SELECT p.jenis_pembayaran || '/' || p.status_pembayaran || '/' || round(p.nominal)::int FROM pembayaran p WHERE p.id_booking = b.id_booking) AS bayar
          FROM booking b WHERE b.kode_booking = $1`, [r.code])
-    assert.deepEqual(rows.rows[0], { tipe_booking: 'online', status_booking: 'menunggu_pembayaran', total: 120000, dp: 25000, selesai: '11:30', layanan: 1, bayar: 'dp/menunggu/25000' })
+    assert.deepEqual(rows.rows[0], { tipe_booking: 'online', status_booking: 'menunggu_pembayaran', total: 120000, dp: 25000, selesai: '12:00', layanan: 1, bayar: 'dp/menunggu/25000' })
     assert.equal((await api.db.query('SELECT count(*)::int AS n FROM invoice')).rows[0].n, 0, 'invoice baru terbit setelah pelunasan')
 
     const overlap = await api.post('/api/reservations', booking({ time: '11:00' }))

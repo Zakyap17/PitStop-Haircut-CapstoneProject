@@ -1,3 +1,4 @@
+const { capsterKey, capsterOffDays, serviceKey } = require('../db/keys')
 const { badRequest, notFound } = require('../lib/errors')
 const { addDays, isValidIsoDate, nowInZone, toMinutes, toTime, weekdayOf } = require('../lib/time')
 const { ACTIVE_STATUSES } = require('./booking-queries')
@@ -18,12 +19,35 @@ async function loadSlotTimes(db) {
   return rows.map((row) => row.time)
 }
 
-/** Layanan aktif berdasarkan slug (id di web). */
-async function loadService(db, slug) {
+/** Panjang satu slot (menit): selisih terkecil antar jam mulai berurutan, mis. slot per jam = 60. */
+function slotLengthMinutes(slotTimes) {
+  const starts = slotTimes.map(toMinutes).sort((a, b) => a - b)
+  let smallest = Infinity
+  for (let i = 1; i < starts.length; i += 1) if (starts[i] > starts[i - 1]) smallest = Math.min(smallest, starts[i] - starts[i - 1])
+  return Number.isFinite(smallest) ? smallest : 60
+}
+
+/**
+ * Waktu yang ditahan untuk satu layanan: durasinya dibulatkan ke atas ke kelipatan satu slot.
+ * Contoh slot per jam: potong 45 menit menahan 1 slot (60 menit), hair coloring 90 menit menahan 2 slot (120 menit).
+ */
+function reserveMinutes(duration, slotLength) {
+  return Math.max(1, Math.ceil(duration / slotLength)) * slotLength
+}
+
+/** Waktu yang ditahan (menit) untuk layanan berdurasi `duration`, memakai jam slot yang berlaku sekarang. */
+async function loadReservedMinutes(db, duration) {
+  return reserveMinutes(duration, slotLengthMinutes(await loadSlotTimes(db)))
+}
+
+/** Layanan aktif berdasarkan kunci (id di web). */
+async function loadService(db, key) {
   const { rows } = await db.query(
-    `SELECT id_layanan::int AS id, slug, nama_layanan AS name, round(harga)::int AS price, durasi_menit AS duration
-       FROM layanan WHERE slug = $1 AND status_aktif`,
-    [slug],
+    `SELECT * FROM (
+       SELECT l.id_layanan::int AS id, ${serviceKey('l')} AS slug, l.nama_layanan AS name, round(l.harga)::int AS price, l.durasi_menit AS duration
+         FROM layanan l WHERE l.status_aktif
+     ) service WHERE slug = $1`,
+    [key],
   )
   if (rows.length === 0) throw notFound('Layanan tidak ditemukan.')
   return rows[0]
@@ -32,17 +56,19 @@ async function loadService(db, slug) {
 /** Capster aktif, berurutan menurut id. */
 async function loadCapsters(db) {
   const { rows } = await db.query(
-    `SELECT id_capster::int AS id, slug, nama_capster AS name, hari_libur AS off_days
-       FROM capster WHERE status_aktif AND slug IS NOT NULL ORDER BY id_capster`,
+    `SELECT c.id_capster::int AS id, ${capsterKey('c')} AS slug, c.nama_capster AS name, ${capsterOffDays('c')} AS off_days
+       FROM capster c WHERE c.status_aktif ORDER BY c.id_capster`,
   )
   return rows
 }
 
-async function loadCapsterBySlug(db, slug) {
+async function loadCapsterBySlug(db, key) {
   const { rows } = await db.query(
-    `SELECT id_capster::int AS id, slug, nama_capster AS name, hari_libur AS off_days
-       FROM capster WHERE slug = $1 AND status_aktif`,
-    [slug],
+    `SELECT * FROM (
+       SELECT c.id_capster::int AS id, ${capsterKey('c')} AS slug, c.nama_capster AS name, ${capsterOffDays('c')} AS off_days
+         FROM capster c WHERE c.status_aktif
+     ) capster WHERE slug = $1`,
+    [key],
   )
   if (rows.length === 0) throw notFound('Kapster tidak ditemukan.')
   return rows[0]
@@ -123,21 +149,25 @@ async function getAvailability({ db, settings, clock }, { date, serviceId }) {
     loadBusyIntervals(db, date, { settings, clock }),
   ])
 
+  // Slot yang ditahan = durasi dibulatkan ke atas ke kelipatan satu slot (hair coloring 90 menit menahan 2 slot per jam).
+  const slotLength = slotLengthMinutes(slotTimes)
+  const reservedMinutes = reserveMinutes(service.duration, slotLength)
   const slots = slotTimes.map((time) => {
     const startMinutes = toMinutes(time)
-    const open = fitsShopHours({ startMinutes, duration: service.duration, date, settings, clock })
+    const open = fitsShopHours({ startMinutes, duration: reservedMinutes, date, settings, clock })
     const barbers = open
-      ? capsters.filter((capster) => isCapsterFree({ capster, date, startMinutes, duration: service.duration, busy, schedules })).map((capster) => capster.slug)
+      ? capsters.filter((capster) => isCapsterFree({ capster, date, startMinutes, duration: reservedMinutes, busy, schedules })).map((capster) => capster.slug)
       : []
     return { time: toTime(startMinutes), barbers }
   })
 
-  return { date, serviceId: service.slug, durationMinutes: service.duration, slots }
+  return { date, serviceId: service.slug, durationMinutes: service.duration, reservedMinutes, slotsNeeded: reservedMinutes / slotLength, slots }
 }
 
 module.exports = {
   assertBookableDate,
   loadSlotTimes,
+  loadReservedMinutes,
   loadService,
   loadCapsters,
   loadCapsterBySlug,
