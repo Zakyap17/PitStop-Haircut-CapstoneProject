@@ -66,7 +66,7 @@ export async function renderReservationImage(reservation: Reservation): Promise<
   const date = fromIsoDate(reservation.date)
   const weekday = date.toLocaleDateString('id-ID', { weekday: 'long' }).toUpperCase()
   const fullDate = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-  const endTime = addMinutesToTime(reservation.time, reservation.durationMinutes)
+  const endTime = addMinutesToTime(reservation.time, reservation.reservedMinutes ?? reservation.durationMinutes)
   const hasDp = reservation.dp.nominal > 0
 
   ctx.fillStyle = COLORS.page

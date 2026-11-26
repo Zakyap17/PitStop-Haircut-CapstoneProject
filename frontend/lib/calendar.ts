@@ -13,7 +13,7 @@ export function buildReservationIcs(reservation: Reservation): string {
   const [hours, minutes] = reservation.time.split(':').map(Number)
   const start = fromIsoDate(reservation.date)
   start.setHours(hours, minutes, 0, 0)
-  const end = new Date(start.getTime() + reservation.durationMinutes * 60_000)
+  const end = new Date(start.getTime() + (reservation.reservedMinutes ?? reservation.durationMinutes) * 60_000)
 
   return [
     'BEGIN:VCALENDAR',

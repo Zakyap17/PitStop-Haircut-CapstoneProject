@@ -6,7 +6,10 @@ export type Reservation = {
   code: string
   serviceId: string | null
   serviceName: string
+  /** Durasi layanan (untuk ditampilkan). */
   durationMinutes: number
+  /** Waktu yang ditahan di kapster: durasi dibulatkan ke atas ke kelipatan satu slot (hair coloring 90 menit menahan 120). */
+  reservedMinutes?: number
   /** Tanggal booking dalam format ISO (YYYY-MM-DD). */
   date: string
   time: string

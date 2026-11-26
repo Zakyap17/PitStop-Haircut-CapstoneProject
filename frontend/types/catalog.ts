@@ -35,5 +35,9 @@ export type Availability = {
   date: string
   serviceId: string
   durationMinutes: number
+  /** Waktu yang ditahan (menit): durasi dibulatkan ke atas ke kelipatan satu slot. */
+  reservedMinutes: number
+  /** Jumlah slot berurutan yang terpakai (hair coloring 90 menit = 2 slot per jam). */
+  slotsNeeded: number
   slots: AvailabilitySlot[]
 }

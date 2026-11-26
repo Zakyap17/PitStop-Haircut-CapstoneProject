@@ -3,7 +3,9 @@
 import Link from 'next/link'
 import { CalendarCheck } from 'lucide-react'
 import { ScheduleFields, chipClass } from '@/components/booking/schedule-fields'
+import { useCatalog } from '@/components/providers/catalog-provider'
 import { useBookingForm } from '@/hooks/use-booking-form'
+import { slotsNeeded } from '@/lib/booking-rules'
 import { formatRupiah } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -12,6 +14,7 @@ const inputClass =
 
 export function BookingSection() {
   const form = useBookingForm()
+  const { booking: rules } = useCatalog()
 
   return (
     <section
@@ -69,7 +72,10 @@ export function BookingSection() {
                   className={cn(chipClass(form.serviceId === service.id), 'text-left')}
                 >
                   <span className="block">{service.name}</span>
-                  <span className="block text-xs opacity-70">{formatRupiah(service.price)}</span>
+                  <span className="block text-xs opacity-70">
+                    {formatRupiah(service.price)}
+                    {slotsNeeded(service.durationMinutes, rules.timeSlots) > 1 && ` · ${slotsNeeded(service.durationMinutes, rules.timeSlots)} slot`}
+                  </span>
                 </button>
               ))}
             </div>

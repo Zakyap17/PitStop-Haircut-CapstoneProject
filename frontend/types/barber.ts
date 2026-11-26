@@ -7,4 +7,6 @@ export type Barber = {
   experienceYears: number | null
   /** Hari libur, 0 = Minggu ... 6 = Sabtu (sesuai Date.getDay()). */
   offDays: number[]
+  /** Alamat foto capster (bisa lewat /api/barbers/:id/photo); null = belum ada foto, tampilkan inisial. */
+  photo: string | null
 }

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useCatalog } from '@/components/providers/catalog-provider'
 import { api, ApiError } from '@/lib/api'
-import { buildBookableDays } from '@/lib/booking-rules'
+import { buildBookableDays, slotsCovered } from '@/lib/booking-rules'
 import { toIsoDate } from '@/lib/format'
 import type { Barber } from '@/types/barber'
 import type { Availability } from '@/types/catalog'
@@ -69,6 +69,8 @@ export function useScheduleSelection(serviceId: string | null) {
 
   const barberState = (barber: Barber): BarberState => {
     if (selectedDay && barber.offDays.includes(selectedDay.getDay())) return 'off'
+    // Tidak punya satu pun jam kosong di hari ini (libur per tanggal atau penuh seharian): tampil tidak tersedia sejak awal.
+    if (ready && !ready.slots.some((slot) => slot.barbers.includes(barber.id))) return 'busy'
     const slot = time ? slotFor(time) : undefined
     if (ready && slot && !slot.barbers.includes(barber.id)) return 'busy'
     return 'available'
@@ -90,6 +92,11 @@ export function useScheduleSelection(serviceId: string | null) {
 
   const reload = useCallback(() => setReloadTick((tick) => tick + 1), [])
 
+  // Layanan yang lebih dari satu slot menahan jam-jam berikutnya juga; jam-jam itu ditandai di pilihan jam.
+  const slotsNeeded = ready?.slotsNeeded ?? 1
+  const reservedMinutes = ready?.reservedMinutes ?? null
+  const coveredTimes = time && slotsNeeded > 1 ? slotsCovered(time, slotsNeeded, booking.timeSlots) : []
+
   return {
     days,
     dayIndex,
@@ -102,6 +109,9 @@ export function useScheduleSelection(serviceId: string | null) {
     setBarberId,
     barbers,
     timeSlots: booking.timeSlots,
+    slotsNeeded,
+    reservedMinutes,
+    coveredTimes,
     availabilityStatus: availability.status,
     availabilityError: availability.error,
     reload,

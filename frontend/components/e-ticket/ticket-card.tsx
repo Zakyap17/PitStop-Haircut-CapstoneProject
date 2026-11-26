@@ -26,7 +26,7 @@ export function TicketCard({ reservation, cancelled = false, awaitingDp = false 
   const date = fromIsoDate(reservation.date)
   const weekday = date.toLocaleDateString('id-ID', { weekday: 'long' })
   const fullDate = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-  const endTime = addMinutesToTime(reservation.time, reservation.durationMinutes)
+  const endTime = addMinutesToTime(reservation.time, reservation.reservedMinutes ?? reservation.durationMinutes)
   const hasDp = reservation.dp.nominal > 0
   const dpPaid = reservation.dp.status === 'dibayar'
   const dpStatusLabel = dpPaid ? 'sudah dibayar' : awaitingDp ? 'belum dibayar' : null
