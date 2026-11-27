@@ -29,6 +29,13 @@ app.use('/api/internal', (req,res,next) => {
   next();
 });
 
+// Dipakai healthcheck container. 200 selama proses hidup; status database hanya informasi (database mati tidak diperbaiki dengan restart).
+app.get('/api/internal/health', async (req, res) => {
+  let database = 'not_configured';
+  if (pool) { try { await pool.query('SELECT 1'); database = 'connected'; } catch { database = 'unavailable'; } }
+  res.json({ status: database === 'unavailable' ? 'degraded' : 'ok', service: 'pitstop-internal', database });
+});
+
 function fail(res, status, message) { return res.status(status).json({ error: message }); }
 function imageData(value, maxBytes, label) {
   if (value == null || value === '') return null;

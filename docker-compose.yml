@@ -1,0 +1,86 @@
+# Pit Stop: web (customer + internal) + dua API terpisah + pintu masuk Cloudflare Tunnel.
+#   Menyalakan : docker compose up -d --build
+#   Dengan tunnel publik : docker compose --profile public up -d --build
+#   Panduan lengkap (migrasi, cadangan, update, rollback): docs/deploy.md
+#
+# API dipisah dua container dari satu image supaya gangguan di salah satunya tidak menjatuhkan yang lain:
+#   api      = API customer (reservasi, OTP, riwayat, try-on, WhatsApp), port 4000
+#   internal = API web internal (Admin, Capster, Owner), port 4001
+# Rahasia backend (DATABASE_URL, JWT_SECRET, FONNTE_TOKEN, TRYON_API_KEY, ...) dibaca dari backend/.env oleh keduanya.
+# Variabel khusus Compose (port, alamat situs, token tunnel) dibaca dari .env di folder ini (contoh: .env.example).
+name: pitstop
+
+x-backend: &backend
+  build:
+    context: ./backend
+  env_file: ./backend/.env
+  restart: unless-stopped
+  init: true
+  networks: [internal]
+  # Tidak ada "ports": API hanya bisa dicapai service lain lewat namanya. Dunia luar masuk lewat web.
+  logging: &logging
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
+services:
+  api:
+    <<: *backend
+    environment:
+      # Menimpa nilai di backend/.env (yang biasanya untuk dev lokal: HOST=127.0.0.1, SERVICE kosong).
+      SERVICE: public
+      HOST: 0.0.0.0
+      PORT: "4000"
+      HEALTH_PATH: /api/health
+      NODE_ENV: production
+
+  internal:
+    <<: *backend
+    environment:
+      SERVICE: internal
+      HOST: 0.0.0.0
+      PORT: "4001"
+      HEALTH_PATH: /api/internal/health
+      NODE_ENV: production
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        # Dikunci saat build (lihat frontend/Dockerfile). Ganti hanya kalau nama atau port service berubah.
+        BACKEND_URL: http://api:4000
+        INTERNAL_BACKEND_URL: http://internal:4001
+        NEXT_PUBLIC_SITE_URL: ${SITE_URL:-}
+    depends_on:
+      api:
+        condition: service_healthy
+      # Web customer tetap harus bisa naik walau API internal sedang mati.
+      internal:
+        condition: service_started
+        required: false
+    ports:
+      # Bawaan hanya bisa dibuka dari laptop/server ini. Isi WEB_BIND=0.0.0.0 di .env untuk membukanya ke jaringan rumah.
+      - "${WEB_BIND:-127.0.0.1}:${WEB_PORT:-3000}:3000"
+    restart: unless-stopped
+    init: true
+    networks: [internal]
+    logging: *logging
+
+  # Pintu masuk dari internet tanpa membuka port router. Di dashboard Cloudflare (Zero Trust > Tunnels), arahkan hostname
+  # publik ke http://web:3000. Hanya jalan kalau profile "public" dinyalakan dan TUNNEL_TOKEN terisi.
+  tunnel:
+    image: cloudflare/cloudflared:latest # setelah stabil, kunci ke satu versi supaya update tidak datang diam-diam
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on:
+      web:
+        condition: service_healthy
+    profiles: [public]
+    restart: unless-stopped
+    networks: [internal]
+    logging: *logging
+
+networks:
+  internal:

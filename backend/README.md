@@ -33,6 +33,18 @@ npm run migrate    # menjalankan migrasi (WAJIB dijalankan sengaja untuk databas
 > mengirim WhatsApp sungguhan dan membaca/menulis data asli. Untuk uji coba lokal pakai
 > `DATABASE_URL= WHATSAPP_PROVIDER=console FONNTE_TOKEN= node src/index.js`.
 
+## Mode server (SERVICE)
+
+Satu kode, tiga mode lewat variabel `SERVICE`:
+
+| Nilai | Isi | Untuk |
+|---|---|---|
+| `all` (bawaan) | API customer + API internal dalam satu proses | Dev lokal |
+| `public` | Hanya API customer (reservasi, OTP, riwayat, try-on, worker WhatsApp) | Container `api` |
+| `internal` | Hanya `/api/internal` (Admin, Capster, Owner) dengan koneksi database sendiri | Container `internal` |
+
+Di Docker, `public` dan `internal` jalan sebagai container terpisah supaya gangguan di salah satunya tidak menjatuhkan yang lain (lihat `docs/deploy.md`).
+
 ## Database
 
 Skema ada di `migrations/` (SQL biasa, berurutan):

@@ -2,7 +2,6 @@ require('dotenv').config()
 
 const { createApp } = require('./app')
 const { createDb } = require('./db')
-const { internalRouter, internalPool } = require('./internal/router')
 const { pendingMigrations, runMigrations } = require('./db/migrate')
 const { createProviderFromEnv } = require('./notifications/providers')
 const { startNotificationWorker } = require('./notifications/worker')
@@ -11,7 +10,25 @@ const { createTryOnProviderFromEnv } = require('./tryon/providers')
 const PORT = Number(process.env.PORT || 4000)
 const HOST = process.env.HOST || '0.0.0.0'
 
+// SERVICE menentukan apa yang dijalankan proses ini:
+//   all      (bawaan) API customer + API internal dalam satu proses, praktis untuk dev lokal.
+//   public   hanya API customer (reservasi, OTP, riwayat, try-on, worker WhatsApp).
+//   internal hanya API web internal (/api/internal). Di Docker kedua mode ini dijalankan sebagai container terpisah.
+const SERVICE = (process.env.SERVICE || 'all').toLowerCase()
+if (!['all', 'public', 'internal'].includes(SERVICE)) {
+  console.error(`SERVICE="${process.env.SERVICE}" tidak dikenal. Pilih: all, public, atau internal.`)
+  process.exit(1)
+}
+
 async function main() {
+  if (SERVICE === 'internal') {
+    // Tidak memakai koneksi/migrasi milik API customer; rute internal punya koneksi database sendiri.
+    require('./internal/server').startInternalServer({ port: PORT, host: HOST })
+    return
+  }
+  // Rute internal baru dimuat kalau dipakai, jadi container "public" tidak membawa kodenya sama sekali.
+  const { internalRouter, internalPool } = SERVICE === 'all' ? require('./internal/router') : { internalRouter: null, internalPool: null }
+
   const db = await createDb()
   // Migrasi otomatis hanya untuk database tertanam (dev/tes). Di database bersama (Supabase/VM) migrasi yang mengubah
   // struktur harus dijalankan sengaja: `npm run migrate`, atau isi AUTO_MIGRATE=true kalau memang mau otomatis.
@@ -55,7 +72,7 @@ async function main() {
   const stopWorker = startNotificationWorker({ db, provider, webUrl })
 
   const server = app.listen(PORT, HOST, () => {
-    console.log(`PitStop backend berjalan di http://${HOST}:${PORT} (database: ${db.driver})`)
+    console.log(`PitStop backend (${SERVICE}) berjalan di http://${HOST}:${PORT} (database: ${db.driver})`)
     if (db.driver === 'pglite') console.log('Memakai database tertanam (PGlite). Isi DATABASE_URL di .env untuk PostgreSQL sungguhan.')
   })
 
