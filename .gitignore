@@ -17,3 +17,6 @@
 .data/
 Thumbs.db
 .DS_Store
+
+# Cadangan database dari scripts/backup-db.sh (berisi data pelanggan)
+cadangan/

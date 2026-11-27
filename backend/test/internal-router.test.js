@@ -64,3 +64,36 @@ describe('web internal dan web customer di satu backend', () => {
     assert.equal(customer.status, 413)
   })
 })
+
+describe('API internal berdiri sendiri (SERVICE=internal)', () => {
+  const { createInternalApp } = require('../src/internal/server')
+  let server
+  let base
+
+  before(async () => {
+    server = await new Promise((resolve) => {
+      const instance = createInternalApp().listen(0, '127.0.0.1', () => resolve(instance))
+    })
+    base = `http://127.0.0.1:${server.address().port}`
+  })
+
+  after(async () => {
+    await new Promise((resolve) => server.close(resolve))
+  })
+
+  test('health internal menjawab 200 selama proses hidup', async () => {
+    const response = await fetch(base + '/api/internal/health')
+    assert.equal(response.status, 200)
+    const body = await response.json()
+    assert.equal(body.service, 'pitstop-internal')
+  })
+
+  test('rute internal ada, rute customer tidak ada di proses ini', async () => {
+    const me = await fetch(base + '/api/internal/auth/me')
+    assert.ok([401, 503].includes(me.status), `status ${me.status}`)
+    for (const path of ['/api/catalog', '/api/otp/request', '/api/reservations', '/api/health']) {
+      const response = await fetch(base + path)
+      assert.equal(response.status, 404, `${path} harus 404 di server internal`)
+    }
+  })
+})

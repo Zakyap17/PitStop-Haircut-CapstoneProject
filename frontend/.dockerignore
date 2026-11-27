@@ -1,0 +1,10 @@
+# Jangan masuk ke image: dependensi lokal, hasil build lama, dan rahasia.
+node_modules
+.next
+.env
+.env.*
+!.env.example
+npm-debug.log*
+*.log
+Dockerfile
+.dockerignore

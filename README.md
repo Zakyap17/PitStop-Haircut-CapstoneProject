@@ -5,7 +5,23 @@ Aplikasi booking potong rambut. Monorepo berisi:
 - `frontend/` - Next.js (TypeScript, Tailwind CSS)
 - `backend/` - Express (Node.js)
 
-## Menjalankan Project
+## Cara cepat: jalankan semuanya dengan Docker
+
+Butuh Docker (Docker Desktop di Windows/Mac) dan satu hal dari pemegang proyek: `DATABASE_URL` (alamat database Supabase).
+
+```bash
+git clone -b deploy https://github.com/Zakyap17/PitStop-Haircut-CapstoneProject.git
+cd PitStop-Haircut-CapstoneProject
+
+./scripts/setup.sh                 # Windows PowerShell: powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1
+# isi DATABASE_URL di backend/.env, jalankan ulang skrip di atas, lalu:
+docker compose up -d --build
+docker compose ps                  # tunggu api, internal, web = healthy
+```
+Buka http://localhost:3000 (web customer) dan http://localhost:3000/internal/login (Admin, Capster, Owner).
+Dua API (customer dan internal) berjalan sebagai container terpisah. Panduan lengkap, update, migrasi, dan cadangan: [docs/deploy.md](docs/deploy.md).
+
+## Menjalankan Project (tanpa Docker, untuk pengembangan)
 
 ### Backend (jalankan lebih dulu)
 ```bash

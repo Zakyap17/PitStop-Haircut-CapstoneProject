@@ -1,0 +1,12 @@
+# Jangan masuk ke image: rahasia, dependensi lokal, data dev, dan tes.
+node_modules
+.env
+.env.*
+!.env.example
+.data
+npm-debug.log*
+*.log
+test
+README.md
+Dockerfile
+.dockerignore
