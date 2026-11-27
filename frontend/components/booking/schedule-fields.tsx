@@ -59,17 +59,18 @@ export function ScheduleFields({ schedule, dateLegend, barberLegend }: ScheduleF
               <button
                 key={barber.name}
                 type="button"
-                disabled={!available}
+                disabled={!available || schedule.availabilityLoading}
                 aria-pressed={schedule.barberName === barber.name}
                 onClick={() => schedule.setBarberName(barber.name)}
                 className={cn(chipClass(schedule.barberName === barber.name), 'text-left')}
               >
                 <span className="block">{barber.name}</span>
-                <span className="block text-xs opacity-70">{available ? 'Tersedia' : 'Libur'}</span>
+                <span className="block text-xs opacity-70">{schedule.availabilityLoading?'Memuat…':available?'Tersedia':'Libur'}</span>
               </button>
             )
           })}
         </div>
+        {!schedule.availabilityLoading&&!schedule.barbers.length&&<p className="mt-2 text-sm text-muted-foreground">{schedule.availabilityError?'Daftar capster gagal dimuat. Coba lagi nanti.':'Tidak ada capster yang tersedia saat ini.'}</p>}
       </fieldset>
     </>
   )

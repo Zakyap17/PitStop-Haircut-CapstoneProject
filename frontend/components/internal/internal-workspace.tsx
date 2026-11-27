@@ -8,13 +8,13 @@ import { internalApi, type InternalUser } from '@/lib/internal-api'
 const roleNames = { owner: 'Owner', admin: 'Admin / Kasir', capster: 'Capster' }
 const navByRole = {
   admin: [
-    ['Dashboard', '/admin'], ['Booking Online', '/admin/bookings'], ['Pembayaran DP', '/admin/payments'],
+    ['Dashboard', '/admin'], ['Atur Capster', '/admin/capsters'], ['Daftar Booking', '/admin/bookings'],
     ['Transaksi', '/admin/transactions'], ['Pelanggan', '/admin/customers'], ['Layanan', '/admin/services'],
   ],
   owner: [
     ['Dashboard', '/owner'], ['Laporan', '/owner/reports'], ['Pengguna', '/owner/staff'], ['Layanan', '/owner/services'],
     ['Pengeluaran', '/owner/expenses'], ['Galeri', '/owner/gallery'], ['Pengaturan DP', '/owner/dp-settings'], ['Jejak Audit', '/owner/audit'],
-    ['Booking', '/admin/bookings'], ['Transaksi', '/admin/transactions'], ['Pelanggan', '/admin/customers'],
+    ['Atur Capster', '/admin/capsters'], ['Daftar Booking', '/admin/bookings'], ['Transaksi', '/admin/transactions'], ['Pelanggan', '/admin/customers'],
   ],
   capster: [
     ['Dashboard', '/capster'], ['Jadwal Saya', '/capster/schedule'], ['Riwayat Layanan', '/capster/history'], ['Pendapatan Saya', '/capster/earnings'],
@@ -50,12 +50,12 @@ export function InternalWorkspace({ children, allowed }: { children: ReactNode; 
   const nav = navByRole[user.role]
   return (
     <div className="admin-theme min-h-svh lg:flex">
-      <aside className="hidden w-64 shrink-0 border-r border-border bg-card p-5 lg:flex lg:flex-col">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden h-svh w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-card p-5 lg:flex">
         <Link href={user.role === 'capster' ? '/capster' : user.role === 'owner' ? '/owner' : '/admin'} className="mb-7 flex items-center gap-3">
           <span className="flex size-10 items-center justify-center rounded-full bg-primary text-xs font-extrabold text-white">PS</span>
           <span><strong className="block tracking-[.18em]">PITSTOP</strong><small className="text-muted-foreground">INTERNAL SYSTEM</small></span>
         </Link>
-        <nav aria-label="Menu internal" className="flex flex-col gap-1">
+        <nav aria-label="Menu internal" className="min-h-0 flex-1 overflow-y-auto flex flex-col gap-1">
           {nav.map(([label, href]) => <Link key={href} href={href} className={`rounded-lg px-3 py-2.5 text-sm ${pathname === href ? 'bg-soft font-semibold text-primary' : 'text-muted-foreground hover:bg-soft/70'}`}>{label}</Link>)}
         </nav>
         <div className="mt-auto border-t border-border pt-4">
@@ -63,7 +63,7 @@ export function InternalWorkspace({ children, allowed }: { children: ReactNode; 
           <button onClick={logout} className="text-sm text-primary hover:underline">Keluar</button>
         </div>
       </aside>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 lg:ml-64">
         <header className="sticky top-0 z-10 border-b border-border bg-card/95 px-4 py-3 backdrop-blur sm:px-7 lg:hidden">
           <div className="mb-3 flex items-center justify-between"><strong className="text-sm">PITSTOP · {roleNames[user.role]}</strong><button onClick={logout} className="text-xs text-primary">Keluar</button></div>
           <nav className="flex gap-2 overflow-x-auto">{nav.map(([label, href]) => <Link key={href} href={href} className={`shrink-0 rounded-md px-2.5 py-1.5 text-xs ${pathname === href ? 'bg-soft font-semibold text-primary' : 'text-muted-foreground'}`}>{label}</Link>)}</nav>

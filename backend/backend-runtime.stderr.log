@@ -1,0 +1,72 @@
+◇ injected env (8) from .env
+error: operator is not unique: unknown - unknown
+    at D:\GYEBRAN\TEL-U\PERKULIAHAN\SEMESTER 7\CAPSTONE\PITSTOP\PitStop-Haircut-CapstoneProject\backend\node_modules\pg\lib\client.js:694:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\GYEBRAN\TEL-U\PERKULIAHAN\SEMESTER 7\CAPSTONE\PITSTOP\PitStop-Haircut-CapstoneProject\backend\src\index.js:500:17 {
+  length: 191,
+  severity: 'ERROR',
+  code: '42725',
+  detail: undefined,
+  hint: 'Could not choose a best candidate operator. You might need to add explicit type casts.',
+  position: '360',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_oper.c',
+  line: '627',
+  routine: 'op_error'
+}
+error: operator is not unique: unknown - unknown
+    at D:\GYEBRAN\TEL-U\PERKULIAHAN\SEMESTER 7\CAPSTONE\PITSTOP\PitStop-Haircut-CapstoneProject\backend\node_modules\pg\lib\client.js:694:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\GYEBRAN\TEL-U\PERKULIAHAN\SEMESTER 7\CAPSTONE\PITSTOP\PitStop-Haircut-CapstoneProject\backend\src\index.js:500:17 {
+  length: 191,
+  severity: 'ERROR',
+  code: '42725',
+  detail: undefined,
+  hint: 'Could not choose a best candidate operator. You might need to add explicit type casts.',
+  position: '360',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_oper.c',
+  line: '627',
+  routine: 'op_error'
+}
+Error: Layanan harus dimulai sebelum diselesaikan.
+    at D:\GYEBRAN\TEL-U\PERKULIAHAN\SEMESTER 7\CAPSTONE\PITSTOP\PitStop-Haircut-CapstoneProject\backend\src\index.js:391:82
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  status: 409
+}
+error: inconsistent types deduced for parameter $6
+    at D:\GYEBRAN\TEL-U\PERKULIAHAN\SEMESTER 7\CAPSTONE\PITSTOP\PitStop-Haircut-CapstoneProject\backend\node_modules\pg\lib\client.js:694:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\GYEBRAN\TEL-U\PERKULIAHAN\SEMESTER 7\CAPSTONE\PITSTOP\PitStop-Haircut-CapstoneProject\backend\src\index.js:447:15 {
+  length: 145,
+  severity: 'ERROR',
+  code: '42P08',
+  detail: 'text versus numeric',
+  hint: undefined,
+  position: '240',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_param.c',
+  line: '219',
+  routine: 'variable_coerce_param_hook'
+}

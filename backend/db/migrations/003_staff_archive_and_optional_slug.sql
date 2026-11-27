@@ -1,0 +1,2 @@
+ALTER TABLE capster ALTER COLUMN slug DROP NOT NULL;
+ALTER TABLE pengguna ADD COLUMN IF NOT EXISTS deleted_at timestamptz;

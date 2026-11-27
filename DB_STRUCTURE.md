@@ -10,6 +10,7 @@
 | `password_hash` | `text` |  |
 | `role` | `varchar` |  |
 | `status_aktif` | `bool` |  |
+| `deleted_at` | `timestamptz` | Nullable; account access removed when set |
 
 ## Table `capster`
 
@@ -22,7 +23,9 @@
 | `nama_capster` | `varchar` |  |
 | `spesialisasi` | `varchar` |  Nullable |
 | `foto` | `text` |  Nullable |
+| `slug` | `varchar` | Unique, nullable |
 | `status_aktif` | `bool` |  |
+| `tersedia` | `bool` | Capster dapat dipilih pada booking dan transaksi walk-in |
 
 ## Table `profil_usaha`
 
@@ -100,7 +103,7 @@
 | Name | Type | Constraints |
 |------|------|-------------|
 | `id_detail` | `int8` | Primary Identity |
-| `id_booking` | `int8` |  |
+| `id_booking` | `int8` | FK ke `booking` |
 | `id_layanan` | `int8` |  |
 | `harga_satuan` | `numeric` |  |
 | `subtotal` | `numeric` |  |
@@ -181,7 +184,8 @@
 | Name | Type | Constraints |
 |------|------|-------------|
 | `id_notifikasi` | `int8` | Primary Identity |
-| `id_booking` | `int8` |  |
+| `id_booking` | `int8` | Nullable FK; invoice notification for a booking |
+| `id_transaksi` | `int8` | Nullable FK; invoice notification for a walk-in transaction |
 | `no_tujuan` | `varchar` |  |
 | `jenis_pesan` | `varchar` |  |
 | `status_kirim` | `varchar` |  |
@@ -209,7 +213,9 @@
 | `id_galeri` | `int8` | Primary Identity |
 | `id_pengguna` | `int8` |  |
 | `judul` | `varchar` |  |
+| `kategori` | `varchar` | Not null; defaults to `Umum` for existing items |
 | `file_gambar` | `text` |  |
+| `id_capster` | `int8` | Nullable foreign key to `capster` |
 | `created_at` | `timestamptz` |  |
 
 ## Table `pengaturan_dp`
@@ -248,6 +254,8 @@
 | `periode_mulai` | `date` |  |
 | `periode_selesai` | `date` |  |
 | `format_ekspor` | `varchar` |  |
+| `granularitas` | `varchar` | `daily`, `weekly`, `monthly`, `yearly`, atau `custom` |
+| `parameter_filter` | `jsonb` | Rentang dan opsi filter saat ekspor |
 | `created_at` | `timestamptz` |  |
 
 ## Table `transaksi` (tambahan untuk sistem internal)
@@ -268,6 +276,9 @@ Tabel transaksi diperlukan agar Admin/Cashier dapat mencatat walk-in tanpa membu
 | `status_transaksi` | `varchar` |  |
 | `status_layanan` | `varchar` | Status progres pelayanan, terpisah dari pembayaran |
 | `metode_pembayaran` | `varchar` | Nullable |
+| `uang_diterima` | `numeric` | Uang tunai yang diserahkan, termasuk transaksi yang belum dikonfirmasi lunas |
+| `kembalian` | `numeric` | Kelebihan uang tunai terhadap tagihan |
+| `waktu_lunas` | `timestamptz` | Nullable; waktu pembayaran dikonfirmasi lunas |
 | `created_at` | `timestamptz` |  |
 
 ## Table `transaksi_layanan` (tambahan untuk snapshot item transaksi)
@@ -289,7 +300,9 @@ Menyimpan rincian layanan transaksi dan snapshot nama/harga agar riwayat transak
 
 `riwayat_layanan.id_transaksi` ditambahkan sebagai nullable foreign key ke `transaksi`, agar progres pelayanan walk-in tercatat terpisah dari status finansial transaksi.
 
-`booking.status_booking` tetap menyimpan status booking. Progres seperti layanan dimulai/selesai hanya dicatat pada `riwayat_layanan.status_layanan`; status Tidak Hadir dan kembali ke antrean dicatat pada `booking`/`antrean_kosong`.
+`booking.status_booking` tetap menyimpan status booking. Progres seperti layanan dimulai/selesai, pembatalan, dan customer terlambat dicatat pada `riwayat_layanan.status_layanan`; status booking dibatalkan atau menunggu reschedule dicatat pada `booking`.
+
+`notifikasi_whatsapp.id_booking` nullable dan `id_transaksi` menghubungkan pengiriman invoice ke booking maupun transaksi walk-in.
 
 **Catatan konsistensi DP:** blueprint menetapkan nominal DP Rp25.000 per booking, sementara kolom `pengaturan_dp` menyimpan `persentase_dp`. Halaman internal saat ini merekam pengaturan persentase tanpa menerapkannya ke nominal booking; kebijakan tersebut perlu diselaraskan sebelum dipakai sebagai aturan aktif.
 

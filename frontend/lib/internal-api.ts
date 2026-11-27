@@ -1,4 +1,4 @@
-export const INTERNAL_API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
+export const INTERNAL_API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:6543'
 
 export async function internalApi<T = unknown>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers)
