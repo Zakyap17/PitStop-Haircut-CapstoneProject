@@ -13,6 +13,15 @@ random_secret() {
   else head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n'; fi
 }
 
+# Berkas .env berakhir baris CRLF (dibuat di Windows) membuat nilai membawa karakter CR: ubah jadi LF.
+CR=$(printf '\r')
+to_lf() {
+  if [ -f "$1" ] && grep -q "$CR" "$1"; then
+    sed -i.bak "s/${CR}\$//" "$1" && rm -f "$1.bak"
+    echo "Dirapikan: $1 (akhir baris CRLF diubah ke LF)"
+  fi
+}
+
 # Mengisi KEY=nilai di sebuah berkas .env hanya kalau KEY itu sekarang kosong.
 fill_if_empty() {
   file=$1 key=$2 value=$3
@@ -27,12 +36,15 @@ if [ ! -f .env ]; then
 else
   echo "Dilewati : .env sudah ada"
 fi
+to_lf .env
 
 if [ ! -f backend/.env ]; then
   cp backend/.env.example backend/.env
+  to_lf backend/.env
   fill_if_empty backend/.env JWT_SECRET "$(random_secret)"
   echo "Dibuat   : backend/.env (JWT_SECRET sudah diisi otomatis)"
 else
+  to_lf backend/.env
   fill_if_empty backend/.env JWT_SECRET "$(random_secret)"
   echo "Dilewati : backend/.env sudah ada"
 fi

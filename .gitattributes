@@ -1,0 +1,7 @@
+# Berkas yang dibaca Linux/Docker harus berakhir baris LF, walau di-clone di Windows (autocrlf).
+# Dengan CRLF, skrip shell gagal, nilai di berkas .env membawa karakter "\r", dan Dockerfile bisa rusak.
+*.sh text eol=lf
+Dockerfile text eol=lf
+.dockerignore text eol=lf
+.env.example text eol=lf
+docker-compose.yml text eol=lf
