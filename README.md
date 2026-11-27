@@ -30,6 +30,23 @@ jadwal, reservasi) dari backend, jadi backend harus menyala.
 
 Memasang di server (VM): lihat [docs/deploy-vm.md](docs/deploy-vm.md).
 
+### Sistem Internal (Owner, Admin/Cashier, Capster)
+
+1. Salin `backend/.env.example` ke `backend/.env`, lalu atur `DATABASE_URL`, `JWT_SECRET` (minimal 32 karakter), dan kredensial owner awal. Di production HTTPS, aktifkan `COOKIE_SECURE=true` dan sesuaikan `FRONTEND_ORIGIN`.
+2. Jalankan migrasi database dari folder `backend`:
+
+```bash
+npm install
+npm run db:migrate
+npm run db:bootstrap-owner
+npm run dev
+```
+
+3. Salin `frontend/.env.example` ke `frontend/.env.local`, lalu jalankan frontend seperti biasa.
+4. Buka `http://localhost:3000/internal/login`. Setelah login, sistem mengarahkan setiap role ke dashboardnya.
+
+Migrasi memakai PostgreSQL dan mencakup tabel internal sesuai `DB_STRUCTURE.md`, termasuk tambahan `transaksi` dan `transaksi_layanan` agar walk-in dapat ditagih tanpa booking serta invoice walk-in tetap tercatat. API internal tersedia di `/api/internal/*`; endpoint customer tidak ditambahkan atau diubah.
+
 ## Coba di HP (jaringan Wi-Fi yang sama)
 
 ```bash

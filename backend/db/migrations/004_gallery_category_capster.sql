@@ -1,0 +1,2 @@
+ALTER TABLE galeri ADD COLUMN IF NOT EXISTS kategori varchar(120) NOT NULL DEFAULT 'Umum';
+ALTER TABLE galeri ADD COLUMN IF NOT EXISTS id_capster bigint REFERENCES capster(id_capster) ON DELETE SET NULL;

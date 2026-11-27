@@ -9,13 +9,15 @@ const { tryOnRouter } = require('./routes/try-on')
 
 /**
  * Membuat aplikasi Express. Dipisah dari index.js supaya tes bisa membuatnya dengan database dan jam palsu.
- * @param {{ db: object, clock?: () => Date, corsOrigins?: string[] | '*', trustProxy?: string, limits?: { write?: number, access?: number, tryOn?: number, otp?: number }, tryOnProvider?: object | null, tryOnGenerate?: boolean, whatsappProvider?: object | null, otpRequired?: boolean }} options
+ * @param {{ db: object, clock?: () => Date, corsOrigins?: string[] | '*', trustProxy?: string, limits?: { write?: number, access?: number, tryOn?: number, otp?: number }, tryOnProvider?: object | null, tryOnGenerate?: boolean, whatsappProvider?: object | null, otpRequired?: boolean, internalRouter?: import('express').Router }} options
  */
-function createApp({ db, clock = () => new Date(), corsOrigins = '*', trustProxy, limits, webUrl, tryOnProvider = null, tryOnGenerate = true, whatsappProvider = null, otpRequired = true } = {}) {
+function createApp({ db, clock = () => new Date(), corsOrigins = '*', trustProxy, limits, webUrl, tryOnProvider = null, tryOnGenerate = true, whatsappProvider = null, otpRequired = true, internalRouter = null } = {}) {
   const app = express()
   if (trustProxy) app.set('trust proxy', trustProxy === 'true' ? true : /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy)
   app.disable('x-powered-by')
 
+  // Rute web internal (/api/internal) punya CORS, parser JSON 3 MB, dan cookie sendiri, jadi dipasang sebelum yang global.
+  if (internalRouter) app.use(internalRouter)
   app.use(cors({ origin: corsOrigins === '*' ? true : corsOrigins }))
   // Try-on menerima foto (beberapa MB), jadi rutenya dimuat sebelum parser JSON global yang hanya 20 KB.
   app.use('/api', tryOnRouter({ db, tryOnProvider, canGenerate: tryOnGenerate, limits }))
