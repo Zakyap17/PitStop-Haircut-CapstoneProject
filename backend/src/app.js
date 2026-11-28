@@ -5,13 +5,14 @@ const { catalogRouter } = require('./routes/catalog')
 const { historyRouter } = require('./routes/history')
 const { otpRouter } = require('./routes/otp')
 const { reservationsRouter } = require('./routes/reservations')
+const { paymentsRouter } = require('./routes/payments')
 const { tryOnRouter } = require('./routes/try-on')
 
 /**
  * Membuat aplikasi Express. Dipisah dari index.js supaya tes bisa membuatnya dengan database dan jam palsu.
- * @param {{ db: object, clock?: () => Date, corsOrigins?: string[] | '*', trustProxy?: string, limits?: { write?: number, access?: number, tryOn?: number, otp?: number }, tryOnProvider?: object | null, tryOnGenerate?: boolean, whatsappProvider?: object | null, otpRequired?: boolean, internalRouter?: import('express').Router }} options
+ * @param {{ db: object, clock?: () => Date, corsOrigins?: string[] | '*', trustProxy?: string, limits?: { write?: number, access?: number, tryOn?: number, otp?: number }, tryOnProvider?: object | null, tryOnGenerate?: boolean, whatsappProvider?: object | null, otpRequired?: boolean, midtrans?: object | null, internalRouter?: import('express').Router }} options
  */
-function createApp({ db, clock = () => new Date(), corsOrigins = '*', trustProxy, limits, webUrl, tryOnProvider = null, tryOnGenerate = true, whatsappProvider = null, otpRequired = true, internalRouter = null } = {}) {
+function createApp({ db, clock = () => new Date(), corsOrigins = '*', trustProxy, limits, webUrl, tryOnProvider = null, tryOnGenerate = true, whatsappProvider = null, otpRequired = true, midtrans = null, internalRouter = null } = {}) {
   const app = express()
   if (trustProxy) app.set('trust proxy', trustProxy === 'true' ? true : /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy)
   app.disable('x-powered-by')
@@ -24,7 +25,7 @@ function createApp({ db, clock = () => new Date(), corsOrigins = '*', trustProxy
   app.use(express.json({ limit: '20kb' }))
 
   // whatsappProvider mengirim kode OTP; otpRequired = booking baru wajib memakai kode OTP dari WhatsApp (OTP_REQUIRED=false untuk mematikan).
-  const ctx = { db, clock, limits, webUrl, whatsappProvider, otpRequired }
+  const ctx = { db, clock, limits, webUrl, whatsappProvider, otpRequired, midtrans }
   app.get('/api/health', async (req, res) => {
     await db.query('SELECT 1')
     res.json({ status: 'ok', service: 'pitstop-backend', database: db.driver })
@@ -33,6 +34,7 @@ function createApp({ db, clock = () => new Date(), corsOrigins = '*', trustProxy
   app.use('/api', otpRouter(ctx))
   app.use('/api', historyRouter(ctx))
   app.use('/api', reservationsRouter(ctx))
+  app.use('/api', paymentsRouter(ctx))
 
   app.use('/api', (req, res) => res.status(404).json({ error: { code: 'not_found', message: 'Alamat API tidak ditemukan.' } }))
 

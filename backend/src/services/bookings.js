@@ -299,4 +299,4 @@ async function cancelBooking({ db, clock, webUrl }, { code, phone }) {
   })
 }
 
-module.exports = { normalizeCode, createBooking, lookupBooking, rescheduleBooking, cancelBooking, SLOT_ERRORS }
+module.exports = { normalizeCode, findOwnedBooking, createBooking, lookupBooking, rescheduleBooking, cancelBooking, SLOT_ERRORS }

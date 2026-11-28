@@ -60,6 +60,12 @@ Isi `WEB_BIND=0.0.0.0` di `.env`, jalankan ulang `docker compose up -d`, buka `h
 
 `npm run dev` / `npm start` di `backend/` menjalankan **kedua API dalam satu proses** (`SERVICE=all`, bawaan) di port 4000, dan web memakainya untuk semua `/api`. Untuk meniru pemisahan: jalankan dua proses dengan `SERVICE=public PORT=4000` dan `SERVICE=internal PORT=4001`, lalu jalankan web dengan `INTERNAL_BACKEND_URL=http://localhost:4001`.
 
+## Pembayaran online (opsional)
+
+Isi `MIDTRANS_SERVER_KEY` (kunci sandbox untuk uji) di `backend/.env`, lalu `docker compose up -d api`. Tanpa itu e-tiket hanya menawarkan transfer manual.
+Agar konfirmasi masuk otomatis, daftarkan `https://<domain-publik>/api/payments/midtrans/notification` sebagai Payment Notification URL di dashboard Midtrans
+(alamat ini lewat proxy web ke container `api`). Detail alur dan keamanan: [docs/pembayaran.md](pembayaran.md).
+
 ## Sehari-hari
 
 | Perlu | Perintah |

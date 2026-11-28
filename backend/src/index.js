@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const { createApp } = require('./app')
 const { createDb } = require('./db')
+const { createMidtransFromEnv } = require('./payments/midtrans')
 const { pendingMigrations, runMigrations } = require('./db/migrate')
 const { createProviderFromEnv } = require('./notifications/providers')
 const { startNotificationWorker } = require('./notifications/worker')
@@ -65,7 +66,10 @@ async function main() {
   const otpRequired = process.env.OTP_REQUIRED !== 'false'
   if (process.env.OTP_RATE_LIMIT) limits.otp = Number(process.env.OTP_RATE_LIMIT)
   console.log(`OTP WhatsApp: ${otpRequired ? 'wajib sebelum booking' : 'dimatikan (OTP_REQUIRED=false)'}`)
-  const app = createApp({ db, corsOrigins, trustProxy: process.env.TRUST_PROXY, limits, webUrl, tryOnProvider, tryOnGenerate, whatsappProvider: provider, otpRequired, internalRouter })
+  // Pembayaran DP online (Midtrans). Aktif kalau MIDTRANS_SERVER_KEY terisi; tanpa itu hanya ada transfer manual.
+  const midtrans = createMidtransFromEnv()
+  console.log(midtrans ? `Pembayaran online: Midtrans ${midtrans.sandbox ? 'SANDBOX (uji)' : 'PRODUKSI'}` : 'Pembayaran online: nonaktif (isi MIDTRANS_SERVER_KEY di .env untuk mengaktifkan).')
+  const app = createApp({ db, corsOrigins, trustProxy: process.env.TRUST_PROXY, limits, webUrl, tryOnProvider, tryOnGenerate, whatsappProvider: provider, otpRequired, midtrans, internalRouter })
 
   console.log(`WhatsApp: penyedia ${provider.name}${provider.name === 'console' ? ' (pesan hanya dicetak di log, tidak dikirim)' : ''}`)
   if (!webUrl) console.warn('PUBLIC_WEB_URL kosong: pesan WhatsApp tidak akan memuat tautan cek/ubah reservasi.')

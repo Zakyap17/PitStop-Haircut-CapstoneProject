@@ -40,6 +40,8 @@ async function request<T>(method: 'GET' | 'POST', path: string, body?: unknown):
   return data as T
 }
 
+export type PaymentConfig = { online: boolean; provider: string | null; sandbox: boolean | null }
+
 export type NewReservation = {
   serviceId: string
   /** Kosong atau "any" = tanpa preferensi capster. */
@@ -83,6 +85,17 @@ export const api = {
   /** Langkah 2 try-on: meminta AI mengganti gaya rambut di foto. Mengembalikan gambar hasil sebagai data URL. Bisa memakan 10 sampai 60 detik. */
   generateTryOn: (input: { photo: EncodedImage; reference: EncodedImage; haircutName: string }) =>
     request<{ image: string }>('POST', '/api/try-on', input).then((result) => result.image),
+
+  /** Apakah pembayaran DP online (Midtrans) aktif di backend. Kalau tidak, hanya transfer manual yang ditawarkan. */
+  getPaymentConfig: () => request<PaymentConfig>('GET', '/api/payments/config'),
+
+  /** Membuat transaksi bayar DP online. `redirectUrl` adalah halaman bayar Midtrans (QRIS, virtual account, e-wallet). */
+  startPayment: (code: string, phone: string) =>
+    request<{ orderId: string; token: string; redirectUrl: string; expiresInMinutes: number }>('POST', `/api/reservations/${encodeURIComponent(code)}/pay`, { phone }),
+
+  /** Menanyakan status pembayaran ke Midtrans lewat server, lalu mengembalikan booking terbaru (DP dibayar = sudah dikonfirmasi). */
+  syncPayment: (code: string, phone: string) =>
+    request<{ result: string; reservation: Reservation }>('POST', `/api/reservations/${encodeURIComponent(code)}/pay/sync`, { phone }),
 
   cancelReservation: (code: string, phone: string) =>
     request<{ reservation: Reservation }>('POST', `/api/reservations/${encodeURIComponent(code)}/cancel`, { phone }).then((result) => result.reservation),

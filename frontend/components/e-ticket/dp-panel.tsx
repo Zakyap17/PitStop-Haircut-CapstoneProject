@@ -1,6 +1,7 @@
 'use client'
 
 import { Clock } from 'lucide-react'
+import { PaymentOptions } from '@/components/e-ticket/payment-options'
 import { useCatalog } from '@/components/providers/catalog-provider'
 import { formatRupiah } from '@/lib/format'
 import type { Reservation } from '@/types/reservation'
@@ -8,10 +9,16 @@ import type { Reservation } from '@/types/reservation'
 const label = 'text-[11px] font-medium tracking-[0.18em] text-ink-muted uppercase'
 
 /**
- * Panel uang muka (DP): nominal, batas bayar, dan cara bayar. Tampil selama booking menunggu DP.
+ * Panel uang muka (DP): nominal, batas bayar, dan pilihan pembayaran (online atau transfer manual). Tampil selama booking menunggu DP.
  * Kartu putih hangat solid dengan garis amber di kiri sebagai penanda "perlu tindakan". Tanpa transparansi.
  */
-export function DpPanel({ reservation }: { reservation: Reservation }) {
+type DpPanelProps = {
+  reservation: Reservation
+  onUpdated: (reservation: Reservation) => void
+  returning: 'idle' | 'checking' | 'still-waiting'
+}
+
+export function DpPanel({ reservation, onUpdated, returning }: DpPanelProps) {
   const { booking } = useCatalog()
   const { dp } = reservation
   const deadline = dp.payBefore
@@ -28,7 +35,7 @@ export function DpPanel({ reservation }: { reservation: Reservation }) {
             Bayar DP untuk mengunci slot
           </h2>
         </div>
-        <dl className="grid gap-x-8 gap-y-5 px-5 py-5 sm:grid-cols-[auto_1fr_1fr] sm:px-6">
+        <dl className="grid gap-x-8 gap-y-5 px-5 py-5 sm:grid-cols-[auto_1fr] sm:px-6">
           <div>
             <dt className={label}>Nominal DP</dt>
             <dd className="mt-1.5 font-display text-4xl leading-none">{formatRupiah(dp.nominal)}</dd>
@@ -39,12 +46,8 @@ export function DpPanel({ reservation }: { reservation: Reservation }) {
             <dd className="mt-1.5 text-[15px] leading-snug font-semibold">{deadline ? `${deadline} WIB` : '-'}</dd>
             <dd className="mt-1 text-xs text-ink-muted">Lewat batas ini booking dibatalkan otomatis.</dd>
           </div>
-          <div>
-            <dt className={label}>Cara bayar</dt>
-            <dd className="mt-1.5 text-[15px] leading-snug font-semibold">{dp.instruction ?? 'Hubungi kasir'}</dd>
-            <dd className="mt-1 text-xs text-ink-muted">Setelah dikonfirmasi admin, bukti booking dikirim ke WhatsApp.</dd>
-          </div>
         </dl>
+        <PaymentOptions reservation={reservation} onUpdated={onUpdated} returning={returning} />
       </div>
     </section>
   )

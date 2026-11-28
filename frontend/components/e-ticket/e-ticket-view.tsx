@@ -32,26 +32,50 @@ function PageHeader({ chip, title, text }: { chip: React.ReactNode; title: strin
 export function ETicketView() {
   // undefined = belum dibaca dari storage; null = tidak ada booking tersimpan.
   const [reservation, setReservation] = useState<Reservation | null | undefined>(undefined)
+  // Pelanggan baru kembali dari halaman bayar Midtrans (alamat memuat ?order_id=...): status dicek langsung ke Midtrans.
+  const [returning, setReturning] = useState<'idle' | 'checking' | 'still-waiting'>('idle')
   useEffect(() => {
     const stored = loadReservation()
     setReservation(stored)
     if (!stored) return
 
-    // Segarkan dari server: admin atau perangkat lain mungkin sudah mengubah atau membatalkan booking ini.
+    const params = new URLSearchParams(window.location.search)
+    const returned = params.has('order_id') || params.has('transaction_status')
+    if (returned) setReturning('checking')
+
+    // Segarkan dari server: admin, perangkat lain, atau pembayaran online mungkin sudah mengubah booking ini.
     // Kalau server tidak terjangkau, tiket tersimpan tetap ditampilkan.
     let cancelled = false
-    api
-      .lookupReservation(stored.code, stored.customerPhone)
+    const refresh = returned
+      ? api
+          .syncPayment(stored.code, stored.customerPhone)
+          .then((result) => result.reservation)
+          .catch(() => api.lookupReservation(stored.code, stored.customerPhone))
+      : api.lookupReservation(stored.code, stored.customerPhone)
+    refresh
       .then((fresh) => {
         if (cancelled) return
         setCurrentReservation(fresh)
         setReservation(fresh)
+        if (returned) {
+          setReturning(fresh.dp.status === 'dibayar' ? 'idle' : 'still-waiting')
+          // Bersihkan parameter Midtrans dari alamat supaya muat ulang tidak mengulang pengecekan.
+          window.history.replaceState(null, '', window.location.pathname)
+        }
       })
-      .catch(() => {})
+      .catch(() => {
+        if (!cancelled && returned) setReturning('still-waiting')
+      })
     return () => {
       cancelled = true
     }
   }, [])
+  const applyUpdate = (fresh: Reservation) => {
+    setCurrentReservation(fresh)
+    setReservation(fresh)
+    setReturning('idle')
+    window.scrollTo({ top: 0 })
+  }
   const [confirmingCancel, setConfirmingCancel] = useState(false)
   const [cancelling, setCancelling] = useState(false)
   const [cancelError, setCancelError] = useState<string | null>(null)
@@ -133,7 +157,7 @@ export function ETicketView() {
         <PageHeader chip={<StatusChip tone="neutral">Status booking</StatusChip>} title="Terima kasih" text="Booking ini sudah tidak aktif." />
       )}
 
-      {awaitingDp && <DpPanel reservation={reservation} />}
+      {awaitingDp && <DpPanel reservation={reservation} onUpdated={applyUpdate} returning={returning} />}
       <TicketCard reservation={reservation} awaitingDp={awaitingDp} />
       <WhatsappStatus whatsapp={reservation.whatsapp} />
 
