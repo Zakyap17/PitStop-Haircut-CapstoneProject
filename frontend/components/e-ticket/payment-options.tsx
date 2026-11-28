@@ -49,8 +49,11 @@ export function PaymentOptions({ reservation, onUpdated, returning }: Props) {
     setNotice(null)
     try {
       const { redirectUrl } = await api.startPayment(reservation.code, reservation.customerPhone)
+      // Pengaman berlapis: hanya mau berpindah ke halaman bayar Midtrans lewat HTTPS, apa pun isi jawaban server.
+      const target = new URL(redirectUrl)
+      if (target.protocol !== 'https:' || !/(^|\.)midtrans\.com$/.test(target.hostname)) throw new Error('Alamat pembayaran tidak dikenali.')
       // Halaman bayar Midtrans dibuka di tab yang sama; setelah selesai pelanggan dikembalikan ke e-tiket ini.
-      window.location.assign(redirectUrl)
+      window.location.assign(target.toString())
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : 'Pembayaran online belum bisa dimulai. Coba lagi atau bayar lewat transfer manual.')
       setPaying(false)
