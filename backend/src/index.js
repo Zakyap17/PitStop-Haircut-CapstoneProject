@@ -21,9 +21,21 @@ if (!['all', 'public', 'internal'].includes(SERVICE)) {
   process.exit(1)
 }
 
+/**
+ * Di belakang proxy (Next, Cloudflare Tunnel) tanpa TRUST_PROXY, semua pengunjung tampak berasal dari satu alamat IP, sehingga
+ * batas percobaan (cek booking, OTP, login internal) dipakai bersama: satu orang yang melewati batas mengunci semua orang.
+ */
+function warnIfProxyUntrusted() {
+  if (process.env.TRUST_PROXY) return
+  console.warn('PERINGATAN: TRUST_PROXY kosong. Di belakang proxy (web Next, Cloudflare Tunnel) semua pengunjung dihitung sebagai SATU klien, ' +
+    'jadi batas percobaan dipakai bersama dan satu orang bisa mengunci semua orang (termasuk login staf). ' +
+    'Isi TRUST_PROXY=1 (tanpa tunnel) atau TRUST_PROXY=2 (dengan Cloudflare Tunnel) di backend/.env. Lihat docs/deploy.md.')
+}
+
 async function main() {
   if (SERVICE === 'internal') {
     // Tidak memakai koneksi/migrasi milik API customer; rute internal punya koneksi database sendiri.
+    warnIfProxyUntrusted()
     require('./internal/server').startInternalServer({ port: PORT, host: HOST })
     return
   }
@@ -46,6 +58,7 @@ async function main() {
     }
   }
 
+  warnIfProxyUntrusted()
   const corsOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim()) : '*'
   // Batas percobaan per alamat IP. Bawaan: 30 pembuatan reservasi per menit dan 100 cek/ubah/batal per 15 menit.
   const limits = {}
