@@ -259,7 +259,7 @@ export async function renderReservationImage(reservation: Reservation): Promise<
   const qrY = cardY + 272
   const unit = qrSize / (matrix.length + QR_QUIET_ZONE * 2)
   ctx.save()
-  if (awaitingDp) ctx.globalAlpha = 0.45
+  // QR selalu penuh kontras; status "belum aktif" dijelaskan oleh teks di bawahnya, bukan dengan memudarkan QR.
   ctx.fillStyle = COLORS.paper
   roundedRect(ctx, qrX - 14, qrY - 14, qrSize + 28, qrSize + 28, 24)
   ctx.fill()

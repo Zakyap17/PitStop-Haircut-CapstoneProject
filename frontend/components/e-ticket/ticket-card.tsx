@@ -144,9 +144,13 @@ export function TicketCard({ reservation, cancelled = false, awaitingDp = false 
         {cancelled ? (
           <p className="rounded-full border border-white/60 px-4 py-1.5 text-xs font-semibold tracking-[0.14em] uppercase">Dibatalkan</p>
         ) : (
-          <div className={cn('rounded-xl bg-paper p-2', awaitingDp && 'opacity-45')}>
+          // QR selalu penuh kontras (Carbon di atas Porcelain solid). Jangan diredam dengan opacity: biru stub menembus dan QR sulit dipindai.
+          <div className="rounded-xl bg-paper p-2">
             <TicketQr value={reservation.code} size={176} />
           </div>
+        )}
+        {awaitingDp && !cancelled && (
+          <p className="rounded-full border border-white/70 px-3.5 py-1 text-[11px] font-semibold tracking-[0.14em] uppercase">Belum aktif</p>
         )}
 
         <p className="max-w-[220px] text-center text-xs leading-relaxed text-white">
