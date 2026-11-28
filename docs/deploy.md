@@ -36,7 +36,11 @@ Prasyarat: Docker Engine + Compose v2 (Linux) atau Docker Desktop (Windows/Mac),
    - `FRONTEND_ORIGIN` harus memuat **alamat yang dipakai di browser** (contoh `https://pitstop.contoh.com,http://192.168.8.118:3000`). Kalau tidak, login dan aksi tulis web internal ditolak 403.
    - `WHATSAPP_PROVIDER=fonnte` dan `FONNTE_TOKEN` untuk mengirim WhatsApp sungguhan. Bawaan `console` hanya mencetak pesan (termasuk kode OTP) di `docker compose logs -f api`.
    - `PUBLIC_WEB_URL` (tautan di pesan WhatsApp) dan `TRYON_*` bila fitur try-on dipakai.
-   - `TRUST_PROXY`: di belakang tunnel dan proxy web ada dua lompatan. Coba `2`, lalu cek bahwa batas percobaan per IP tidak menganggap semua pengunjung satu orang.
+   - **`TRUST_PROXY` (WAJIB diisi, ini soal keamanan).** Kosong berarti semua pengunjung dihitung sebagai satu klien: satu orang yang melewati batas percobaan
+     mengunci **semua orang**, termasuk login staf (8 percobaan salah dari siapa pun mengunci semua login selama 15 menit) dan OTP. Diuji di Docker.
+     Isi `TRUST_PROXY=2` kalau memakai Cloudflare Tunnel (hop: tunnel lalu web), atau `TRUST_PROXY=1` kalau web diakses langsung tanpa tunnel di Linux.
+     Jangan mengisi 2 tanpa tunnel: pengunjung bisa memalsukan header `X-Forwarded-For` untuk lolos dari batas. Backend mencetak PERINGATAN saat start bila kosong.
+     Uji: dua perangkat berbeda tidak boleh saling terkena batas `429`.
 4. Variabel Compose di `.env`: isi `SITE_URL` (alamat publik) dan `TUNNEL_TOKEN` bila memakai tunnel.
 5. Migrasi database (hanya jika ada migrasi baru, lihat bagian Migrasi): lewati kalau Supabase sudah sama dengan kode.
 6. Nyalakan:
